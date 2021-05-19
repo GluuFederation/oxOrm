@@ -16,7 +16,6 @@ import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
 
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.exception.extension.PersistenceExtension;
 import org.gluu.persist.model.AttributeData;
@@ -25,6 +24,7 @@ import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.operation.PersistenceOperationService;
+import org.gluu.search.filter.Filter;
 
 /**
  * Methods which Entry Manager must provide

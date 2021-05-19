@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.gluu.orm.search.filter.Filter;
-import org.gluu.orm.search.filter.FilterType;
 import org.gluu.persist.annotation.AttributeEnum;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.exception.operation.SearchException;
@@ -26,6 +24,8 @@ import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.persist.reflect.util.ReflectHelper;
 import org.gluu.persist.sql.model.ConvertedExpression;
 import org.gluu.persist.sql.operation.SqlOperationService;
+import org.gluu.search.filter.Filter;
+import org.gluu.search.filter.FilterType;
 import org.gluu.orm.util.ArrayHelper;
 import org.gluu.orm.util.StringHelper;
 import org.slf4j.Logger;

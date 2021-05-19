@@ -14,13 +14,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.persist.cloud.spanner.impl.SpannerEntryManager;
 import org.gluu.persist.cloud.spanner.model.SimpleUser;
 import org.gluu.persist.cloud.spanner.model.UserRole;
 import org.gluu.persist.cloud.spanner.operation.impl.SpannerConnectionProvider;
 import org.gluu.persist.cloud.spanner.persistence.SpannerEntryManagerSample;
 import org.gluu.persist.model.base.CustomObjectAttribute;
+import org.gluu.search.filter.Filter;
 import org.gluu.orm.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

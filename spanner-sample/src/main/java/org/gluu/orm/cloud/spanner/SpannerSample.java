@@ -9,7 +9,6 @@ package org.gluu.orm.cloud.spanner;
 import java.util.Arrays;
 import java.util.List;
 
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.persist.cloud.spanner.impl.SpannerEntryManager;
 import org.gluu.persist.cloud.spanner.model.SimpleAttribute;
 import org.gluu.persist.cloud.spanner.model.SimpleGrant;
@@ -21,6 +20,7 @@ import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.model.base.CustomObjectAttribute;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

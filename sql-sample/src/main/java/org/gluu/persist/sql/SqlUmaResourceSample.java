@@ -9,7 +9,6 @@ package org.gluu.persist.sql;
 import java.util.Arrays;
 import java.util.List;
 
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
@@ -22,6 +21,7 @@ import org.gluu.persist.sql.model.SimpleUser;
 import org.gluu.persist.sql.model.UmaResource;
 import org.gluu.persist.sql.operation.impl.SqlConnectionProvider;
 import org.gluu.persist.sql.persistence.SqlEntryManagerSample;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

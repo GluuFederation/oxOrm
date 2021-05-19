@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.persist.cloud.spanner.impl.SpannerEntryManager;
 import org.gluu.persist.cloud.spanner.impl.SpannerEntryManagerFactory;
 import org.gluu.persist.exception.EntryPersistenceException;
@@ -29,6 +28,7 @@ import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.ProcessBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
+import org.gluu.search.filter.Filter;
 import org.gluu.orm.util.Pair;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;

@@ -18,8 +18,8 @@ import org.apache.logging.log4j.status.StatusLogger;
 
 import org.gluu.orm.couchbase.impl.CouchbaseEntryManager;
 import org.gluu.orm.couchbase.model.SimpleUser;
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.orm.util.StringHelper;
+import org.gluu.search.filter.Filter;
 
 /**
  * @author Yuriy Movchan Date: 09/18/2019

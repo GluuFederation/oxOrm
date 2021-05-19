@@ -6,12 +6,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
-import org.gluu.orm.search.filter.Filter;
-import org.gluu.orm.search.filter.FilterProcessor;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.sql.dsl.template.SqlJsonMySQLTemplates;
 import org.gluu.persist.sql.impl.SqlFilterConverter;
 import org.gluu.persist.sql.model.ConvertedExpression;
+import org.gluu.search.filter.Filter;
+import org.gluu.search.filter.FilterProcessor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

@@ -8,9 +8,9 @@ import java.util.TimeZone;
 
 import org.gluu.orm.couchbase.impl.CouchbaseFilterConverter;
 import org.gluu.orm.couchbase.model.ConvertedExpression;
-import org.gluu.orm.search.filter.Filter;
-import org.gluu.orm.search.filter.FilterProcessor;
 import org.gluu.persist.exception.operation.SearchException;
+import org.gluu.search.filter.Filter;
+import org.gluu.search.filter.FilterProcessor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 

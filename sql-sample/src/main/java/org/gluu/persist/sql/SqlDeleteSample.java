@@ -8,11 +8,11 @@ package org.gluu.persist.sql;
 
 import java.util.Date;
 
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.persist.sql.impl.SqlEntryManager;
 import org.gluu.persist.sql.model.SimpleSession;
 import org.gluu.persist.sql.operation.impl.SqlConnectionProvider;
 import org.gluu.persist.sql.persistence.SqlEntryManagerSample;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

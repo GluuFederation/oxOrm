@@ -9,12 +9,12 @@ package org.gluu.persist.sql;
 import java.util.Arrays;
 import java.util.List;
 
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.persist.model.base.CustomObjectAttribute;
 import org.gluu.persist.sql.impl.SqlEntryManager;
 import org.gluu.persist.sql.model.SimpleUser;
 import org.gluu.persist.sql.operation.impl.SqlConnectionProvider;
 import org.gluu.persist.sql.persistence.SqlEntryManagerSample;
+import org.gluu.search.filter.Filter;
 import org.gluu.orm.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

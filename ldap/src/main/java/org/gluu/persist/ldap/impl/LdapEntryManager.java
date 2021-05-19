@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.exception.AuthenticationException;
@@ -44,6 +43,7 @@ import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
+import org.gluu.search.filter.Filter;
 import org.gluu.orm.util.ArrayHelper;
 import org.gluu.orm.util.StringHelper;
 import org.slf4j.Logger;

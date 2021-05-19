@@ -19,8 +19,7 @@ import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.model.base.CustomObjectAttribute;
-import org.gluu.orm.search.filter.Filter;
-
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

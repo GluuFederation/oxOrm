@@ -14,7 +14,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.persist.cloud.spanner.impl.SpannerEntryManager;
 import org.gluu.persist.cloud.spanner.model.SimpleClient;
 import org.gluu.persist.cloud.spanner.model.SimpleSession;
@@ -26,6 +25,7 @@ import org.gluu.persist.model.DefaultBatchOperation;
 import org.gluu.persist.model.ProcessBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.CustomAttribute;
+import org.gluu.search.filter.Filter;
 
 /**
  * @author Yuriy Movchan Date: 01/15/2020

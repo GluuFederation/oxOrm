@@ -18,8 +18,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.gluu.orm.search.filter.Filter;
-import org.gluu.orm.search.filter.FilterProcessor;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.cloud.spanner.model.ConvertedExpression;
 import org.gluu.persist.cloud.spanner.model.SearchReturnDataType;
@@ -44,6 +42,8 @@ import org.gluu.persist.model.Sort;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
+import org.gluu.search.filter.Filter;
+import org.gluu.search.filter.FilterProcessor;
 import org.gluu.orm.util.ArrayHelper;
 import org.gluu.orm.util.StringHelper;
 import org.slf4j.Logger;

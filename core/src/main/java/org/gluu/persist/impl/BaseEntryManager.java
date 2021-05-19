@@ -23,7 +23,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Base64;
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.annotation.AttributeEnum;
 import org.gluu.persist.annotation.AttributeName;
@@ -48,6 +47,7 @@ import org.gluu.persist.reflect.property.Getter;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.persist.reflect.property.Setter;
 import org.gluu.persist.reflect.util.ReflectHelper;
+import org.gluu.search.filter.Filter;
 import org.gluu.orm.util.ArrayHelper;
 import org.gluu.orm.util.StringHelper;
 import org.slf4j.Logger;

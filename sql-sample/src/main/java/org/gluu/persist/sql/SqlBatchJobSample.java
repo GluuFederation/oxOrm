@@ -14,7 +14,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.DefaultBatchOperation;
@@ -26,6 +25,7 @@ import org.gluu.persist.sql.model.SimpleClient;
 import org.gluu.persist.sql.model.SimpleSession;
 import org.gluu.persist.sql.model.SimpleToken;
 import org.gluu.persist.sql.persistence.SqlEntryManagerSample;
+import org.gluu.search.filter.Filter;
 
 /**
  * @author Yuriy Movchan Date: 01/15/2020

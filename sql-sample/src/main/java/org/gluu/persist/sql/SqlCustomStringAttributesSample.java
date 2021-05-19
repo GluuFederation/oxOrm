@@ -9,13 +9,13 @@ package org.gluu.persist.sql;
 import java.util.Arrays;
 import java.util.List;
 
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.persist.model.base.CustomAttribute;
 import org.gluu.persist.sql.impl.SqlEntryManager;
 import org.gluu.persist.sql.model.SimpleCustomStringUser;
 import org.gluu.persist.sql.model.UserRole;
 import org.gluu.persist.sql.operation.impl.SqlConnectionProvider;
 import org.gluu.persist.sql.persistence.SqlEntryManagerSample;
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -12,14 +12,14 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.gluu.orm.couchbase.model.ConvertedExpression;
-import org.gluu.orm.search.filter.Filter;
-import org.gluu.orm.search.filter.FilterType;
 import org.gluu.persist.annotation.AttributeEnum;
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.ldap.impl.LdapFilterConverter;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.persist.reflect.util.ReflectHelper;
+import org.gluu.search.filter.Filter;
+import org.gluu.search.filter.FilterType;
 import org.gluu.orm.util.ArrayHelper;
 import org.gluu.orm.util.Pair;
 import org.gluu.orm.util.StringHelper;

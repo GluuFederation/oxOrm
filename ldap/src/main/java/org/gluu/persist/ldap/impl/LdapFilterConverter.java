@@ -8,9 +8,9 @@ package org.gluu.persist.ldap.impl;
 
 import javax.enterprise.context.ApplicationScoped;
 
-import org.gluu.orm.search.filter.Filter;
-import org.gluu.orm.search.filter.FilterType;
 import org.gluu.persist.exception.operation.SearchException;
+import org.gluu.search.filter.Filter;
+import org.gluu.search.filter.FilterType;
 import org.gluu.orm.util.ArrayHelper;
 
 /**

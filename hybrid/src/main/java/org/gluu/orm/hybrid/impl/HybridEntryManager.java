@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.exception.KeyConversionException;
@@ -30,6 +29,7 @@ import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
+import org.gluu.search.filter.Filter;
 import org.gluu.orm.util.ArrayHelper;
 import org.gluu.orm.util.StringHelper;
 import org.slf4j.Logger;

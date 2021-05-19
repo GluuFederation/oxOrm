@@ -1,4 +1,4 @@
-package org.gluu.orm.search.filter;
+package org.gluu.search.filter;
 /*
  * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
  *

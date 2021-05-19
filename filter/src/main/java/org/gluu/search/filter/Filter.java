@@ -4,7 +4,7 @@
  * Copyright (c) 2014, Gluu
  */
 
-package org.gluu.orm.search.filter;
+package org.gluu.search.filter;
 
 import java.util.List;
 

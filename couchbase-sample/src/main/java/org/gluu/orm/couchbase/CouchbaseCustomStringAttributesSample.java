@@ -14,8 +14,7 @@ import org.gluu.orm.couchbase.model.SimpleCustomStringUser;
 import org.gluu.orm.couchbase.model.UserRole;
 import org.gluu.orm.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.model.base.CustomAttribute;
-import org.gluu.orm.search.filter.Filter;
-
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

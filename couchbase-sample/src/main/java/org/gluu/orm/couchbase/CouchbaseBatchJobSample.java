@@ -20,7 +20,7 @@ import org.gluu.persist.model.DefaultBatchOperation;
 import org.gluu.persist.model.ProcessBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.CustomAttribute;
-import org.gluu.orm.search.filter.Filter;
+import org.gluu.search.filter.Filter;
 
 import java.util.Arrays;
 import java.util.Calendar;

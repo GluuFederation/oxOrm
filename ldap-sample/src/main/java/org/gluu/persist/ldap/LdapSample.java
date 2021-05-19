@@ -11,7 +11,6 @@ import java.util.List;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.ldap.model.SimpleAttribute;
 import org.gluu.persist.ldap.model.SimpleGrant;
@@ -21,6 +20,7 @@ import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.model.base.CustomAttribute;
+import org.gluu.search.filter.Filter;
 
 /**
  * @author Yuriy Movchan Date: 11/03/2016

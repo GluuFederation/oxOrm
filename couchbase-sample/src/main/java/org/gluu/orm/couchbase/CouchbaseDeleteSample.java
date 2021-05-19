@@ -9,8 +9,7 @@ package org.gluu.orm.couchbase;
 import org.gluu.orm.couchbase.impl.CouchbaseEntryManager;
 import org.gluu.orm.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.model.base.DeletableEntity;
-import org.gluu.orm.search.filter.Filter;
-
+import org.gluu.search.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

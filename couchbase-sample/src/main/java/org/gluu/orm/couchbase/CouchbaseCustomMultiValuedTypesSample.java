@@ -13,7 +13,7 @@ import org.gluu.orm.couchbase.impl.CouchbaseEntryManager;
 import org.gluu.orm.couchbase.model.SimpleUser;
 import org.gluu.orm.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.model.base.CustomObjectAttribute;
-import org.gluu.orm.search.filter.Filter;
+import org.gluu.search.filter.Filter;
 import org.gluu.orm.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

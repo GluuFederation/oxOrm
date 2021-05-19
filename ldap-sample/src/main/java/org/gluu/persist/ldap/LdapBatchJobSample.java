@@ -11,7 +11,6 @@ import com.unboundid.util.StaticUtils;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.ldap.model.SimpleClient;
@@ -22,6 +21,7 @@ import org.gluu.persist.model.DefaultBatchOperation;
 import org.gluu.persist.model.ProcessBatchOperation;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.base.CustomAttribute;
+import org.gluu.search.filter.Filter;
 
 import java.text.ParseException;
 import java.util.Arrays;

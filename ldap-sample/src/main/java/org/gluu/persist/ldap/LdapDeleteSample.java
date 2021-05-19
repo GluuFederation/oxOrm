@@ -9,9 +9,9 @@ package org.gluu.persist.ldap;
 import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
-import org.gluu.orm.search.filter.Filter;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.model.base.DeletableEntity;
+import org.gluu.search.filter.Filter;
 
 import java.util.Date;
 
