@@ -464,7 +464,7 @@ public class CouchbaseFilterConverterTest {
 		}
 
 		Filter searchFilter = Filter.createORFilter(descriptionFilter, displayNameFilter);
-		Filter typeFilter = Filter.createEqualityFilter("jansScrTyp", "person_authentication");
+		Filter typeFilter = Filter.createEqualityFilter("gluuScrTyp", "person_authentication");
         Filter filter = Filter.createANDFilter(searchFilter, typeFilter);
         
 		ConvertedExpression expression = simpleConverter.convertToCouchbaseFilter(filter, null, null);
@@ -473,7 +473,7 @@ public class CouchbaseFilterConverterTest {
 	}
 
 	private String toSelectSQL(ConvertedExpression convertedExpression) {
-		GroupByPath select = Select.select("jans_doc.*").from(Expression.i("jans")).as("jans_doc").where(convertedExpression.expression());
+		GroupByPath select = Select.select("gluu_doc.*").from(Expression.i("gluu")).as("gluu_doc").where(convertedExpression.expression());
 
 		return select.toString();
 	}

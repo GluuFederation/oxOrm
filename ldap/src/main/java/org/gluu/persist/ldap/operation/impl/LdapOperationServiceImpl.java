@@ -270,7 +270,7 @@ public class LdapOperationServiceImpl implements LdapOperationService {
 
         if (LOG.isTraceEnabled()) {
             // Find whole tree search. This can be very slow
-            if (StringHelper.equalsIgnoreCase(dn, "o=jans")) {
+            if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
                 LOG.trace("Search in whole LDAP tree", new Exception());
             }
         }
@@ -436,7 +436,7 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         //This method does not assume that count <= pageSize as occurs in SCIM, but it's more general
 
         //Why this?
-        if (StringHelper.equalsIgnoreCase(dn, "o=jans")) {
+        if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
             (new Exception()).printStackTrace();
         }
 
@@ -538,7 +538,7 @@ public class LdapOperationServiceImpl implements LdapOperationService {
 
     private SearchResult searchVirtualListViewImpl(String dn, Filter filter, SearchScope scope, int start, int count, String sortBy,
             SortOrder sortOrder, PagedResult vlvResponse, String... attributes) throws LDAPSearchException, LDAPException {
-        if (StringHelper.equalsIgnoreCase(dn, "o=jans")) {
+        if (StringHelper.equalsIgnoreCase(dn, "o=gluu")) {
             (new Exception()).printStackTrace();
         }
 

@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -34,8 +34,8 @@ import com.google.common.collect.Maps;
 *
 * @author Yuriy Movchan Date: 01/15/2020
 */
-@DataEntry(sortBy = { "creationDate", "id" }, sortByName = { "creationDate", "jansId" })
-@ObjectClass(value = "jansSessId")
+@DataEntry(sortBy = { "creationDate", "id" }, sortByName = { "creationDate", "gluuId" })
+@ObjectClass(value = "gluuSessId")
 public class SessionId implements Deletable, Serializable {
 
     public static final String OLD_SESSION_ID_ATTR_KEY = "old_session_id";
@@ -45,38 +45,38 @@ public class SessionId implements Deletable, Serializable {
     @DN
     private String dn;
 
-    @AttributeName(name = "jansId")
+    @AttributeName(name = "gluuId")
     private String id;
 
     @AttributeName(name = "sid")
     private String outsideSid;
 
-    @AttributeName(name = "jansLastAccessTime")
+    @AttributeName(name = "gluuLastAccessTime")
     private Date lastUsedAt;
 
-    @AttributeName(name = "jansUsrDN")
+    @AttributeName(name = "gluuUsrDN")
     private String userDn;
 
     @AttributeName(name = "authnTime")
     private Date authenticationTime;
 
-    @AttributeName(name = "jansState")
+    @AttributeName(name = "gluuState")
     private SessionIdState state;
 
-    @AttributeName(name = "jansSessState")
+    @AttributeName(name = "gluuSessState")
     private String sessionState;
 
-    @AttributeName(name = "jansPermissionGranted")
+    @AttributeName(name = "gluuPermissionGranted")
     private Boolean permissionGranted;
 
-    @AttributeName(name = "jansAsJwt")
+    @AttributeName(name = "gluuAsJwt")
     private Boolean isJwt = false;
 
-    @AttributeName(name = "jansJwt")
+    @AttributeName(name = "gluuJwt")
     private String jwt;
 
     @JsonObject
-    @AttributeName(name = "jansSessAttr")
+    @AttributeName(name = "gluuSessAttr")
     private Map<String, String> sessionAttributes;
 
     @AttributeName(name = "exp")

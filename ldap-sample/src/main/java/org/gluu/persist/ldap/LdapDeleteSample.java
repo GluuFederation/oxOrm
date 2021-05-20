@@ -38,7 +38,7 @@ public final class LdapDeleteSample {
         // Create LDAP entry manager
         LdapEntryManager ldapEntryManager = ldapEntryManagerSample.createLdapEntryManager();
 
-        String baseDn = "ou=cache,o=jans";
+        String baseDn = "ou=cache,o=gluu";
 		Filter filter = Filter.createANDFilter(
 		        Filter.createEqualityFilter("del", true),
 				Filter.createLessOrEqualFilter("exp", ldapEntryManager.encodeTime(baseDn, new Date(System.currentTimeMillis() + 2 * 24 * 60 * 60 * 1000)))

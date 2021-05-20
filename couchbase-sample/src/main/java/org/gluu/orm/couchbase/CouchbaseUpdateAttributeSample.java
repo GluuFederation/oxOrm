@@ -1,7 +1,7 @@
 /*
- * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2020, Janssen Project
+ * Copyright (c) 2020, Gluu
  */
 
 package org.gluu.orm.couchbase;
@@ -37,7 +37,7 @@ public final class CouchbaseUpdateAttributeSample {
         CouchbaseEntryManager couchbaseEntryManager = couchbaseEntryManagerSample.createCouchbaseEntryManager();
 
         String uid = "sample_user_" + System.currentTimeMillis();
-        String dn = String.format("inum=%s,ou=people,o=jans", System.currentTimeMillis());
+        String dn = String.format("inum=%s,ou=people,o=gluu", System.currentTimeMillis());
 
         SimpleUser newUser = new SimpleUser();
         newUser.setDn(dn);
@@ -50,11 +50,11 @@ public final class CouchbaseUpdateAttributeSample {
 
         CustomEntry customEntry = new CustomEntry();
 		customEntry.setDn(user.getDn());
-		customEntry.setCustomObjectClasses(new String[] { "jansPerson" });
+		customEntry.setCustomObjectClasses(new String[] { "gluuPerson" });
 
 		Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
 		String nowDateString = couchbaseEntryManager.encodeTime(customEntry.getDn(), now);
-		CustomAttribute customAttribute = new CustomAttribute("jansLastLogonTime", nowDateString);
+		CustomAttribute customAttribute = new CustomAttribute("gluuLastLogonTime", nowDateString);
 		customEntry.getCustomAttributes().add(customAttribute);
 
 		couchbaseEntryManager.merge(customEntry);

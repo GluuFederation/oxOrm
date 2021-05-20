@@ -1,7 +1,7 @@
 /*
- * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2020, Janssen Project
+ * Copyright (c) 2020, Gluu
  */
 
 package org.gluu.orm.couchbase.model;
@@ -24,7 +24,7 @@ import org.gluu.orm.util.StringHelper;
  * Date: 11/03/2016
  */
 @DataEntry
-@ObjectClass(value = "jansPerson")
+@ObjectClass(value = "gluuPerson")
 public class SimpleCustomStringUser implements Serializable {
 
     private static final long serialVersionUID = -1634191420188575733L;

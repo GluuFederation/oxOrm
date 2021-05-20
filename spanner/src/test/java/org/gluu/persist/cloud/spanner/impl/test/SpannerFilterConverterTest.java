@@ -422,7 +422,7 @@ public class SpannerFilterConverterTest {
 		}
 
 		Filter searchFilter = Filter.createORFilter(descriptionFilter, displayNameFilter);
-		Filter typeFilter = Filter.createEqualityFilter("jansScrTyp", "person_authentication");
+		Filter typeFilter = Filter.createEqualityFilter("gluuScrTyp", "person_authentication");
         Filter filter = Filter.createANDFilter(searchFilter, typeFilter);
         
 		ConvertedExpression expression = simpleConverter.convertToSqlFilter(filter, null, null);

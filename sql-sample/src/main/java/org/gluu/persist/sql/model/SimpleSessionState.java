@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -23,7 +23,7 @@ import org.gluu.persist.annotation.ObjectClass;
 * @author Yuriy Movchan Date: 01/15/2020
  */
 @DataEntry
-@ObjectClass(value = "jansSessId")
+@ObjectClass(value = "gluuSessId")
 public class SimpleSessionState implements Serializable {
 
     private static final long serialVersionUID = -237476411915686378L;
@@ -31,29 +31,29 @@ public class SimpleSessionState implements Serializable {
     @DN
     private String dn;
 
-    @AttributeName(name = "jansId")
+    @AttributeName(name = "gluuId")
     private String id;
 
-    @AttributeName(name = "jansLastAccessTime")
+    @AttributeName(name = "gluuLastAccessTime")
     private Date lastUsedAt;
 
-    @AttributeName(name = "jansUsrDN")
+    @AttributeName(name = "gluuUsrDN")
     private String userDn;
 
     @AttributeName(name = "authnTime")
     private Date authenticationTime;
 
-    @AttributeName(name = "jansPermissionGranted")
+    @AttributeName(name = "gluuPermissionGranted")
     private Boolean permissionGranted;
 
-    @AttributeName(name = "jansAsJwt")
+    @AttributeName(name = "gluuAsJwt")
     private Boolean isJwt = false;
 
-    @AttributeName(name = "jansJwt")
+    @AttributeName(name = "gluuJwt")
     private String jwt;
 
     @JsonObject
-    @AttributeName(name = "jansSessAttr")
+    @AttributeName(name = "gluuSessAttr")
     private Map<String, String> sessionAttributes;
 
     @Transient

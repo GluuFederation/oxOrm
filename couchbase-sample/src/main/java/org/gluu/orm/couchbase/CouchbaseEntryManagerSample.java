@@ -1,7 +1,7 @@
 /*
- * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2020, Janssen Project
+ * Copyright (c) 2020, Gluu
  */
 
 package org.gluu.orm.couchbase;
@@ -26,10 +26,10 @@ public class CouchbaseEntryManagerSample {
         connectionProperties.put("couchbase#servers", "localhost");
         connectionProperties.put("couchbase#auth.userName", "admin");
         connectionProperties.put("couchbase#auth.userPassword", "secret");
-//        connectionProperties.put("couchbase#buckets", "jans");
-        connectionProperties.put("couchbase#buckets", "jans, jans_user, jans_token");
+//        connectionProperties.put("couchbase#buckets", "gluu");
+        connectionProperties.put("couchbase#buckets", "gluu, jans_user, jans_token");
 
-        connectionProperties.put("couchbase#bucket.default", "jans");
+        connectionProperties.put("couchbase#bucket.default", "gluu");
         connectionProperties.put("couchbase#bucket.jans_user.mapping", "people, groups");
         connectionProperties.put("couchbase#bucket.jans_token.mapping", "sessions");
 

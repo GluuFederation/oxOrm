@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -35,7 +35,7 @@ public final class SpannerUpateMissingEntrySample {
         SpannerEntryManager sqlEntryManager = sqlEntryManagerSample.createSpannerEntryManager();
 
         String sessionId = UUID.randomUUID().toString();
-        final String sessionDn = "uniqueIdentifier=" + sessionId + ",ou=session,o=jans";
+        final String sessionDn = "uniqueIdentifier=" + sessionId + ",ou=session,o=gluu";
 
         final SimpleSessionState simpleSessionState = new SimpleSessionState();
         simpleSessionState.setDn(sessionDn);

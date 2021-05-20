@@ -32,8 +32,8 @@ import org.slf4j.LoggerFactory;
 public class LdapEntryManagerFactory implements PersistenceEntryManagerFactory {
 
     public static final String PERSISTENCE_TYPE = PersistenceEntryManager.PERSITENCE_TYPES.ldap.name();
-    public static final String LDAP_DEFAULT_PROPERTIES_FILE = "jans-ldap.properties";
-    public static final String PROPERTIES_FILE = "jans-ldap%s.properties";
+    public static final String LDAP_DEFAULT_PROPERTIES_FILE = "gluu-ldap.properties";
+    public static final String PROPERTIES_FILE = "gluu-ldap%s.properties";
 
 	private static final Logger LOG = LoggerFactory.getLogger(LdapEntryManagerFactory.class);
 

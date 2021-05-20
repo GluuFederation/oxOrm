@@ -33,7 +33,7 @@ public class ManualCouchbaseEntryManagerTest {
         CouchbaseEntryManager manager = createCouchbaseEntryManager();
 
         try {
-            List<SimpleClient> attributeList = manager.findEntries("o=jans", SimpleClient.class, null);
+            List<SimpleClient> attributeList = manager.findEntries("o=gluu", SimpleClient.class, null);
             System.out.println(attributeList);
         } finally {
             manager.destroy();
@@ -72,7 +72,7 @@ public class ManualCouchbaseEntryManagerTest {
     private SessionId createSessionId() {
         SessionId sessionId = new SessionId();
         sessionId.setId(UUID.randomUUID().toString());
-        sessionId.setDn(String.format("jansId=%s,%s", sessionId.getId(), "ou=sessions,o=jans"));
+        sessionId.setDn(String.format("gluuId=%s,%s", sessionId.getId(), "ou=sessions,o=gluu"));
         sessionId.setCreationDate(new Date());
 
         updateSession(sessionId);

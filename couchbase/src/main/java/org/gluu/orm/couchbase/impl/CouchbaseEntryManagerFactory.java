@@ -38,7 +38,7 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
     private static final Logger LOG = LoggerFactory.getLogger(CouchbaseEntryManagerFactory.class);
 
     public static final String PERSISTENCE_TYPE = PersistenceEntryManager.PERSITENCE_TYPES.couchbase.name();
-    public static final String PROPERTIES_FILE = "jans-couchbase%s.properties";
+    public static final String PROPERTIES_FILE = "gluu-couchbase%s.properties";
 
     private DefaultCouchbaseEnvironment.Builder builder;
     private CouchbaseEnvironment couchbaseEnvironment;

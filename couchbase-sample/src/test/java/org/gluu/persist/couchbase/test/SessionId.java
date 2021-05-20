@@ -24,8 +24,8 @@ import java.util.Map;
  * @author Javier Rojas Blum
  * @version December 8, 2018
  */
-@DataEntry(sortBy = { "creationDate", "id" }, sortByName = { "creationDate", "jansId" })
-@ObjectClass(value = "jansSessId")
+@DataEntry(sortBy = { "creationDate", "id" }, sortByName = { "creationDate", "gluuId" })
+@ObjectClass(value = "gluuSessId")
 public class SessionId implements Deletable, Serializable {
 
     private static final long serialVersionUID = -237476411915686378L;
@@ -33,35 +33,35 @@ public class SessionId implements Deletable, Serializable {
     @DN
     private String dn;
 
-    @AttributeName(name = "jansId")
+    @AttributeName(name = "gluuId")
     private String id;
 
-    @AttributeName(name = "jansLastAccessTime")
+    @AttributeName(name = "gluuLastAccessTime")
     private Date lastUsedAt;
 
-    @AttributeName(name = "jansUsrDN")
+    @AttributeName(name = "gluuUsrDN")
     private String userDn;
 
     @AttributeName(name = "authnTime")
     private Date authenticationTime;
 
-    @AttributeName(name = "jansState")
+    @AttributeName(name = "gluuState")
     private SessionIdState state;
 
-    @AttributeName(name = "jansSessState")
+    @AttributeName(name = "gluuSessState")
     private String sessionState;
 
-    @AttributeName(name = "jansPermissionGranted")
+    @AttributeName(name = "gluuPermissionGranted")
     private Boolean permissionGranted;
 
-    @AttributeName(name = "jansAsJwt")
+    @AttributeName(name = "gluuAsJwt")
     private Boolean isJwt = false;
 
-    @AttributeName(name = "jansJwt")
+    @AttributeName(name = "gluuJwt")
     private String jwt;
 
     @JsonObject
-    @AttributeName(name = "jansSessAttr")
+    @AttributeName(name = "gluuSessAttr")
     private Map<String, String> sessionAttributes;
 
     @AttributeName(name = "exp")

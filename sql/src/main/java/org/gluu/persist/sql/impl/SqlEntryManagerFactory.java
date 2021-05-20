@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 public class SqlEntryManagerFactory implements PersistenceEntryManagerFactory {
 
     public static final String PERSISTENCE_TYPE = PersistenceEntryManager.PERSITENCE_TYPES.sql.name();
-    public static final String PROPERTIES_FILE = "jans-sql%s.properties";
+    public static final String PROPERTIES_FILE = "gluu-sql%s.properties";
 
 	private static final Logger LOG = LoggerFactory.getLogger(SqlEntryManagerFactory.class);
 

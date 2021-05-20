@@ -1,7 +1,7 @@
 /*
- * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2020, Janssen Project
+ * Copyright (c) 2020, Gluu
  */
 
 package org.gluu.orm.couchbase;
@@ -70,7 +70,7 @@ public final class CouchbaseBatchJobSample {
         };
 
         final Filter filter1 = Filter.createPresenceFilter("exp");
-        couchbaseEntryManager.findEntries("o=jans", SimpleTokenCouchbase.class, filter1, SearchScope.SUB, new String[] {"exp"},
+        couchbaseEntryManager.findEntries("o=gluu", SimpleTokenCouchbase.class, filter1, SearchScope.SUB, new String[] {"exp"},
                 tokenCouchbaseBatchOperation, 0, 0, 100);
 
         BatchOperation<SimpleSession> sessionBatchOperation = new ProcessBatchOperation<SimpleSession>() {
@@ -80,8 +80,8 @@ public final class CouchbaseBatchJobSample {
             public void performAction(List<SimpleSession> objects) {
                 for (SimpleSession simpleSession : objects) {
                     try {
-                        CustomAttribute customAttribute = getUpdatedAttribute(couchbaseEntryManager, simpleSession.getDn(), "jansLastAccessTime",
-                                simpleSession.getAttribute("jansLastAccessTime"));
+                        CustomAttribute customAttribute = getUpdatedAttribute(couchbaseEntryManager, simpleSession.getDn(), "gluuLastAccessTime",
+                                simpleSession.getAttribute("gluuLastAccessTime"));
                         simpleSession.setCustomAttributes(Arrays.asList(new CustomAttribute[] {customAttribute}));
                         couchbaseEntryManager.merge(simpleSession);
                         processedCount++;
@@ -94,8 +94,8 @@ public final class CouchbaseBatchJobSample {
             }
         };
 
-        final Filter filter2 = Filter.createPresenceFilter("jansLastAccessTime");
-        couchbaseEntryManager.findEntries("o=jans", SimpleSession.class, filter2, SearchScope.SUB, new String[] {"jansLastAccessTime"},
+        final Filter filter2 = Filter.createPresenceFilter("gluuLastAccessTime");
+        couchbaseEntryManager.findEntries("o=gluu", SimpleSession.class, filter2, SearchScope.SUB, new String[] {"gluuLastAccessTime"},
                 sessionBatchOperation, 0, 0, 100);
 
         BatchOperation<SimpleClient> clientBatchOperation = new ProcessBatchOperation<SimpleClient>() {
@@ -112,7 +112,7 @@ public final class CouchbaseBatchJobSample {
         };
 
         final Filter filter3 = Filter.createPresenceFilter("exp");
-        List<SimpleClient> result3 = couchbaseEntryManager.findEntries("o=jans", SimpleClient.class, filter3, SearchScope.SUB,
+        List<SimpleClient> result3 = couchbaseEntryManager.findEntries("o=gluu", SimpleClient.class, filter3, SearchScope.SUB,
                 new String[] {"exp"}, clientBatchOperation, 0, 0, 1000);
 
         LOG.info("Result count (without collecting results): " + result3.size());
@@ -131,7 +131,7 @@ public final class CouchbaseBatchJobSample {
         };
 
         final Filter filter4 = Filter.createPresenceFilter("exp");
-        List<SimpleClient> result4 = couchbaseEntryManager.findEntries("o=jans", SimpleClient.class, filter4, SearchScope.SUB,
+        List<SimpleClient> result4 = couchbaseEntryManager.findEntries("o=gluu", SimpleClient.class, filter4, SearchScope.SUB,
                 new String[] {"exp"}, clientBatchOperation2, 0, 0, 1000);
 
         LOG.info("Result count (with collecting results): " + result4.size());

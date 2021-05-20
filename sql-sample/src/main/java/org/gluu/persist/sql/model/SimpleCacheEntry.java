@@ -12,7 +12,7 @@ import org.gluu.persist.model.base.Deletable;
 import org.gluu.persist.model.base.DeletableEntity;
 
 @DataEntry(forceUpdate = true)
-@ObjectClass(value = "jansCache")
+@ObjectClass(value = "gluuCache")
 public class SimpleCacheEntry extends DeletableEntity implements Serializable, Deletable {
 
 	private static final long serialVersionUID = 3360900373193184522L;

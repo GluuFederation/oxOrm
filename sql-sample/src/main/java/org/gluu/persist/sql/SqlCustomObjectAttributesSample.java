@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -41,13 +41,13 @@ public final class SqlCustomObjectAttributesSample {
 
 		// Add dummy user
 		SimpleUser newUser = new SimpleUser();
-		newUser.setDn(String.format("inum=%s,ou=people,o=jans", System.currentTimeMillis()));
+		newUser.setDn(String.format("inum=%s,ou=people,o=gluu", System.currentTimeMillis()));
 		newUser.setUserId("sample_user_" + System.currentTimeMillis());
 		newUser.setUserPassword("test");
 		newUser.getCustomAttributes().add(new CustomObjectAttribute("address", Arrays.asList("London", "Texas", "Kiev")));
-		newUser.getCustomAttributes().add(new CustomObjectAttribute("jansGuid", "test_value"));
+		newUser.getCustomAttributes().add(new CustomObjectAttribute("gluuGuid", "test_value"));
 		newUser.getCustomAttributes().add(new CustomObjectAttribute("birthdate", new Date()));
-		newUser.getCustomAttributes().add(new CustomObjectAttribute("jansActive", false));
+		newUser.getCustomAttributes().add(new CustomObjectAttribute("gluuActive", false));
 		
 		// Require cusom attribute in table with age: INT type
 		newUser.getCustomAttributes().add(new CustomObjectAttribute("scimCustomThird", 18));
@@ -78,7 +78,7 @@ public final class SqlCustomObjectAttributesSample {
 		
 		for (Iterator<CustomObjectAttribute> it = foundUser.getCustomAttributes().iterator(); it.hasNext();) {
 			CustomObjectAttribute attr = (CustomObjectAttribute) it.next();
-			if (StringHelper.equalsIgnoreCase(attr.getName(), "jansGuid")) {
+			if (StringHelper.equalsIgnoreCase(attr.getName(), "gluuGuid")) {
 				attr.setValue("");
 				break;
 			}
@@ -105,7 +105,7 @@ public final class SqlCustomObjectAttributesSample {
 
 		// Find added dummy user by numeric attribute
 		Filter filter = Filter.createGreaterOrEqualFilter("scimCustomThird", 16);
-		List<SimpleUser> foundUsers = sqlEntryManager.findEntries("ou=people,o=jans", SimpleUser.class, filter);
+		List<SimpleUser> foundUsers = sqlEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, filter);
 		if (foundUsers.size() > 0) {
 			foundUser = foundUsers.get(0);
 			LOG.info("Found User '{}' by filter '{}' with uid '{}' and key '{}'", foundUser, filter, foundUser, foundUser);

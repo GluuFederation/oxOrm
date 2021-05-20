@@ -24,7 +24,7 @@ import org.gluu.orm.util.StringHelper;
  * Date: 11/03/2016
  */
 @DataEntry(sortBy = "userId")
-@ObjectClass(value = "jansPerson")
+@ObjectClass(value = "gluuPerson")
 public class SimpleUser implements Serializable {
 
     private static final long serialVersionUID = -1634191420188575733L;

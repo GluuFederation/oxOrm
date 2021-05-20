@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -22,14 +22,14 @@ public class SqlEntryManagerSample {
     private Properties getSampleConnectionProperties() {
         Properties connectionProperties = new Properties();
 
-        connectionProperties.put("sql#db.schema.name", "jans");
+        connectionProperties.put("sql#db.schema.name", "gluu");
         connectionProperties.put("sql#connection.uri", "jdbc:mysql://localhost:3306/jans?profileSQL=true");
 
         connectionProperties.put("sql#connection.driver-property.serverTimezone", "GMT+2");
         connectionProperties.put("sql#connection.pool.max-total", "300");
         connectionProperties.put("sql#connection.pool.max-idle", "300");
 
-        connectionProperties.put("sql#auth.userName", "jans");
+        connectionProperties.put("sql#auth.userName", "gluu");
         connectionProperties.put("sql#auth.userPassword", "secret");
         
         // Password hash method

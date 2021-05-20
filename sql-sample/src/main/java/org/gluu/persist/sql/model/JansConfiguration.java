@@ -21,7 +21,7 @@ import org.gluu.persist.model.base.InumEntry;
  * @author Yuriy Movchan Date: 08.27.2012
  */
 @DataEntry
-@ObjectClass(value = "jansAppConf")
+@ObjectClass(value = "gluuAppConf")
 public class JansConfiguration extends InumEntry implements Serializable {
 
 	private static final long serialVersionUID = -2818003894646725601L;
@@ -29,11 +29,11 @@ public class JansConfiguration extends InumEntry implements Serializable {
 	@AttributeName(ignoreDuringUpdate = true)
 	private String inum;
 
-	@AttributeName(name = "jansDbAuth")
+	@AttributeName(name = "gluuDbAuth")
 	@JsonObject
 	private List<IDPAuthConf> idpAuthn;
 
-	@AttributeName(name = "jansAuthMode")
+	@AttributeName(name = "gluuAuthMode")
 	private String authenticationMode;
 
 	public String getInum() {

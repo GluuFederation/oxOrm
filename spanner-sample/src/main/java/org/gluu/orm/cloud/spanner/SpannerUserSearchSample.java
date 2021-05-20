@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -51,7 +51,7 @@ public final class SpannerUserSearchSample {
         int threadIterationCount = 200;
 
         Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("uid"), String.format("user%06d", countUsers));
-        boolean foundUser = sqlEntryManager.contains("ou=people,o=jans", SimpleUser.class, filter);
+        boolean foundUser = sqlEntryManager.contains("ou=people,o=gluu", SimpleUser.class, filter);
         if (!foundUser) {
         	addTestUsers(sqlEntryManager, countUsers);
         }
@@ -72,7 +72,7 @@ public final class SpannerUserSearchSample {
 	                        try {
 		                        Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("uid"), StringHelper.toLowerCase(uid));
 //		                        Filter filter = Filter.createEqualityFilter("uid", uid);
-		                        List<SimpleUser> foundUsers = sqlEntryManager.findEntries("ou=people,o=jans", SimpleUser.class, filter);
+		                        List<SimpleUser> foundUsers = sqlEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, filter);
 		                        if (foundUsers.size() > 0) {
 		                        	successResult.incrementAndGet();
 		                        } else {
@@ -115,7 +115,7 @@ public final class SpannerUserSearchSample {
         	String uid = "user" + j; /*String.format("user%06d", userUid);*/
 
         	SimpleUser newUser = new SimpleUser();
-	        newUser.setDn(String.format("inum=%s,ou=people,o=jans", System.currentTimeMillis()));
+	        newUser.setDn(String.format("inum=%s,ou=people,o=gluu", System.currentTimeMillis()));
 	        newUser.setUserId(uid);
 	        newUser.setUserPassword("topsecret" + uid);
 	        newUser.setUserRole(j % 2 == 0 ? UserRole.ADMIN : UserRole.USER);
@@ -134,9 +134,9 @@ public final class SpannerUserSearchSample {
 	        } else if (j % 5 == 0) {
 	        	jansExtUid = Arrays.asList(1, 11, 2, 22, 3, 33, 4, 44);
 	        }
-	        newUser.getCustomAttributes().add(new CustomObjectAttribute("jansExtUid", jansExtUid));
+	        newUser.getCustomAttributes().add(new CustomObjectAttribute("gluuExtUid", jansExtUid));
 			newUser.getCustomAttributes().add(new CustomObjectAttribute("birthdate", new Date()));
-			newUser.getCustomAttributes().add(new CustomObjectAttribute("jansActive", false));
+			newUser.getCustomAttributes().add(new CustomObjectAttribute("gluuActive", false));
 
 			sqlEntryManager.persist(newUser);
 

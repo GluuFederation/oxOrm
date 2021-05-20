@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -42,7 +42,7 @@ public final class SpannerSample {
         SpannerEntryManager sqlEntryManager = sqlEntryManagerSample.createSpannerEntryManager();
 
         SimpleUser newUser = new SimpleUser();
-        newUser.setDn(String.format("inum=%s,ou=people,o=jans", System.currentTimeMillis()));
+        newUser.setDn(String.format("inum=%s,ou=people,o=gluu", System.currentTimeMillis()));
         newUser.setUserId("sample_user_" + System.currentTimeMillis());
         newUser.setUserPassword("pwd");
         newUser.getCustomAttributes().add(new CustomObjectAttribute("address", Arrays.asList("London", "Texas", "Kiev")));
@@ -56,29 +56,29 @@ public final class SpannerSample {
         String[] values = new String[] { "Somewhere: " + System.currentTimeMillis(), "Somewhere2: " + System.currentTimeMillis() };
         dummyUser.getCustomAttributes().add(new CustomObjectAttribute("address", Arrays.asList(values)));
         dummyUser.getCustomAttributes().add(new CustomObjectAttribute("transientId", "new_transientId"));
-        dummyUser.getCustomAttributes().add(new CustomObjectAttribute("jansGuid", "test_guid"));
+        dummyUser.getCustomAttributes().add(new CustomObjectAttribute("gluuGuid", "test_guid"));
         dummyUser.getCustomAttributes().add(new CustomObjectAttribute("memberOf", Arrays.asList("1", "9")));
         dummyUser.setUserId("user1");
         dummyUser.setUserPassword("test_pwd");
         sqlEntryManager.merge(dummyUser);
 /*
         Filter filterX1 = Filter.createEqualityFilter("transientId", "new_transientId");
-        List<SimpleUser> usersss = sqlEntryManager.findEntries("ou=people,o=jans", SimpleUser.class, filterX1);
+        List<SimpleUser> usersss = sqlEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, filterX1);
         System.out.println(usersss.size());
 */
         Filter filterX = Filter.createEqualityFilter("memberOf", "1");
-        List<SimpleUser> userss = sqlEntryManager.findEntries("ou=people,o=jans", SimpleUser.class, filterX, new String[] { "memberOf", "uid" }, 10);
+        List<SimpleUser> userss = sqlEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, filterX, new String[] { "memberOf", "uid" }, 10);
         System.out.println(userss.size());
 
-        Filter filterR = Filter.createEqualityFilter("jansGuid", "test_guid");
-        int removed = sqlEntryManager.remove("ou=people,o=jans", SimpleUser.class, filterR, 10);
+        Filter filterR = Filter.createEqualityFilter("gluuGuid", "test_guid");
+        int removed = sqlEntryManager.remove("ou=people,o=gluu", SimpleUser.class, filterR, 10);
         System.out.println(removed);
 //        sqlEntryManager.remove(dummyUser);
         sqlEntryManager.destroy();
         System.exit(0);
 
         // Find all users which have specified object classes defined in SimpleUser
-        List<SimpleUser> users = sqlEntryManager.findEntries("ou=people,o=jans", SimpleUser.class, null);
+        List<SimpleUser> users = sqlEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, null);
         for (SimpleUser user : users) {
             LOG.info("User with uid: '{}' with DN: '{}'", user.getUserId(), user.getDn());
         }
@@ -91,7 +91,7 @@ public final class SpannerSample {
             String[] values = new String[] { "Somewhere: " + System.currentTimeMillis(), "Somewhere2: " + System.currentTimeMillis() };
             user.getCustomAttributes().add(new CustomObjectAttribute("address", Arrays.asList(values)));
             user.getCustomAttributes().add(new CustomObjectAttribute("transientId", "new_transientId"));
-            user.getCustomAttributes().add(new CustomObjectAttribute("jansGuid", "test_guid"));
+            user.getCustomAttributes().add(new CustomObjectAttribute("gluuGuid", "test_guid"));
             user.setUserId("user1");
             user.setUserPassword("test_pwd");
 
@@ -100,29 +100,29 @@ public final class SpannerSample {
 */
         for (SimpleUser user : users) {
             boolean result1 = sqlEntryManager.authenticate(user.getDn(), SimpleUser.class, "test_pwd");
-            boolean result2 = sqlEntryManager.authenticate("ou=people,o=jans", SimpleUser.class, user.getUserId(), "test");
+            boolean result2 = sqlEntryManager.authenticate("ou=people,o=gluu", SimpleUser.class, user.getUserId(), "test");
             System.out.println("authetication result: " + result1 + ", " + result2);
         }
 
-        Filter filter = Filter.createEqualityFilter("jansStatus", "active");
-        List<SimpleAttribute> attributes = sqlEntryManager.findEntries("o=jans", SimpleAttribute.class, filter, SearchScope.SUB, null, null, 10,
+        Filter filter = Filter.createEqualityFilter("gluuStatus", "active");
+        List<SimpleAttribute> attributes = sqlEntryManager.findEntries("o=gluu", SimpleAttribute.class, filter, SearchScope.SUB, null, null, 10,
                 0, 0);
         for (SimpleAttribute attribute : attributes) {
             LOG.info("Attribute with displayName: " + attribute.getCustomAttributes().get(1));
         }
 
-        Filter filter2 = Filter.createEqualityFilter("jansState", "authenticated");
-        List<SimpleSession> sessions = sqlEntryManager.findEntries("o=jans", SimpleSession.class, filter2, SearchScope.SUB, null, null, 10, 0,
+        Filter filter2 = Filter.createEqualityFilter("gluuState", "authenticated");
+        List<SimpleSession> sessions = sqlEntryManager.findEntries("o=gluu", SimpleSession.class, filter2, SearchScope.SUB, null, null, 10, 0,
                 0);
         LOG.info("Found sessions: " + sessions.size());
 
-        List<SimpleGrant> grants = sqlEntryManager.findEntries("o=jans", SimpleGrant.class, null, SearchScope.SUB,
+        List<SimpleGrant> grants = sqlEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB,
                 new String[] { "grtId" }, null, 1, 0, 0);
         LOG.info("Found grants: " + grants.size());
 
         try {
-            PagedResult<SimpleUser> listViewResponse = sqlEntryManager.findPagedEntries("o=jans", SimpleUser.class, null,
-                    new String[] { "uid", "displayName", "jansStatus" }, "uid", SortOrder.ASCENDING, 0, 6, 4);
+            PagedResult<SimpleUser> listViewResponse = sqlEntryManager.findPagedEntries("o=gluu", SimpleUser.class, null,
+                    new String[] { "uid", "displayName", "gluuStatus" }, "uid", SortOrder.ASCENDING, 0, 6, 4);
 
             LOG.info("Found persons: " + listViewResponse.getEntriesCount() + ", total persons: " + listViewResponse.getTotalEntriesCount());
             for (SimpleUser user : listViewResponse.getEntries()) {
@@ -133,8 +133,8 @@ public final class SpannerSample {
         }
 
         try {
-            PagedResult<SimpleUser> listViewResponse = sqlEntryManager.findPagedEntries("o=jans", SimpleUser.class, null,
-                    new String[] { "uid", "displayName", "jansStatus" }, "uid", SortOrder.DESCENDING, 0, 6, 4);
+            PagedResult<SimpleUser> listViewResponse = sqlEntryManager.findPagedEntries("o=gluu", SimpleUser.class, null,
+                    new String[] { "uid", "displayName", "gluuStatus" }, "uid", SortOrder.DESCENDING, 0, 6, 4);
 
             LOG.info("Found persons: " + listViewResponse.getEntriesCount() + ", total persons: " + listViewResponse.getTotalEntriesCount());
             for (SimpleUser user : listViewResponse.getEntries()) {

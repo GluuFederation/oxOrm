@@ -43,25 +43,25 @@ public class SpannerMultiValuedDataPopulatorTest {
 
 			// Change to false to insert data into parent-child tables
 			if (true) {
-				WriteBuilder insertMutation = Mutation.newInsertOrUpdateBuilder("jansClnt_Array")
+				WriteBuilder insertMutation = Mutation.newInsertOrUpdateBuilder("gluuClnt_Array")
 						.set(SpannerOperationService.DOC_ID).to(String.valueOf(i))
-						.set(SpannerOperationService.OBJECT_CLASS).to("jansClnt").set("jansRedirectURI")
+						.set(SpannerOperationService.OBJECT_CLASS).to("gluuClnt").set("gluuRedirectURI")
 						.toStringArray(Arrays.asList(redirectURIs));
 
 				mutations.add(insertMutation.build());
 			} else {
 
-				WriteBuilder insertMutation = Mutation.newInsertOrUpdateBuilder("jansClnt_Interleave")
+				WriteBuilder insertMutation = Mutation.newInsertOrUpdateBuilder("gluuClnt_Interleave")
 						.set(SpannerOperationService.DOC_ID).to(String.valueOf(i))
-						.set(SpannerOperationService.OBJECT_CLASS).to("jansClnt");
+						.set(SpannerOperationService.OBJECT_CLASS).to("gluuClnt");
 
 				mutations.add(insertMutation.build());
 
 				for (int j = 0; j < redirectURIs.length; j++) {
 					WriteBuilder insertDictMutation = Mutation
-							.newInsertOrUpdateBuilder("jansClnt_Interleave_jansRedirectURI")
+							.newInsertOrUpdateBuilder("gluuClnt_Interleave_jansRedirectURI")
 							.set(SpannerOperationService.DOC_ID).to(String.valueOf(i))
-							.set(SpannerOperationService.DICT_DOC_ID).to(String.valueOf(j)).set("jansRedirectURI")
+							.set(SpannerOperationService.DICT_DOC_ID).to(String.valueOf(j)).set("gluuRedirectURI")
 							.to(redirectURIs[j]);
 
 					mutations.add(insertDictMutation.build());

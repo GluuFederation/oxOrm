@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -33,8 +33,8 @@ public final class SpannerUmaResourceSample {
         // Create SQL entry manager
         SpannerEntryManager sqlEntryManager = sqlEntryManagerSample.createSpannerEntryManager();
 
-        final Filter filter = Filter.createEqualityFilter("jansAssociatedClnt", "inum=AB77-1A2B,ou=clients,o=jans").multiValued();
-        List<UmaResource> umaResource = sqlEntryManager.findEntries("ou=resources,ou=uma,o=jans", UmaResource.class, filter);
+        final Filter filter = Filter.createEqualityFilter("gluuAssociatedClnt", "inum=AB77-1A2B,ou=clients,o=gluu").multiValued();
+        List<UmaResource> umaResource = sqlEntryManager.findEntries("ou=resources,ou=uma,o=gluu", UmaResource.class, filter);
 
         LOG.info("Found umaResources: " + umaResource);
     }

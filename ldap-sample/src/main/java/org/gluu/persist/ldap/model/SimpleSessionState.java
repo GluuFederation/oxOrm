@@ -25,7 +25,7 @@ import org.gluu.persist.annotation.ObjectClass;
  * @version December 15, 2015
  */
 @DataEntry
-@ObjectClass(value = "jansSessId")
+@ObjectClass(value = "gluuSessId")
 public class SimpleSessionState implements Serializable {
 
     private static final long serialVersionUID = -237476411915686378L;
@@ -36,10 +36,10 @@ public class SimpleSessionState implements Serializable {
     @AttributeName(name = "uniqueIdentifier")
     private String id;
 
-    @AttributeName(name = "jansLastAccessTime")
+    @AttributeName(name = "gluuLastAccessTime")
     private Date lastUsedAt;
 
-    @AttributeName(name = "jansUsrDN")
+    @AttributeName(name = "gluuUsrDN")
     private String userDn;
 
     @AttributeName(name = "authnTime")
@@ -48,14 +48,14 @@ public class SimpleSessionState implements Serializable {
     @AttributeName(name = "oxAuthSessionState")
     private Boolean permissionGranted;
 
-    @AttributeName(name = "jansAsJwt")
+    @AttributeName(name = "gluuAsJwt")
     private Boolean isJwt = false;
 
-    @AttributeName(name = "jansJwt")
+    @AttributeName(name = "gluuJwt")
     private String jwt;
 
     @JsonObject
-    @AttributeName(name = "jansSessAttr")
+    @AttributeName(name = "gluuSessAttr")
     private Map<String, String> sessionAttributes;
 
     @Transient

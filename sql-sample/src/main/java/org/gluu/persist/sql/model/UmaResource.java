@@ -28,7 +28,7 @@ import com.google.common.collect.Lists;
  * @author Yuriy Zabrovarnyy Date: 10/03/2012
  */
 @DataEntry
-@ObjectClass(value = "jansUmaResource")
+@ObjectClass(value = "gluuUmaResource")
 public class UmaResource implements Serializable {
 
     @DN
@@ -37,29 +37,29 @@ public class UmaResource implements Serializable {
     @AttributeName(ignoreDuringUpdate = true)
     private String inum;
 
-    @AttributeName(name = "jansId")
+    @AttributeName(name = "gluuId")
     private String id;
 
     @NotNull(message = "Display name should be not empty")
     @AttributeName(name = "displayName")
     private String name;
 
-    @AttributeName(name = "jansFaviconImage")
+    @AttributeName(name = "gluuFaviconImage")
     private String iconUri;
 
-    @AttributeName(name = "jansUmaScope", consistency = true)
+    @AttributeName(name = "gluuUmaScope", consistency = true)
     private List<String> scopes;
 
-    @AttributeName(name = "jansScopeExpression", consistency = true)
+    @AttributeName(name = "gluuScopeExpression", consistency = true)
     private String scopeExpression;
 
-    @AttributeName(name = "jansAssociatedClnt", consistency = true)
+    @AttributeName(name = "gluuAssociatedClnt", consistency = true)
     private List<String> clients;
 
-    @AttributeName(name = "jansResource")
+    @AttributeName(name = "gluuResource")
     private List<String> resources;
 
-    @AttributeName(name = "jansRevision")
+    @AttributeName(name = "gluuRevision")
     private String rev;
 
     @AttributeName(name = "owner")
@@ -68,7 +68,7 @@ public class UmaResource implements Serializable {
     @AttributeName(name = "description")
     private String description;
 
-    @AttributeName(name = "jansTyp")
+    @AttributeName(name = "gluuTyp")
     private String type;
 
     @AttributeName(name = "iat")

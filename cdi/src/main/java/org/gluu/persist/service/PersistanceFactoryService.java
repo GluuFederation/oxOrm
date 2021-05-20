@@ -1,7 +1,7 @@
 /*
- * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2020, Janssen Project
+ * Copyright (c) 2020, Gluu
  */
 
 package org.gluu.persist.service;
@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 public class PersistanceFactoryService implements BaseFactoryService {
 
 	static {
-		if (System.getProperty("jans.base") != null) {
-			BASE_DIR = System.getProperty("jans.base");
+		if (System.getProperty("gluu.base") != null) {
+			BASE_DIR = System.getProperty("gluu.base");
 		} else if ((System.getProperty("catalina.base") != null) && (System.getProperty("catalina.base.ignore") == null)) {
 			BASE_DIR = System.getProperty("catalina.base");
 		} else if (System.getProperty("catalina.home") != null) {
@@ -48,7 +48,7 @@ public class PersistanceFactoryService implements BaseFactoryService {
 
 	public static final String BASE_DIR;
 	public static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
-	private static final String JANS_FILE_PATH = DIR + "jans.properties";
+	private static final String JANS_FILE_PATH = DIR + "gluu.properties";
 
 	@Inject
 	private Logger log;

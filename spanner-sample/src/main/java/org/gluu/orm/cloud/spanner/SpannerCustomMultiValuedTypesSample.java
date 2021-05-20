@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -38,12 +38,12 @@ public final class SpannerCustomMultiValuedTypesSample {
 
 		// Add dummy user
 		SimpleUser newUser = new SimpleUser();
-		newUser.setDn(String.format("inum=%s,ou=people,o=jans", System.currentTimeMillis()));
+		newUser.setDn(String.format("inum=%s,ou=people,o=gluu", System.currentTimeMillis()));
 		newUser.setUserId("sample_user_" + System.currentTimeMillis());
 		newUser.setUserPassword("test");
-		newUser.getCustomAttributes().add(new CustomObjectAttribute("jansOptOuts", Arrays.asList("London", "Texas", "Kiev")));
-		newUser.getCustomAttributes().add(new CustomObjectAttribute("jansExtUid", "test_value").multiValued());
-		newUser.getCustomAttributes().add(new CustomObjectAttribute("jansPPID", "test_value").multiValued());
+		newUser.getCustomAttributes().add(new CustomObjectAttribute("gluuOptOuts", Arrays.asList("London", "Texas", "Kiev")));
+		newUser.getCustomAttributes().add(new CustomObjectAttribute("gluuExtUid", "test_value").multiValued());
+		newUser.getCustomAttributes().add(new CustomObjectAttribute("gluuPPID", "test_value").multiValued());
 		newUser.setMemberOf(Arrays.asList("group_1", "group_2", "group_3"));
 		newUser.setAttributeValue("givenName", "john");
 
@@ -63,13 +63,13 @@ public final class SpannerCustomMultiValuedTypesSample {
 		}
 
 		// Update custom attributes
-		foundUser.setAttributeValues("jansOptOuts", Arrays.asList("London", "Texas", "Kiev", "Dublin"));
-		foundUser.setAttributeValues("jansExtUid", Arrays.asList("test_value_11", "test_value_22", "test_value_33", "test_value_44"));
-		foundUser.setAttributeValues("jansExtUid", Arrays.asList(11, 22, 33, 44));
-		foundUser.setAttributeValues("jansPPID", Arrays.asList("fuzzy_value_1", "fuzzy_value_2"));
-		foundUser.setAttributeValue("jansGuid", "simple");
+		foundUser.setAttributeValues("gluuOptOuts", Arrays.asList("London", "Texas", "Kiev", "Dublin"));
+		foundUser.setAttributeValues("gluuExtUid", Arrays.asList("test_value_11", "test_value_22", "test_value_33", "test_value_44"));
+		foundUser.setAttributeValues("gluuExtUid", Arrays.asList(11, 22, 33, 44));
+		foundUser.setAttributeValues("gluuPPID", Arrays.asList("fuzzy_value_1", "fuzzy_value_2"));
+		foundUser.setAttributeValue("gluuGuid", "simple");
 		
-		CustomObjectAttribute multiValuedSingleValue = new CustomObjectAttribute("jansAssociatedClnt", "multivalued_single_valued");
+		CustomObjectAttribute multiValuedSingleValue = new CustomObjectAttribute("gluuAssociatedClnt", "multivalued_single_valued");
 		multiValuedSingleValue.setMultiValued(true);
 		foundUser.getCustomAttributes().add(multiValuedSingleValue);
 		sqlEntryManager.merge(foundUser);
@@ -86,7 +86,7 @@ public final class SpannerCustomMultiValuedTypesSample {
 		}
 
 		Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("givenName"), StringHelper.toLowerCase("john"));
-		List<SimpleUser> foundUpdatedUsers = sqlEntryManager.findEntries("o=jans", SimpleUser.class, filter);
+		List<SimpleUser> foundUpdatedUsers = sqlEntryManager.findEntries("o=gluu", SimpleUser.class, filter);
 		System.out.println(foundUpdatedUsers);
 	}
 

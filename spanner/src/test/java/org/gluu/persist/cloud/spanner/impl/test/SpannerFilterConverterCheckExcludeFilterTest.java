@@ -30,7 +30,7 @@ public class SpannerFilterConverterCheckExcludeFilterTest {
 	public void checkObjectClassExcludeFilter() throws SearchException {
 		Filter filterEq1 = Filter.createEqualityFilter("uid", "test");
 		Filter filterEq2 = Filter.createEqualityFilter(Filter.createLowercaseFilter("uid"), "test");
-		Filter filterEq3 = Filter.createEqualityFilter("objectClass", "jansPerson");
+		Filter filterEq3 = Filter.createEqualityFilter("objectClass", "gluuPerson");
 		Filter filterEq4 = Filter.createEqualityFilter("added", getUtcDateFromMillis(1608130698398L)).multiValued();
 
 		Filter andFilter = Filter.createANDFilter(filterEq1, filterEq2, filterEq3, filterEq4);

@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -23,7 +23,7 @@ import org.gluu.orm.util.StringHelper;
 * @author Yuriy Movchan Date: 01/15/2020
  */
 @DataEntry
-@ObjectClass(value = "jansPerson")
+@ObjectClass(value = "gluuPerson")
 public class SimpleCustomStringUser implements Serializable {
 
     private static final long serialVersionUID = -1634191420188575733L;
@@ -37,7 +37,7 @@ public class SimpleCustomStringUser implements Serializable {
     @AttributeName(name = "userPassword")
     private String userPassword;
     
-    @AttributeName(name = "jansRole")
+    @AttributeName(name = "gluuRole")
     private UserRole userRole; 
 
     @AttributeName(name = "memberOf")

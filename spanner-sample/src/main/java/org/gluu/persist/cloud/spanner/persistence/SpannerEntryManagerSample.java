@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -22,9 +22,9 @@ public class SpannerEntryManagerSample {
     private Properties getSampleConnectionProperties() {
         Properties connectionProperties = new Properties();
 
-        connectionProperties.put("spanner#connection.project", "jans-project");
-        connectionProperties.put("spanner#connection.instance", "jans-instance");
-        connectionProperties.put("spanner#connection.database", "jansdb");
+        connectionProperties.put("spanner#connection.project", "gluu-project");
+        connectionProperties.put("spanner#connection.instance", "gluu-instance");
+        connectionProperties.put("spanner#connection.database", "gluudb");
 
         connectionProperties.put("spanner#connection.emulator-host", "localhost:9010");
         

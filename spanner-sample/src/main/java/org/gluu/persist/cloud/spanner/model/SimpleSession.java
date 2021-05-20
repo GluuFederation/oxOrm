@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -22,7 +22,7 @@ import org.gluu.orm.util.StringHelper;
 * @author Yuriy Movchan Date: 01/15/2020
  */
 @DataEntry
-@ObjectClass(value = "jansSessId")
+@ObjectClass(value = "gluuSessId")
 public class SimpleSession implements Serializable {
 
     private static final long serialVersionUID = -1534191420188575733L;

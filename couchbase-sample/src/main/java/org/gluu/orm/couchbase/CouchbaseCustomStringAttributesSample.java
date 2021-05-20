@@ -1,7 +1,7 @@
 /*
- * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2020, Janssen Project
+ * Copyright (c) 2020, Gluu
  */
 
 package org.gluu.orm.couchbase;
@@ -39,11 +39,11 @@ public final class CouchbaseCustomStringAttributesSample {
 
 		// Add dummy user
 		SimpleCustomStringUser newUser = new SimpleCustomStringUser();
-		newUser.setDn(String.format("inum=%s,ou=people,o=jans", System.currentTimeMillis()));
+		newUser.setDn(String.format("inum=%s,ou=people,o=gluu", System.currentTimeMillis()));
 		newUser.setUserId("sample_user_" + System.currentTimeMillis());
 		newUser.setUserPassword("test");
 		newUser.getCustomAttributes().add(new CustomAttribute("streetAddress", Arrays.asList("London", "Texas", "Kiev")));
-		newUser.getCustomAttributes().add((new CustomAttribute("jansExternalUid", randomExternalUid)).setMultiValued(true));
+		newUser.getCustomAttributes().add((new CustomAttribute("gluuExternalUid", randomExternalUid)).setMultiValued(true));
 
 		newUser.setUserRole(UserRole.ADMIN);
 		newUser.setNotes(Arrays.asList("note 1", "note 2", "note 3"));
@@ -62,8 +62,8 @@ public final class CouchbaseCustomStringAttributesSample {
 		}
 
 		// Find by jsExternalUid
-		Filter jsExternalUidFilter = Filter.createEqualityFilter("jansExternalUid", randomExternalUid).multiValued();
-		List<SimpleCustomStringUser> foundUsers = couchbaseEntryManager.findEntries("ou=people,o=jans", SimpleCustomStringUser.class, jsExternalUidFilter);
+		Filter jsExternalUidFilter = Filter.createEqualityFilter("gluuExternalUid", randomExternalUid).multiValued();
+		List<SimpleCustomStringUser> foundUsers = couchbaseEntryManager.findEntries("ou=people,o=gluu", SimpleCustomStringUser.class, jsExternalUidFilter);
 		for (SimpleCustomStringUser foundUser2 : foundUsers) {
 			LOG.info("Found User '{}' by jsExternalUid with uid '{}' and key '{}'", foundUser2, foundUser2.getUserId(), foundUser2.getDn());
 		}

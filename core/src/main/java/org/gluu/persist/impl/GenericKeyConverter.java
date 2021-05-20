@@ -49,7 +49,7 @@ public class GenericKeyConverter {
             }
             String value = token.substring(pos + 1, token.length());
             if (StringHelper.equalsIgnoreCase(name, "o")) {
-                if (!StringHelper.equalsIgnoreCase(value, "jans")) {
+                if (!StringHelper.equalsIgnoreCase(value, "gluu")) {
                     orgInum = value;
                 }
                 continue;

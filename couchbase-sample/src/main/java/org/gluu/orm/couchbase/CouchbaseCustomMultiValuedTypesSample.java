@@ -1,7 +1,7 @@
 /*
- * Janssen Project software is available under the Apache License (2004). See http://www.apache.org/licenses/ for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
- * Copyright (c) 2020, Janssen Project
+ * Copyright (c) 2020, Gluu
  */
 
 package org.gluu.orm.couchbase;
@@ -37,7 +37,7 @@ public final class CouchbaseCustomMultiValuedTypesSample {
 
 		// Add dummy user
 		SimpleUser newUser = new SimpleUser();
-		newUser.setDn(String.format("inum=%s,ou=people,o=jans", System.currentTimeMillis()));
+		newUser.setDn(String.format("inum=%s,ou=people,o=gluu", System.currentTimeMillis()));
 		newUser.setUserId("sample_user_" + System.currentTimeMillis());
 		newUser.setUserPassword("test");
 		newUser.getCustomAttributes().add(new CustomObjectAttribute("streetAddress", Arrays.asList("London", "Texas", "Kiev")));
@@ -76,7 +76,7 @@ public final class CouchbaseCustomMultiValuedTypesSample {
 		LOG.info("Cusom attributes '{}'", foundUpdatedUser.getCustomAttributes());
 
 		Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("givenName"), StringHelper.toLowerCase("jon"));
-		List<SimpleUser> foundUpdatedUsers = couchbaseEntryManager.findEntries("o=jans", SimpleUser.class, filter);
+		List<SimpleUser> foundUpdatedUsers = couchbaseEntryManager.findEntries("o=gluu", SimpleUser.class, filter);
 		System.out.println(foundUpdatedUsers);
 		
 	}

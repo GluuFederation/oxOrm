@@ -23,7 +23,7 @@ import org.gluu.orm.util.StringHelper;
  * Date: 02/08/2018
  */
 @DataEntry
-@ObjectClass(value = "jansClnt")
+@ObjectClass(value = "gluuClnt")
 public class SimpleClient implements Serializable {
 
     private static final long serialVersionUID = -2534191420188575733L;

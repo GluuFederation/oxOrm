@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -33,7 +33,7 @@ public final class SqlDeleteSample {
         // Create SQL entry manager
         SqlEntryManager sqlEntryManager = sqlEntryManagerSample.createSqlEntryManager();
 
-        String baseDn = "ou=people,o=jans";
+        String baseDn = "ou=people,o=gluu";
 		Filter filter = Filter.createANDFilter(
 		        Filter.createEqualityFilter("del", true),
 				Filter.createLessOrEqualFilter("exp", sqlEntryManager.encodeTime(baseDn, new Date()))

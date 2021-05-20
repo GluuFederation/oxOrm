@@ -72,7 +72,7 @@ public final class LdapBatchJobSample {
         };
 
         final Filter filter1 = Filter.createPresenceFilter("exp");
-        ldapEntryManager.findEntries("o=jans", SimpleTokenLdap.class, filter1, SearchScope.SUB, new String[] {"exp"},
+        ldapEntryManager.findEntries("o=gluu", SimpleTokenLdap.class, filter1, SearchScope.SUB, new String[] {"exp"},
                 tokenLdapBatchOperation, 0, 0, 100);
 
         BatchOperation<SimpleSession> sessionBatchOperation = new ProcessBatchOperation<SimpleSession>() {
@@ -82,8 +82,8 @@ public final class LdapBatchJobSample {
             public void performAction(List<SimpleSession> objects) {
                 for (SimpleSession simpleSession : objects) {
                     try {
-                        CustomAttribute customAttribute = getUpdatedAttribute(ldapEntryManager, simpleSession.getDn(), "jansLastAccessTime",
-                                simpleSession.getAttribute("jansLastAccessTime"));
+                        CustomAttribute customAttribute = getUpdatedAttribute(ldapEntryManager, simpleSession.getDn(), "gluuLastAccessTime",
+                                simpleSession.getAttribute("gluuLastAccessTime"));
                         simpleSession.setCustomAttributes(Arrays.asList(new CustomAttribute[] {customAttribute}));
                         ldapEntryManager.merge(simpleSession);
                         processedCount++;
@@ -96,8 +96,8 @@ public final class LdapBatchJobSample {
             }
         };
 
-        final Filter filter2 = Filter.createPresenceFilter("jansLastAccessTime");
-        ldapEntryManager.findEntries("o=jans", SimpleSession.class, filter2, SearchScope.SUB, new String[] {"jansLastAccessTime"},
+        final Filter filter2 = Filter.createPresenceFilter("gluuLastAccessTime");
+        ldapEntryManager.findEntries("o=gluu", SimpleSession.class, filter2, SearchScope.SUB, new String[] {"gluuLastAccessTime"},
                 sessionBatchOperation, 0, 0, 100);
 
         BatchOperation<SimpleClient> clientBatchOperation = new ProcessBatchOperation<SimpleClient>() {
@@ -114,7 +114,7 @@ public final class LdapBatchJobSample {
         };
 
         final Filter filter3 = Filter.createPresenceFilter("exp");
-        List<SimpleClient> result3 = ldapEntryManager.findEntries("o=jans", SimpleClient.class, filter3, SearchScope.SUB,
+        List<SimpleClient> result3 = ldapEntryManager.findEntries("o=gluu", SimpleClient.class, filter3, SearchScope.SUB,
                 new String[] {"exp"}, clientBatchOperation, 0, 0, 1000);
 
         LOG.info("Result count (without collecting results): " + result3.size());
@@ -133,7 +133,7 @@ public final class LdapBatchJobSample {
         };
 
         final Filter filter4 = Filter.createPresenceFilter("exp");
-        List<SimpleClient> result4 = ldapEntryManager.findEntries("o=jans", SimpleClient.class, filter4, SearchScope.SUB,
+        List<SimpleClient> result4 = ldapEntryManager.findEntries("o=gluu", SimpleClient.class, filter4, SearchScope.SUB,
                 new String[] {"exp"}, clientBatchOperation2, 0, 0, 1000);
 
         LOG.info("Result count (with collecting results): " + result4.size());

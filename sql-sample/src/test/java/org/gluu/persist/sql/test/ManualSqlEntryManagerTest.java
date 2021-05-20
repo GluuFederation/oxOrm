@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -68,7 +68,7 @@ public class ManualSqlEntryManagerTest {
 
     @Test(dependsOnMethods = "createSessionId", enabled = false)
     public void searchSessionId() throws IOException {
-        List<SessionId> sessionIdList = manager.findEntries("o=jans", SessionId.class, null);
+        List<SessionId> sessionIdList = manager.findEntries("o=gluu", SessionId.class, null);
         System.out.println(sessionIdList);
     }
 
@@ -147,27 +147,27 @@ public class ManualSqlEntryManagerTest {
 
 		Filter filter = Filter.createEqualityFilter("sid", outsideSid);
 
-		List<SessionId> sessionIdList = manager.findEntries("o=jans", SessionId.class, filter);
+		List<SessionId> sessionIdList = manager.findEntries("o=gluu", SessionId.class, filter);
 		assertNotNull(sessionIdList);
 		assertEquals(sessionIdList.size(), 20);
 
-		List<SessionId> sessionIdList2 = manager.findEntries("o=jans", SessionId.class, filter, 5);
+		List<SessionId> sessionIdList2 = manager.findEntries("o=gluu", SessionId.class, filter, 5);
 		assertNotNull(sessionIdList2);
 		assertEquals(sessionIdList2.size(), 5);
 
-		List<SessionId> sessionIdList3 = manager.findEntries("o=jans", SessionId.class, filter, 25);
+		List<SessionId> sessionIdList3 = manager.findEntries("o=gluu", SessionId.class, filter, 25);
 		assertNotNull(sessionIdList3);
 		assertEquals(sessionIdList3.size(), 20);
 
-		List<SessionId> sessionIdList4 = manager.findEntries("o=jans", SessionId.class, filter, null, null, 14, 7, 3);
+		List<SessionId> sessionIdList4 = manager.findEntries("o=gluu", SessionId.class, filter, null, null, 14, 7, 3);
 		assertNotNull(sessionIdList4);
 		assertEquals(sessionIdList4.size(), 6);
 
-		List<SessionId> sessionIdList5 = manager.findEntries("o=jans", SessionId.class, filter, null, null, 20, 10, 5);
+		List<SessionId> sessionIdList5 = manager.findEntries("o=gluu", SessionId.class, filter, null, null, 20, 10, 5);
 		assertNotNull(sessionIdList5);
 		assertEquals(sessionIdList5.size(), 0);
 
-		List<SessionId> sessionIdList6 = manager.findEntries("o=jans", SessionId.class, filter, null, null, 19, -1, 5);
+		List<SessionId> sessionIdList6 = manager.findEntries("o=gluu", SessionId.class, filter, null, null, 19, -1, 5);
 		assertNotNull(sessionIdList6);
 		assertEquals(sessionIdList6.size(), 1);
     }
@@ -184,29 +184,29 @@ public class ManualSqlEntryManagerTest {
 
 		Filter filter = Filter.createEqualityFilter("sid", outsideSid);
 
-		PagedResult<SessionId> sessionIdList = manager.findPagedEntries("o=jans", SessionId.class, filter, null, "sid", SortOrder.DESCENDING, 0, -1, -1);
+		PagedResult<SessionId> sessionIdList = manager.findPagedEntries("o=gluu", SessionId.class, filter, null, "sid", SortOrder.DESCENDING, 0, -1, -1);
 		assertNotNull(sessionIdList);
 		assertEquals(sessionIdList.getTotalEntriesCount(), 20);
 
-		PagedResult<SessionId> sessionIdList2 = manager.findPagedEntries("o=jans", SessionId.class, filter, null, "sid", SortOrder.DESCENDING, 0, 5, -1);
+		PagedResult<SessionId> sessionIdList2 = manager.findPagedEntries("o=gluu", SessionId.class, filter, null, "sid", SortOrder.DESCENDING, 0, 5, -1);
 		assertNotNull(sessionIdList2);
 		assertEquals(sessionIdList2.getStart(), 0);
 		assertEquals(sessionIdList2.getEntriesCount(), 5);
 		assertEquals(sessionIdList2.getTotalEntriesCount(), 20);
 
-		PagedResult<SessionId> sessionIdList4 = manager.findPagedEntries("o=jans", SessionId.class, filter, null, "sid", SortOrder.DESCENDING, 14, 7, 3);
+		PagedResult<SessionId> sessionIdList4 = manager.findPagedEntries("o=gluu", SessionId.class, filter, null, "sid", SortOrder.DESCENDING, 14, 7, 3);
 		assertNotNull(sessionIdList4);
 		assertEquals(sessionIdList4.getStart(), 14);
 		assertEquals(sessionIdList4.getEntriesCount(), 6);
 		assertEquals(sessionIdList4.getTotalEntriesCount(), 20);
 
-		PagedResult<SessionId> sessionIdList5 = manager.findPagedEntries("o=jans", SessionId.class, filter, null, "sid", SortOrder.DESCENDING, 20, 10, 5);
+		PagedResult<SessionId> sessionIdList5 = manager.findPagedEntries("o=gluu", SessionId.class, filter, null, "sid", SortOrder.DESCENDING, 20, 10, 5);
 		assertNotNull(sessionIdList5);
 		assertEquals(sessionIdList5.getStart(), 20);
 		assertEquals(sessionIdList5.getEntriesCount(), 0);
 		assertEquals(sessionIdList5.getTotalEntriesCount(), 20);
 
-		PagedResult<SessionId> sessionIdList6 = manager.findPagedEntries("o=jans", SessionId.class, filter, null, "sid", SortOrder.DESCENDING, 19, -1, 5);
+		PagedResult<SessionId> sessionIdList6 = manager.findPagedEntries("o=gluu", SessionId.class, filter, null, "sid", SortOrder.DESCENDING, 19, -1, 5);
 		assertNotNull(sessionIdList6);
 		assertEquals(sessionIdList6.getStart(), 19);
 		assertEquals(sessionIdList6.getEntriesCount(), 1);
@@ -225,13 +225,13 @@ public class ManualSqlEntryManagerTest {
 
 		Filter filter = Filter.createEqualityFilter("sid", outsideSid);
 		
-		int removedCount = manager.remove("ou=sessions,o=jans", SessionId.class, filter, 14);
+		int removedCount = manager.remove("ou=sessions,o=gluu", SessionId.class, filter, 14);
 		assertEquals(removedCount, 14);
 
-		int removedCount2 = manager.remove("ou=sessions,o=jans", SessionId.class, filter, 5);
+		int removedCount2 = manager.remove("ou=sessions,o=gluu", SessionId.class, filter, 5);
 		assertEquals(removedCount2, 5);
 
-		int removedCount3 = manager.remove("ou=sessions,o=jans", SessionId.class, filter, 1);
+		int removedCount3 = manager.remove("ou=sessions,o=gluu", SessionId.class, filter, 1);
 		assertEquals(removedCount3, 1);
     }
 
@@ -247,7 +247,7 @@ public class ManualSqlEntryManagerTest {
 
 		Filter filter = Filter.createEqualityFilter("sid", outsideSid);
 
-		int countEntries = manager.countEntries("ou=sessions,o=jans", SessionId.class, filter, null);
+		int countEntries = manager.countEntries("ou=sessions,o=gluu", SessionId.class, filter, null);
 		assertEquals(countEntries, 33);
     }
     
@@ -296,7 +296,7 @@ public class ManualSqlEntryManagerTest {
         };
 
         Filter filter1 = Filter.createANDFilter(Filter.createPresenceFilter("exp"), Filter.createEqualityFilter("sid", outsideSid));
-        manager.findEntries("o=jans", SessionId.class, filter1, SearchScope.SUB, new String[] {"exp"},
+        manager.findEntries("o=gluu", SessionId.class, filter1, SearchScope.SUB, new String[] {"exp"},
         		sessionBatchOperation, 0, 500, 100);
 
         assertEquals(totalProcessedCount, 200);
@@ -305,7 +305,7 @@ public class ManualSqlEntryManagerTest {
     private SessionId buildSessionId() {
         SessionId sessionId = new SessionId();
         sessionId.setId(UUID.randomUUID().toString());
-        sessionId.setDn(String.format("jansId=%s,%s", sessionId.getId(), "ou=sessions,o=jans"));
+        sessionId.setDn(String.format("gluuId=%s,%s", sessionId.getId(), "ou=sessions,o=gluu"));
         sessionId.setCreationDate(new Date());
         sessionId.setJwt("{}");
         sessionId.setIsJwt(true);

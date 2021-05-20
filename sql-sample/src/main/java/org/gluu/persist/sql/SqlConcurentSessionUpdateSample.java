@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -44,9 +44,9 @@ public final class SqlConcurentSessionUpdateSample {
 
         try {
             String sessionId = UUID.randomUUID().toString();
-            final String sessionDn = "uniqueIdentifier=" + sessionId + ",ou=session,o=jans";
+            final String sessionDn = "uniqueIdentifier=" + sessionId + ",ou=session,o=gluu";
             final String userDn =
-                    "inum=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163!0000!A8F2.DE1E.D7FB,ou=people,o=jans";
+                    "inum=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163!0000!A8F2.DE1E.D7FB,ou=people,o=gluu";
 
             final SimpleSessionState simpleSessionState = new SimpleSessionState();
             simpleSessionState.setDn(sessionDn);

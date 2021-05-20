@@ -1,5 +1,5 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * oxCore is available under the MIT License (2014). See http://opensource.org/licenses/MIT for full text.
  *
  * Copyright (c) 2014, Gluu
  */
@@ -70,7 +70,7 @@ public final class SqlBatchJobSample {
         };
 
         final Filter filter1 = Filter.createPresenceFilter("exp");
-        sqlEntryManager.findEntries("o=jans", SimpleToken.class, filter1, SearchScope.SUB, new String[] {"exp"},
+        sqlEntryManager.findEntries("o=gluu", SimpleToken.class, filter1, SearchScope.SUB, new String[] {"exp"},
                 tokenSQLBatchOperation, 0, 0, 100);
 
         BatchOperation<SimpleSession> sessionBatchOperation = new ProcessBatchOperation<SimpleSession>() {
@@ -81,8 +81,8 @@ public final class SqlBatchJobSample {
             	int currentProcessedCount = 0;
                 for (SimpleSession simpleSession : objects) {
                     try {
-                        CustomAttribute customAttribute = getUpdatedAttribute(sqlEntryManager, simpleSession.getDn(), "jansLastAccessTime",
-                                simpleSession.getAttribute("jansLastAccessTime"));
+                        CustomAttribute customAttribute = getUpdatedAttribute(sqlEntryManager, simpleSession.getDn(), "gluuLastAccessTime",
+                                simpleSession.getAttribute("gluuLastAccessTime"));
                         simpleSession.setCustomAttributes(Arrays.asList(new CustomAttribute[] {customAttribute}));
                         sqlEntryManager.merge(simpleSession);
                         processedCount++;
@@ -97,8 +97,8 @@ public final class SqlBatchJobSample {
             }
         };
 
-        final Filter filter2 = Filter.createPresenceFilter("jansLastAccessTime");
-        sqlEntryManager.findEntries("o=jans", SimpleSession.class, filter2, SearchScope.SUB, new String[] {"jansLastAccessTime"},
+        final Filter filter2 = Filter.createPresenceFilter("gluuLastAccessTime");
+        sqlEntryManager.findEntries("o=gluu", SimpleSession.class, filter2, SearchScope.SUB, new String[] {"gluuLastAccessTime"},
                 sessionBatchOperation, 0, 0, 100);
 
         BatchOperation<SimpleClient> clientBatchOperation = new ProcessBatchOperation<SimpleClient>() {
@@ -115,7 +115,7 @@ public final class SqlBatchJobSample {
         };
 
         final Filter filter3 = Filter.createPresenceFilter("exp");
-        List<SimpleClient> result3 = sqlEntryManager.findEntries("o=jans", SimpleClient.class, filter3, SearchScope.SUB,
+        List<SimpleClient> result3 = sqlEntryManager.findEntries("o=gluu", SimpleClient.class, filter3, SearchScope.SUB,
                 new String[] {"exp"}, clientBatchOperation, 0, 0, 1000);
 
         LOG.info("Result count (without collecting results): " + result3.size());
@@ -134,7 +134,7 @@ public final class SqlBatchJobSample {
         };
 
         final Filter filter4 = Filter.createPresenceFilter("exp");
-        List<SimpleClient> result4 = sqlEntryManager.findEntries("o=jans", SimpleClient.class, filter4, SearchScope.SUB,
+        List<SimpleClient> result4 = sqlEntryManager.findEntries("o=gluu", SimpleClient.class, filter4, SearchScope.SUB,
                 new String[] {"exp"}, clientBatchOperation2, 0, 0, 1000);
 
         LOG.info("Result count (with collecting results): " + result4.size());

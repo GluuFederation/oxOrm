@@ -33,7 +33,7 @@ public class CouchbaseFilterConverterCheckExcludeFilterTest {
 	public void checkObjectClassExcludeFilter() throws SearchException {
 		Filter filterEq1 = Filter.createEqualityFilter("uid", "test");
 		Filter filterEq2 = Filter.createEqualityFilter(Filter.createLowercaseFilter("uid"), "test");
-		Filter filterEq3 = Filter.createEqualityFilter("objectClass", "jansPerson");
+		Filter filterEq3 = Filter.createEqualityFilter("objectClass", "gluuPerson");
 		Filter filterEq4 = Filter.createEqualityFilter("added", getUtcDateFromMillis(1608130698398L)).multiValued();
 
 		Filter andFilter = Filter.createANDFilter(filterEq1, filterEq2, filterEq3, filterEq4);
@@ -43,7 +43,7 @@ public class CouchbaseFilterConverterCheckExcludeFilterTest {
 		ConvertedExpression expression1 = simpleConverter.convertToCouchbaseFilter(filter1, null, null);
 
 		String query1 = toSelectSQL(expression1);
-		assertEquals(query1, "SELECT jans_doc.* FROM `jans` AS jans_doc WHERE ( ( ( objectClass = \"jansPerson\" ) OR ( \"jansPerson\" IN objectClass ) ) AND ( ( ( uid = \"test\" ) OR ( \"test\" IN uid ) ) AND LOWER(uid) = \"test\" AND ( ( objectClass = \"jansPerson\" ) OR ( \"jansPerson\" IN objectClass ) ) AND ( ( ( uid = \"test\" ) OR ( \"test\" IN uid ) ) AND LOWER(uid) = \"test\" AND ( ( objectClass = \"jansPerson\" ) OR ( \"jansPerson\" IN objectClass ) ) AND ANY added_ IN added SATISFIES added_ = \"Wed Dec 16 14:58:18 UTC 2020\" END ) AND ANY added_ IN added SATISFIES added_ = \"Wed Dec 16 14:58:18 UTC 2020\" END ) )");
+		assertEquals(query1, "SELECT jans_doc.* FROM `jans` AS jans_doc WHERE ( ( ( objectClass = \"gluuPerson\" ) OR ( \"gluuPerson\" IN objectClass ) ) AND ( ( ( uid = \"test\" ) OR ( \"test\" IN uid ) ) AND LOWER(uid) = \"test\" AND ( ( objectClass = \"gluuPerson\" ) OR ( \"gluuPerson\" IN objectClass ) ) AND ( ( ( uid = \"test\" ) OR ( \"test\" IN uid ) ) AND LOWER(uid) = \"test\" AND ( ( objectClass = \"gluuPerson\" ) OR ( \"gluuPerson\" IN objectClass ) ) AND ANY added_ IN added SATISFIES added_ = \"Wed Dec 16 14:58:18 UTC 2020\" END ) AND ANY added_ IN added SATISFIES added_ = \"Wed Dec 16 14:58:18 UTC 2020\" END ) )");
 
 		Filter filter2 = filterProcessor.excludeFilter(filter1, filterEq3);
 
@@ -61,7 +61,7 @@ public class CouchbaseFilterConverterCheckExcludeFilterTest {
 	}
 
 	private String toSelectSQL(ConvertedExpression convertedExpression) {
-		GroupByPath select = Select.select("jans_doc.*").from(Expression.i("jans")).as("jans_doc").where(convertedExpression.expression());
+		GroupByPath select = Select.select("gluu_doc.*").from(Expression.i("gluu")).as("gluu_doc").where(convertedExpression.expression());
 
 		return select.toString();
 	}
