@@ -469,7 +469,7 @@ public class CouchbaseFilterConverterTest {
         
 		ConvertedExpression expression = simpleConverter.convertToCouchbaseFilter(filter, null, null);
 		String query = toSelectSQL(expression);
-		assertEquals(query, "SELECT gluu_doc.* FROM `gluu` AS gluu_doc WHERE ( ( LOWER(description) LIKE \"%test_value%\" OR LOWER(displayName) LIKE \"%test_value%\" ) AND ( ( jansScrTyp = \"person_authentication\" ) OR ( \"person_authentication\" IN jansScrTyp ) ) )");
+		assertEquals(query, "SELECT gluu_doc.* FROM `gluu` AS gluu_doc WHERE ( ( LOWER(description) LIKE \"%test_value%\" OR LOWER(displayName) LIKE \"%test_value%\" ) AND ( ( gluuScrTyp = \"person_authentication\" ) OR ( \"person_authentication\" IN gluuScrTyp ) ) )");
 	}
 
 	private String toSelectSQL(ConvertedExpression convertedExpression) {
