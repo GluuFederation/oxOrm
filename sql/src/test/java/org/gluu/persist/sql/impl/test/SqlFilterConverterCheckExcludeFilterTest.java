@@ -65,7 +65,7 @@ public class SqlFilterConverterCheckExcludeFilterTest {
 		ConvertedExpression expression1 = simpleConverter.convertToSqlFilter(filter1, null, null);
 
 		String query1 = toSelectSQL(expression1);
-		assertEquals(query1, "select doc.`*` from `table` as doc where doc.objectClass = 'jansPerson' and (doc.uid = 'test' and lower(doc.uid) = 'test' and doc.objectClass = 'jansPerson' and (doc.uid = 'test' and lower(doc.uid) = 'test' and doc.objectClass = 'jansPerson' and JSON_CONTAINS(doc.added->'$.v', CAST('[\"2020-12-16T14:58:18.398\"]' AS JSON))) and JSON_CONTAINS(doc.added->'$.v', CAST('[\"2020-12-16T14:58:18.398\"]' AS JSON)))");
+		assertEquals(query1, "select doc.`*` from `table` as doc where doc.objectClass = 'gluuPerson' and (doc.uid = 'test' and lower(doc.uid) = 'test' and doc.objectClass = 'gluuPerson' and (doc.uid = 'test' and lower(doc.uid) = 'test' and doc.objectClass = 'gluuPerson' and JSON_CONTAINS(doc.added->'$.v', CAST('[\"2020-12-16T14:58:18.398\"]' AS JSON))) and JSON_CONTAINS(doc.added->'$.v', CAST('[\"2020-12-16T14:58:18.398\"]' AS JSON)))");
 
 		Filter filter2 = filterProcessor.excludeFilter(filter1, filterEq3);
 
