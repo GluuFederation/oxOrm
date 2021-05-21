@@ -23,7 +23,7 @@ import org.gluu.orm.util.StringHelper;
  * @author Yuriy Movchan
  * Date: 11/03/2016
  */
-@DataEntry(sortBy = "userId")
+@DataEntry(sortBy = "userId", sortByName = "uid")
 @ObjectClass(value = "gluuPerson")
 public class SimpleUser implements Serializable {
 
