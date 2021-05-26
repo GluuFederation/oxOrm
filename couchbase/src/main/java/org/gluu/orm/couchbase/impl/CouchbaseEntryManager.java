@@ -593,7 +593,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
                     attributeValueObjects = new Object[] { attributeObject };
             	} else if (attributeObject instanceof String) {
             		// If it looks like date, treat as Date
-                    Object valueAsDate = decodeTime(null, attributeObject.toString());
+                    Object valueAsDate = decodeTime(null, attributeObject.toString(), true);
                     Object value = valueAsDate == null ? attributeObject.toString() : valueAsDate;
                     
             		attributeValueObjects = new Object[] { value };
@@ -856,6 +856,10 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
     @Override
     public Date decodeTime(String baseDN, String date) {
+    	return decodeTime(baseDN, date, false);
+    }
+
+    protected Date decodeTime(String baseDN, String date, boolean silent) {
         if (StringHelper.isEmpty(date)) {
             return null;
         }
@@ -865,8 +869,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         try {
             return new Date(Instant.parse(dateZ).toEpochMilli());
         } catch (DateTimeParseException ex) {
-            LOG.error("Failed to decode generalized time '{}'", date, ex);
-            return null;
+        	if (!silent) {
+	            LOG.error("Failed to decode generalized time '{}'", date, ex);
+        	}
+
+        	return null;
         }
     }
 
