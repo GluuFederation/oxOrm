@@ -182,7 +182,7 @@ public class SqlFilterConverter {
     			Expression expression = buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
 
 				Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_CONTAINS, expression,
-						buildTypedExpression(currentGenericFilter), Expressions.constant("$.v"));
+						buildTypedExpression(currentGenericFilter, true), Expressions.constant("$.v"));
 
         		return ConvertedExpression.build(operation, jsonAttributes);
             } else {
@@ -359,24 +359,27 @@ public class SqlFilterConverter {
 	}
 
 	private Expression buildTypedExpression(Filter filter) throws SearchException {
-		if (Boolean.TRUE.equals(filter.getMultiValued())) {
-			Object assertionValue = filter.getAssertionValue();
-			if (assertionValue instanceof AttributeEnum) {
-				assertionValue = ((AttributeEnum) assertionValue).getValue();
-			} else if (assertionValue instanceof Date) {
-		        SimpleDateFormat jsonDateFormat = new SimpleDateFormat(SQL_DATA_FORMAT);
-		        assertionValue = jsonDateFormat.format(filter.getAssertionValue());
-			}
-	
-	        return Expressions.constant(convertValueToJson(Arrays.asList(assertionValue)));
-		} else {
-			Object assertionValue = filter.getAssertionValue();
-			if (assertionValue instanceof AttributeEnum) {
-				assertionValue = ((AttributeEnum) assertionValue).getValue();
-			}
+		return buildTypedExpression(filter, false);
+	}
 
-			return Expressions.constant(assertionValue);
+	private Expression buildTypedExpression(Filter filter, boolean isArray) throws SearchException {
+		Object assertionValue = filter.getAssertionValue();
+		if (assertionValue instanceof AttributeEnum) {
+			assertionValue = ((AttributeEnum) assertionValue).getValue();
+		} else if (assertionValue instanceof Date) {
+	        SimpleDateFormat jsonDateFormat = new SimpleDateFormat(SQL_DATA_FORMAT);
+	        assertionValue = jsonDateFormat.format(filter.getAssertionValue());
 		}
+
+		if (Boolean.TRUE.equals(filter.getMultiValued())) {
+			assertionValue = convertValueToJson(Arrays.asList(assertionValue));
+		}
+
+		if (isArray && (assertionValue instanceof String)) {
+			assertionValue = "[\"" + assertionValue + "\"]";
+		}
+
+		return Expressions.constant(assertionValue);
 	}
 
 	private Expression buildTypedPath(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap,

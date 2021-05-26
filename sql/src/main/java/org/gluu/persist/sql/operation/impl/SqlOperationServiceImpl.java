@@ -488,7 +488,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
                     }
         		} catch (QueryException ex) {
         			String sqlExpression = queryStr;
-        			if (StringHelper.isEmpty(sqlExpression)) {
+        			if (StringHelper.isNotEmpty(sqlExpression)) {
         				sqlExpression = expression.expression().toString();
         			}
 					throw new SearchException(String.format("Failed to build search entries query. Key: '%s', expression: '%s'", key, sqlExpression), ex);
