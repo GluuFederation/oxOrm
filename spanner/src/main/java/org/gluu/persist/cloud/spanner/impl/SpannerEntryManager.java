@@ -787,12 +787,20 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
     
     private ConvertedExpression toSqlFilter(String key, String objectClass, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
     	TableMapping tableMapping = getOperationService().getTabeMapping(key, objectClass);
-        return filterConverter.convertToSqlFilter(tableMapping, excludeObjectClassFilters(genericFilter), propertiesAnnotationsMap);
+    	if (tableMapping == null) {
+            throw new MappingException(String.format("Failed to get table mapping by key '%s' and objectClass '%s'", key, objectClass));
+    	}
+
+    	return filterConverter.convertToSqlFilter(tableMapping, excludeObjectClassFilters(genericFilter), propertiesAnnotationsMap);
     }
 
     private ConvertedExpression toSqlFilterWithEmptyAlias(String key, String objectClass, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
     	TableMapping tableMapping = getOperationService().getTabeMapping(key, objectClass);
-        return filterConverter.convertToSqlFilter(tableMapping, excludeObjectClassFilters(genericFilter), propertiesAnnotationsMap, true);
+    	if (tableMapping == null) {
+            throw new MappingException(String.format("Failed to get table mapping by key '%s' and objectClass '%s'", key, objectClass));
+    	}
+
+    	return filterConverter.convertToSqlFilter(tableMapping, excludeObjectClassFilters(genericFilter), propertiesAnnotationsMap, true);
     }
 
 	private Filter excludeObjectClassFilters(Filter genericFilter) {
