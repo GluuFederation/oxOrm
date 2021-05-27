@@ -731,11 +731,11 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		Annotation ldapEntry = ReflectHelper.getAnnotationByType(entryAnnotations, DataEntry.class);
 		if (isAllowSchemaEntry) {
 			if ((ldapSchemaEntry == null) && (ldapEntry == null)) {
-				throw new MappingException("Entry should has DataEntry or SchemaEntry annotation");
+				throw new MappingException(String.format("Entry should has DataEntry or SchemaEntry annotation", entryClass));
 			}
 		} else {
 			if (ldapEntry == null) {
-				throw new MappingException("Entry should has DataEntry annotation");
+				throw new MappingException(String.format("Entry '%s' should has DataEntry annotation", entryClass));
 			}
 		}
 
