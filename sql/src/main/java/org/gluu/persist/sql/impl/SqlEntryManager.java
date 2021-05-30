@@ -8,6 +8,8 @@ package org.gluu.persist.sql.impl;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -18,6 +20,8 @@ import java.util.function.Function;
 
 import javax.inject.Inject;
 
+import org.gluu.orm.util.ArrayHelper;
+import org.gluu.orm.util.StringHelper;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.exception.AuthenticationException;
@@ -30,21 +34,18 @@ import org.gluu.persist.impl.GenericKeyConverter;
 import org.gluu.persist.impl.model.ParsedKey;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
+import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
 import org.gluu.persist.model.BatchOperation;
-import org.gluu.persist.model.DefaultBatchOperation;
 import org.gluu.persist.model.EntryData;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
-import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.persist.sql.model.ConvertedExpression;
 import org.gluu.persist.sql.model.SearchReturnDataType;
 import org.gluu.persist.sql.operation.SqlOperationService;
 import org.gluu.search.filter.Filter;
 import org.gluu.search.filter.FilterProcessor;
-import org.gluu.orm.util.ArrayHelper;
-import org.gluu.orm.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -829,28 +830,32 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
 	}
 
     @Override
+    public Date decodeTime(String date) {
+		return decodeTime(null, date);
+	}
+
+    @Override
     public Date decodeTime(String baseDN, String date) {
+    	return decodeTime(baseDN, date, false);
+    }
+
+    protected Date decodeTime(String baseDN, String date, boolean silent) {
         if (StringHelper.isEmpty(date)) {
             return null;
         }
 
-        SimpleDateFormat jsonDateFormat = new SimpleDateFormat(SqlOperationService.SQL_DATA_FORMAT);
-        Date decodedDate;
+        // Add ending Z if necessary
+        String dateZ = date.endsWith("Z") ? date : date + "Z";
         try {
-            decodedDate = jsonDateFormat.parse(date);
-        } catch (Exception ex) {
-            LOG.error("Failed to decode generalized time '{}'", date, ex);
+            return new Date(Instant.parse(dateZ).toEpochMilli());
+        } catch (DateTimeParseException ex) {
+        	if (!silent) {
+	            LOG.error("Failed to decode generalized time '{}'", date, ex);
+        	}
 
-            return null;
+        	return null;
         }
-
-        return decodedDate;
     }
-
-    @Override
-    public Date decodeTime(String date) {
-		return decodeTime(null, date);
-	}
 
 	@Override
 	public boolean hasBranchesSupport(String dn) {
