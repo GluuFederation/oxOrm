@@ -607,7 +607,9 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
         List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
         
         // Find entries
-        Filter searchFilter = Filter.createEqualityFilter(Filter.createLowercaseFilter(SpannerOperationService.UID), StringHelper.toLowerCase(userName));
+        Filter searchFilter = Filter.createEqualityFilter(SpannerOperationService.UID, StringHelper.toLowerCase(userName));
+        // Spanner to support lower in indexes. This led to performance decrease 
+        // Filter searchFilter = Filter.createEqualityFilter(Filter.createLowercaseFilter(SpannerOperationService.UID), StringHelper.toLowerCase(userName));
         if (objectClasses.length > 0) {
             searchFilter = addObjectClassFilter(searchFilter, objectClasses);
         }
