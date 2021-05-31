@@ -21,6 +21,7 @@ import java.util.Set;
 import org.gluu.persist.cloud.spanner.model.ResultCode;
 import org.gluu.persist.cloud.spanner.model.TableMapping;
 import org.gluu.persist.exception.KeyConversionException;
+import org.gluu.persist.exception.MappingException;
 import org.gluu.persist.exception.operation.ConfigurationException;
 import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
@@ -430,6 +431,10 @@ public class SpannerConnectionProvider {
 
 	public TableMapping getTableMappingByKey(String key, String objectClass, String tableName) {
 		Map<String, StructField> columTypes = tableColumnsMap.get(tableName);
+		if (!tableColumnsMap.containsKey(tableName)) {
+			throw new MappingException(String.format("Table '%s' metadata is not exists '", tableName));
+		}
+
 		if ("_".equals(key)) {
 			return new TableMapping("", tableName, objectClass, columTypes);
 		}

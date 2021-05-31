@@ -185,6 +185,7 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
         Instant startTime = OperationDurationUtil.instance().now();
 
         TableMapping tableMapping = connectionProvider.getTableMappingByKey(key, objectClass);
+        if (tableMapping == )
         boolean result = addEntryImpl(tableMapping, key, attributes);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
