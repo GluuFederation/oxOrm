@@ -143,7 +143,7 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
             }
             
             // We need to check only first element of each array because objectCLass in SQL is single value attribute
-            if (!StringHelper.equals(objectClassesFromDb[0], objectClasses[0])) {
+            if (!StringHelper.equals(getBaseObjectClass(entryClass, objectClassesFromDb), getBaseObjectClass(entryClass, objectClasses))) {
             	throw new UnsupportedOperationException(String.format("It's not possible to change objectClasses of already persisted entry! Entry is invalid: '%s'", entry));
             }
         }
@@ -207,7 +207,7 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
             resultAttributes.add(new AttributeData(SqlOperationService.DN, dn));
             resultAttributes.add(new AttributeData(SqlOperationService.DOC_ID, parsedKey.getKey()));
 
-            boolean result = getOperationService().addEntry(parsedKey.getKey(), objectClasses[0], resultAttributes);
+            boolean result = getOperationService().addEntry(parsedKey.getKey(), getBaseObjectClass(objectClasses), resultAttributes);
             if (!result) {
                 throw new EntryPersistenceException(String.format("Failed to persist entry: '%s'", dn));
             }
@@ -264,7 +264,7 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
             }
 
             if (modifications.size() > 0) {
-                boolean result = getOperationService().updateEntry(toSQLKey(dn).getKey(), objectClasses[0], modifications);
+                boolean result = getOperationService().updateEntry(toSQLKey(dn).getKey(), getBaseObjectClass(objectClasses), modifications);
                 if (!result) {
                     throw new EntryPersistenceException(String.format("Failed to update entry: '%s'", dn));
                 }
@@ -285,7 +285,7 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
             for (DeleteNotifier subscriber : subscribers) {
                 subscriber.onBeforeRemove(dn);
             }
-            getOperationService().delete(toSQLKey(dn).getKey(), objectClasses[0]);
+            getOperationService().delete(toSQLKey(dn).getKey(), getBaseObjectClass(objectClasses));
             for (DeleteNotifier subscriber : subscribers) {
                 subscriber.onAfterRemove(dn);
             }
@@ -306,7 +306,7 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
             for (DeleteNotifier subscriber : subscribers) {
                 subscriber.onBeforeRemove(dn);
             }
-            getOperationService().deleteRecursively(toSQLKey(dn).getKey(), objectClasses[0]);
+            getOperationService().deleteRecursively(toSQLKey(dn).getKey(), getBaseObjectClass(objectClasses));
             for (DeleteNotifier subscriber : subscribers) {
                 subscriber.onAfterRemove(dn);
             }
@@ -358,7 +358,7 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
 		}
         
         try {
-        	int processed = (int) getOperationService().delete(keyWithInum.getKey(), objectClasses[0], convertedExpression, count);
+        	int processed = (int) getOperationService().delete(keyWithInum.getKey(), getBaseObjectClass(entryClass, objectClasses), convertedExpression, count);
         	
         	return processed;
         } catch (Exception ex) {
@@ -371,7 +371,7 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
         try {
             // Load entry
             ParsedKey keyWithInum = toSQLKey(dn);
-            List<AttributeData> result = getOperationService().lookup(keyWithInum.getKey(), objectClasses[0], toInternalAttributes(ldapReturnAttributes));
+            List<AttributeData> result = getOperationService().lookup(keyWithInum.getKey(), getBaseObjectClass(objectClasses), toInternalAttributes(ldapReturnAttributes));
             if (result != null) {
                 return result;
             }
@@ -483,7 +483,7 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
             if (batchOperation != null) {
                 batchOperationWraper = new SqlBatchOperationWraper<T>(batchOperation, this, entryClass, propertiesAnnotations);
             }
-            searchResult = searchImpl(keyWithInum.getKey(), objectClasses[0], convertedExpression, scope, currentLdapReturnAttributes,
+            searchResult = searchImpl(keyWithInum.getKey(), getBaseObjectClass(entryClass, objectClasses), convertedExpression, scope, currentLdapReturnAttributes,
                     defaultSort, batchOperationWraper, returnDataType, start, count, chunkSize);
 
             if (searchResult == null) {
@@ -525,7 +525,7 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
         PagedResult<EntryData> searchResult = null;
         try {
             ParsedKey keyWithInum = toSQLKey(baseDN);
-            searchResult = searchImpl(keyWithInum.getKey(), objectClasses[0], convertedExpression, SearchScope.SUB, ldapReturnAttributes, null,
+            searchResult = searchImpl(keyWithInum.getKey(), getBaseObjectClass(entryClass, objectClasses), convertedExpression, SearchScope.SUB, ldapReturnAttributes, null,
                     null, SearchReturnDataType.SEARCH, 0, 1, 0);
             if (searchResult == null) {
                 throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: '%s', filter: '%s'", baseDN, searchFilter));
@@ -615,7 +615,7 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
 		}
 
 		try {
-            PagedResult<EntryData> searchResult = searchImpl(toSQLKey(baseDN).getKey(), objectClasses[0], convertedExpression,
+            PagedResult<EntryData> searchResult = searchImpl(toSQLKey(baseDN).getKey(), getBaseObjectClass(entryClass, objectClasses), convertedExpression,
                     SearchScope.SUB, SqlOperationService.UID_ARRAY, null, null, SearchReturnDataType.SEARCH, 0, 1, 1);
             if ((searchResult == null) || (searchResult.getEntriesCount() != 1)) {
                 return false;
@@ -653,7 +653,7 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
 		String[] objectClasses = getTypeObjectClasses(entryClass);
 
     	try {
-            return getOperationService().authenticate(toSQLKey(bindDn).getKey(), escapeValue(password), objectClasses[0]);
+            return getOperationService().authenticate(toSQLKey(bindDn).getKey(), escapeValue(password), getBaseObjectClass(entryClass, objectClasses));
         } catch (Exception ex) {
             throw new AuthenticationException(String.format("Failed to authenticate DN: '%s'", bindDn), ex);
         }
@@ -695,7 +695,7 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
 
         PagedResult<EntryData> searchResult;
         try {
-            searchResult = searchImpl(toSQLKey(baseDN).getKey(), objectClasses[0], convertedExpression, scope, null, null,
+            searchResult = searchImpl(toSQLKey(baseDN).getKey(), getBaseObjectClass(entryClass, objectClasses), convertedExpression, scope, null, null,
                     null, SearchReturnDataType.COUNT, 0, 0, 0);
         } catch (Exception ex) {
             throw new EntryPersistenceException(
@@ -941,6 +941,22 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
 
 	protected boolean isSupportForceUpdate() {
 		return true;
+	}
+
+	private String getBaseObjectClass(String[] objectClasses) {
+		if (ArrayHelper.isEmpty(objectClasses)) {
+			throw new MappingException("Object class isn't defined!");
+		}
+		
+		return objectClasses[0];
+	}
+
+	private String getBaseObjectClass(Class<?> entryClass, String[] objectClasses) {
+		if (ArrayHelper.isEmpty(objectClasses)) {
+			throw new MappingException(String.format("Object class isn't defined in bean '%s'!", entryClass));
+		}
+		
+		return objectClasses[0];
 	}
 
 }
