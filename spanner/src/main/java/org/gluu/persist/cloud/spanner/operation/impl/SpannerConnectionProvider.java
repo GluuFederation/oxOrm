@@ -24,6 +24,7 @@ import org.gluu.persist.exception.KeyConversionException;
 import org.gluu.persist.exception.MappingException;
 import org.gluu.persist.exception.operation.ConfigurationException;
 import org.gluu.persist.exception.operation.ConnectionException;
+import org.gluu.persist.exception.operation.PersistenceException;
 import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
 import org.gluu.orm.util.ArrayHelper;
 import org.gluu.orm.util.PropertiesHelper;
@@ -430,10 +431,11 @@ public class SpannerConnectionProvider {
     }
 
 	public TableMapping getTableMappingByKey(String key, String objectClass, String tableName) {
-		Map<String, StructField> columTypes = tableColumnsMap.get(tableName);
 		if (!tableColumnsMap.containsKey(tableName)) {
-			throw new MappingException(String.format("Table '%s' metadata is not exists '", tableName));
+			throw new MappingException(String.format("Table '%s' is not exists in metadata'", tableName));
 		}
+
+		Map<String, StructField> columTypes = tableColumnsMap.get(tableName);
 
 		if ("_".equals(key)) {
 			return new TableMapping("", tableName, objectClass, columTypes);
@@ -455,7 +457,13 @@ public class SpannerConnectionProvider {
 
 	 public TableMapping getChildTableMappingByKey(String key, TableMapping tableMapping, String columnName) {
 		String childTableName = tableMapping.getTableName() + "_" + columnName;
+
+		if (!tableColumnsMap.containsKey(childTableName)) {
+			return null;
+		}
+
 		TableMapping childTableMapping = getTableMappingByKey(key, tableMapping.getObjectClass(), childTableName);
+			
 		return childTableMapping;
 	}
 
@@ -472,6 +480,10 @@ public class SpannerConnectionProvider {
 		Map<String, TableMapping> childTableMapping = new HashMap<>();
 		for (String childAttribute : childAttributes) {
 			TableMapping childColumTypes = getChildTableMappingByKey(key, tableMapping, childAttribute);
+			if (childColumTypes == null) {
+				String childTableName = tableMapping.getTableName() + "_" + childAttribute;
+				throw new MappingException(String.format("Table '%s' is not exists in metadata'", childTableName));
+			}
 			childTableMapping.put(childAttribute.toLowerCase(), childColumTypes);
 		}
 		
