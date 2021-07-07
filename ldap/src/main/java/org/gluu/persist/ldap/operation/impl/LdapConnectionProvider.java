@@ -14,6 +14,7 @@ import java.util.Properties;
 import org.gluu.persist.exception.operation.ConfigurationException;
 import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
 import org.gluu.orm.util.ArrayHelper;
+import org.gluu.orm.util.CertUtils;
 import org.gluu.orm.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,23 +134,27 @@ public class LdapConnectionProvider {
 
         LDAPConnectionOptions connectionOptions = new LDAPConnectionOptions();
         connectionOptions.setConnectTimeoutMillis(100 * 1000);
-        connectionOptions.setAutoReconnect(true);
+        //connectionOptions.setAutoReconnect(true);
 
         this.useSSL = Boolean.valueOf(props.getProperty("useSSL")).booleanValue();
 
         SSLUtil sslUtil = null;
         FailoverServerSet failoverSet;
         if (this.useSSL) {
-            String sslTrustStoreFile = props.getProperty("ssl.trustStoreFile");
-            String sslTrustStorePin = props.getProperty("ssl.trustStorePin");
-            String sslTrustStoreFormat = props.getProperty("ssl.trustStoreFormat");
+            String trustStoreFile = props.getProperty("ssl.trustStoreFile");
+            String trustStorePin = props.getProperty("ssl.trustStorePin");
+            String trustStoreType = props.getProperty("ssl.trustStoreFormat");
 
-            if (StringHelper.isEmpty(sslTrustStoreFile) && StringHelper.isEmpty(sslTrustStorePin)) {
-                sslUtil = new SSLUtil(new TrustAllTrustManager());
+            if (CertUtils.isFips()) {
+                sslUtil = new SSLUtil(CertUtils.getTrustManagers(trustStoreFile, trustStorePin, trustStoreType));
             } else {
-                TrustStoreTrustManager trustStoreTrustManager = new TrustStoreTrustManager(sslTrustStoreFile, sslTrustStorePin.toCharArray(),
-                        sslTrustStoreFormat, true);
-                sslUtil = new SSLUtil(trustStoreTrustManager);
+	            if (StringHelper.isEmpty(trustStoreFile) && StringHelper.isEmpty(trustStorePin)) {
+	                sslUtil = new SSLUtil(new TrustAllTrustManager());
+	            } else {
+	                TrustStoreTrustManager trustStoreTrustManager = new TrustStoreTrustManager(trustStoreFile, trustStorePin.toCharArray(),
+	                        trustStoreType, true);
+	                sslUtil = new SSLUtil(trustStoreTrustManager);
+	            }
             }
 
             failoverSet = new FailoverServerSet(this.addresses, this.ports, sslUtil.createSSLSocketFactory(SSL_PROTOCOLS[0]), connectionOptions);
