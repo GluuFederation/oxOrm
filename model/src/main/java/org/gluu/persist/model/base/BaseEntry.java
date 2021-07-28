@@ -10,48 +10,28 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.gluu.persist.annotation.DN;
-
 /**
  * Provides DN attribute
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */
-public class BaseEntry {
-
-    @DN
-    private String dn;
+public class BaseEntry extends Entry {
 
     public BaseEntry() {
+    	super();
     }
 
     public BaseEntry(String dn) {
-        super();
-        this.dn = dn;
-    }
-
-    public String getDn() {
-        return dn;
-    }
-
-    public void setDn(String dn) {
-        this.dn = dn;
-    }
-
-    public String getBaseDn() {
-        return dn;
-    }
-
-    public void setBaseDn(String dn) {
-        this.dn = dn;
+        super(dn);
     }
 
     @Override
     public String toString() {
-        return String.format("BaseEntry [dn=%s]", dn);
+        return String.format("BaseEntry [dn=%s]", getDn());
     }
 
     public static List<String> getDNs(Collection<? extends BaseEntry> collection) {
         return collection.stream().map(BaseEntry::getDn).collect(Collectors.toList());
     }
+    
 }
