@@ -80,18 +80,17 @@ public class LdapConnectionProvider {
     public void create() {
         try {
             init(props);
-        } catch (LDAPException ex) {
-            creationResultCode = ex.getResultCode();
+        } catch (Exception ex) {
+        	if (ex instanceof LDAPException) {
+        		creationResultCode = ((LDAPException) ex).getResultCode();
+        	}
 
             Properties clonedProperties = (Properties) props.clone();
             if (clonedProperties.getProperty("bindPassword") != null) {
                 clonedProperties.setProperty("bindPassword", "REDACTED");
             }
-            LOG.error("Failed to create connection pool with properties: " + clonedProperties, ex);
-        } catch (Exception ex) {
-            Properties clonedProperties = (Properties) props.clone();
-            if (clonedProperties.getProperty("bindPassword") != null) {
-                clonedProperties.setProperty("bindPassword", "REDACTED");
+            if (clonedProperties.getProperty("ssl.trustStorePin") != null) {
+                clonedProperties.setProperty("ssl.trustStorePin", "REDACTED");
             }
             LOG.error("Failed to create connection pool with properties: " + clonedProperties, ex);
         }
