@@ -21,7 +21,8 @@ public final class PropertiesHelper {
     	Iterator<?> keys = conf.keySet().iterator();
         while (keys.hasNext()) {
             String key = (String) keys.next();
-            if(!key.contains("#")){
+            splitter = "#";
+            if(!key.contains(splitter)){
                 splitter = ".";
             }
             int index = key.indexOf(splitter);
