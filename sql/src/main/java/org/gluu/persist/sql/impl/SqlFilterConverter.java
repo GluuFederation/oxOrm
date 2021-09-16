@@ -371,12 +371,10 @@ public class SqlFilterConverter {
 	        assertionValue = jsonDateFormat.format(filter.getAssertionValue());
 		}
 
-		if (Boolean.TRUE.equals(filter.getMultiValued())) {
-			assertionValue = convertValueToJson(Arrays.asList(assertionValue));
-		}
-
 		if (isArray && (assertionValue instanceof String)) {
 			assertionValue = "[\"" + assertionValue + "\"]";
+		} else if (Boolean.TRUE.equals(filter.getMultiValued())) {
+			assertionValue = convertValueToJson(Arrays.asList(assertionValue));
 		}
 
 		return Expressions.constant(assertionValue);
