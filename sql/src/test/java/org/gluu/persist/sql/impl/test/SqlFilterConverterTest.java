@@ -109,7 +109,7 @@ public class SqlFilterConverterTest {
 		ConvertedExpression expressionEq4 = simpleConverter.convertToSqlFilter(filterEq4, null, null);
 
 		String queryEq4 = toSelectSQL(expressionEq4);
-		assertEquals(queryEq4, "select doc.`*` from `table` as doc where JSON_CONTAINS(doc.added->'$.v', CAST('[\"[\"2020-12-16T14:58:18.398\"]\"]' AS JSON))");
+		assertEquals(queryEq4, "select doc.`*` from `table` as doc where JSON_CONTAINS(doc.added->'$.v', CAST('[\"2020-12-16T14:58:18.398\"]' AS JSON))");
 	}
 
 	@Test
