@@ -65,21 +65,21 @@ public class SqlFilterConverterCheckExcludeFilterTest {
 		ConvertedExpression expression1 = simpleConverter.convertToSqlFilter(filter1, null, null);
 
 		String query1 = toSelectSQL(expression1);
-		assertEquals(query1, "select doc.`*` from `table` as doc where doc.objectClass = 'gluuPerson' and (doc.uid = 'test' and lower(doc.uid) = 'test' and doc.objectClass = 'gluuPerson' and (doc.uid = 'test' and lower(doc.uid) = 'test' and doc.objectClass = 'gluuPerson' and JSON_CONTAINS(doc.added->'$.v', CAST('[\"[\"2020-12-16T14:58:18.398\"]\"]' AS JSON))) and JSON_CONTAINS(doc.added->'$.v', CAST('[\"[\"2020-12-16T14:58:18.398\"]\"]' AS JSON)))");
+		assertEquals(query1, "select doc.`*` from `table` as doc where doc.objectClass = 'gluuPerson' and (doc.uid = 'test' and lower(doc.uid) = 'test' and doc.objectClass = 'gluuPerson' and (doc.uid = 'test' and lower(doc.uid) = 'test' and doc.objectClass = 'gluuPerson' and JSON_CONTAINS(doc.added->'$.v', CAST('[\"2020-12-16T14:58:18.398\"]' AS JSON))) and JSON_CONTAINS(doc.added->'$.v', CAST('[\"2020-12-16T14:58:18.398\"]' AS JSON)))");
 
 		Filter filter2 = filterProcessor.excludeFilter(filter1, filterEq3);
 
 		ConvertedExpression expression2 = simpleConverter.convertToSqlFilter(filter2, null, null);
 
 		String query2 = toSelectSQL(expression2);
-		assertEquals(query2, "select doc.`*` from `table` as doc where doc.uid = 'test' and lower(doc.uid) = 'test' and (doc.uid = 'test' and lower(doc.uid) = 'test' and JSON_CONTAINS(doc.added->'$.v', CAST('[\"[\"2020-12-16T14:58:18.398\"]\"]' AS JSON))) and JSON_CONTAINS(doc.added->'$.v', CAST('[\"[\"2020-12-16T14:58:18.398\"]\"]' AS JSON))");
+		assertEquals(query2, "select doc.`*` from `table` as doc where doc.uid = 'test' and lower(doc.uid) = 'test' and (doc.uid = 'test' and lower(doc.uid) = 'test' and JSON_CONTAINS(doc.added->'$.v', CAST('[\"2020-12-16T14:58:18.398\"]' AS JSON))) and JSON_CONTAINS(doc.added->'$.v', CAST('[\"2020-12-16T14:58:18.398\"]' AS JSON))");
 
 		Filter filter3 = filterProcessor.excludeFilter(filter1, Filter.createEqualityFilter("objectClass", null));
 
 		ConvertedExpression expression3 = simpleConverter.convertToSqlFilter(filter3, null, null);
 
 		String query3 = toSelectSQL(expression3);
-		assertEquals(query3, "select doc.`*` from `table` as doc where doc.uid = 'test' and lower(doc.uid) = 'test' and (doc.uid = 'test' and lower(doc.uid) = 'test' and JSON_CONTAINS(doc.added->'$.v', CAST('[\"[\"2020-12-16T14:58:18.398\"]\"]' AS JSON))) and JSON_CONTAINS(doc.added->'$.v', CAST('[\"[\"2020-12-16T14:58:18.398\"]\"]' AS JSON))");
+		assertEquals(query3, "select doc.`*` from `table` as doc where doc.uid = 'test' and lower(doc.uid) = 'test' and (doc.uid = 'test' and lower(doc.uid) = 'test' and JSON_CONTAINS(doc.added->'$.v', CAST('[\"2020-12-16T14:58:18.398\"]' AS JSON))) and JSON_CONTAINS(doc.added->'$.v', CAST('[\"2020-12-16T14:58:18.398\"]' AS JSON))");
 	}
 
 	private String toSelectSQL(ConvertedExpression convertedExpression) {
