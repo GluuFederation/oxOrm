@@ -86,21 +86,21 @@ public class SqlFilterConverterTest {
 		ConvertedExpression expressionEq1 = simpleConverter.convertToSqlFilter(filterEq1, null, null);
 
 		String queryEq1 = toSelectSQL(expressionEq1);
-		assertEquals(queryEq1, "select doc.`*` from `table` as doc where JSON_CONTAINS(doc.uid->'$.v', CAST('[\"[\"test\"]\"]' AS JSON))");
+		assertEquals(queryEq1, "select doc.`*` from `table` as doc where JSON_CONTAINS(doc.uid->'$.v', CAST('[\"test\"]' AS JSON))");
 
 		// EQ -- Integer
 		Filter filterEq2 = Filter.createEqualityFilter("age", 23).multiValued();
 		ConvertedExpression expressionEq2 = simpleConverter.convertToSqlFilter(filterEq2, null, null);
 
 		String queryEq2 = toSelectSQL(expressionEq2);
-		assertEquals(queryEq2, "select doc.`*` from `table` as doc where JSON_CONTAINS(doc.age->'$.v', CAST('[\"[23]\"]' AS JSON))");
+		assertEquals(queryEq2, "select doc.`*` from `table` as doc where JSON_CONTAINS(doc.age->'$.v', CAST('[23]' AS JSON))");
 
 		// EQ -- Long
 		Filter filterEq3 = Filter.createEqualityFilter("age", 23L).multiValued();
 		ConvertedExpression expressionEq3 = simpleConverter.convertToSqlFilter(filterEq3, null, null);
 
 		String queryEq3 = toSelectSQL(expressionEq3);
-		assertEquals(queryEq3, "select doc.`*` from `table` as doc where JSON_CONTAINS(doc.age->'$.v', CAST('[\"[23]\"]' AS JSON))");
+		assertEquals(queryEq3, "select doc.`*` from `table` as doc where JSON_CONTAINS(doc.age->'$.v', CAST('[23]]' AS JSON))");
 
 		
 
