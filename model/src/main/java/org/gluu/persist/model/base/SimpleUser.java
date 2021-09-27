@@ -34,10 +34,10 @@ public class SimpleUser extends BaseEntry implements Serializable {
     @AttributeName
     private Date updatedAt;
 
-    @AttributeName(name = "gluuCreationTimestamp")
+    @AttributeName(name = "oxCreationTimestamp")
     private Date createdAt;
 
-    @AttributeName(name = "gluuPersistentJWT")
+    @AttributeName(name = "oxAuthPersistentJWT")
     private String[] oxAuthPersistentJwt;
 
     @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true)
