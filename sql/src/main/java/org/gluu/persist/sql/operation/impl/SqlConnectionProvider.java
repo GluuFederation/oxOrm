@@ -8,6 +8,7 @@ package org.gluu.persist.sql.operation.impl;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -25,6 +26,9 @@ import org.apache.commons.dbcp2.PoolingDataSource;
 import org.apache.commons.pool2.ObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.gluu.orm.util.ArrayHelper;
+import org.gluu.orm.util.PropertiesHelper;
+import org.gluu.orm.util.StringHelper;
 import org.gluu.persist.exception.KeyConversionException;
 import org.gluu.persist.exception.operation.ConfigurationException;
 import org.gluu.persist.exception.operation.ConnectionException;
@@ -32,9 +36,6 @@ import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
 import org.gluu.persist.sql.dsl.template.SqlJsonMySQLTemplates;
 import org.gluu.persist.sql.model.ResultCode;
 import org.gluu.persist.sql.model.TableMapping;
-import org.gluu.orm.util.ArrayHelper;
-import org.gluu.orm.util.PropertiesHelper;
-import org.gluu.orm.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +53,9 @@ import com.querydsl.sql.SQLTemplatesRegistry;
 public class SqlConnectionProvider {
 
     private static final Logger LOG = LoggerFactory.getLogger(SqlConnectionProvider.class);
+
+    private static final String QUERY_ENGINE_TYPE =
+    		"SELECT TABLE_NAME, ENGINE FROM information_schema.tables WHERE table_schema = ?";
 
     private static final String DRIVER_PROPERTIES_PREFIX = "connection.driver-property";
 
@@ -77,6 +81,7 @@ public class SqlConnectionProvider {
 	private SQLQueryFactory sqlQueryFactory;
 	
 	private Map<String, Map<String, String>> tableColumnsMap;
+	private Map<String, String> tableEnginesMap;
 
     protected SqlConnectionProvider() {
     }
@@ -183,15 +188,15 @@ public class SqlConnectionProvider {
         	DatabaseMetaData databaseMetaData = con.getMetaData();
         	this.dbType = databaseMetaData.getDatabaseProductName().toLowerCase();
             LOG.debug("Database product name: '{}'", dbType);
-            loadTableMetaData(databaseMetaData);
+            loadTableMetaData(databaseMetaData, con);
         } catch (Exception ex) {
-            throw new ConnectionException("Failed to detect database product name", ex);
+            throw new ConnectionException("Failed to detect database product name and load metadata", ex);
         }
 
         this.creationResultCode = ResultCode.SUCCESS_INT_VALUE;
     }
 
-    private void loadTableMetaData(DatabaseMetaData databaseMetaData) throws SQLException {
+    private void loadTableMetaData(DatabaseMetaData databaseMetaData, Connection con) throws SQLException {
         LOG.info("Scanning DB metadata...");
 
         long takes = System.currentTimeMillis();
@@ -207,6 +212,18 @@ public class SqlConnectionProvider {
         	}
 
         	tableColumnsMap.put(tableName, tableColumns);
+    	}
+    	
+        LOG.info("Detecting engine types...");
+    	PreparedStatement preparedStatement = con.prepareStatement(QUERY_ENGINE_TYPE);
+    	preparedStatement.setString(1, schemaName);
+
+    	ResultSet tableEnginesResultSet = preparedStatement.executeQuery();
+    	while (tableEnginesResultSet.next()) {
+    		String tableName = tableEnginesResultSet.getString("TABLE_NAME");
+    		String engineName = tableEnginesResultSet.getString("ENGINE");
+
+        	tableEnginesMap.put(tableName, engineName);
     	}
 
     	takes = System.currentTimeMillis() - takes;
@@ -371,6 +388,12 @@ public class SqlConnectionProvider {
 		TableMapping tableMapping = new TableMapping(baseNameParts[0], tableName, objectClass, columTypes);
 		
 		return tableMapping;
+	}
+
+	public String getEngineType(String objectClass) {
+		String tableName = objectClass;
+
+		return tableEnginesMap.get(tableName);
 	}
 
 	public Connection getConnection() {
