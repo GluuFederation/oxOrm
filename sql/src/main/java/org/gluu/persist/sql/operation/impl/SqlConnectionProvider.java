@@ -78,6 +78,10 @@ public class SqlConnectionProvider {
     private PasswordEncryptionMethod passwordEncryptionMethod;
 
 	private String dbType;
+	private String dbVersion;
+
+	private boolean mariaDb = false;
+
 	private String schemaName;
 
 	private SQLTemplates sqlTemplates;
@@ -86,6 +90,7 @@ public class SqlConnectionProvider {
 	
 	private Map<String, Map<String, String>> tableColumnsMap;
 	private Map<String, String> tableEnginesMap = new HashMap<>();
+
 
     protected SqlConnectionProvider() {
     }
@@ -191,6 +196,10 @@ public class SqlConnectionProvider {
         try (Connection con = this.poolingDataSource.getConnection()) {
         	DatabaseMetaData databaseMetaData = con.getMetaData();
         	this.dbType = databaseMetaData.getDatabaseProductName().toLowerCase();
+        	this.dbVersion = databaseMetaData.getDatabaseProductVersion().toLowerCase();
+        	if ((this.dbVersion != null) && this.dbVersion.toLowerCase().contains("mariadb")) {
+        		this.mariaDb = true;
+        	}
             LOG.debug("Database product name: '{}'", dbType);
             loadTableMetaData(databaseMetaData, con);
         } catch (Exception ex) {
@@ -230,7 +239,7 @@ public class SqlConnectionProvider {
 				String columTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
 
 				String remark = columnResultSet.getString("REMARKS");
-        		if ("mariadb".equalsIgnoreCase(engineType) && "longtext".equalsIgnoreCase(columTypeName) && "json".equalsIgnoreCase(remark)) {
+        		if (mariaDb && "longtext".equalsIgnoreCase(columTypeName) && "json".equalsIgnoreCase(remark)) {
         			columTypeName = JSON_TYPE_NAME;
         		}
 				tableColumns.put(columnName, columTypeName);
