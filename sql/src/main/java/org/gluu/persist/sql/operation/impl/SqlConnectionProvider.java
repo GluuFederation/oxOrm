@@ -230,7 +230,7 @@ public class SqlConnectionProvider {
 				String columTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
 
 				String remark = columnResultSet.getString("REMARKS");
-        		if ("mariadb".equalsIgnoreCase(engineType) && "json".equalsIgnoreCase(remark)) {
+        		if ("mariadb".equalsIgnoreCase(engineType) && "longtext".equalsIgnoreCase(columTypeName) && "json".equalsIgnoreCase(remark)) {
         			columTypeName = JSON_TYPE_NAME;
         		}
 				tableColumns.put(columnName, columTypeName);
