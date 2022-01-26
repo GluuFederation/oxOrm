@@ -873,10 +873,10 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			return false;
 		}
 		
-		String engineType = connectionProvider.getEngineType(tableName);
-		if ((engineType != null) && engineType.equalsIgnoreCase("mariadb")) {
-			return "longtext".equals(columnTypeName);
-		}
+//		String engineType = connectionProvider.getEngineType(tableName);
+//		if ((engineType != null) && engineType.equalsIgnoreCase("mariadb")) {
+//			return "longtext".equals(columnTypeName);
+//		}
 
 		return "json".equals(columnTypeName);
 		
