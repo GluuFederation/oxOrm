@@ -14,9 +14,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.commons.dbcp2.ConnectionFactory;
 import org.apache.commons.dbcp2.DriverManagerConnectionFactory;
@@ -52,7 +54,9 @@ import com.querydsl.sql.SQLTemplatesRegistry;
  */
 public class SqlConnectionProvider {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SqlConnectionProvider.class);
+    private static final String JSON_TYPE_NAME = "json";
+
+	private static final Logger LOG = LoggerFactory.getLogger(SqlConnectionProvider.class);
 
     private static final String QUERY_ENGINE_TYPE =
     		"SELECT TABLE_NAME, ENGINE FROM information_schema.tables WHERE table_schema = ?";
@@ -81,7 +85,7 @@ public class SqlConnectionProvider {
 	private SQLQueryFactory sqlQueryFactory;
 	
 	private Map<String, Map<String, String>> tableColumnsMap;
-	private Map<String, String> tableEnginesMap;
+	private Map<String, String> tableEnginesMap = new HashMap<>();
 
     protected SqlConnectionProvider() {
     }
@@ -197,23 +201,8 @@ public class SqlConnectionProvider {
     }
 
     private void loadTableMetaData(DatabaseMetaData databaseMetaData, Connection con) throws SQLException {
-        LOG.info("Scanning DB metadata...");
-
         long takes = System.currentTimeMillis();
-    	ResultSet tableResultSet = databaseMetaData.getTables(null, schemaName, null, new String[]{"TABLE"});
-    	while (tableResultSet.next()) {
-    		String tableName = tableResultSet.getString("TABLE_NAME");
-    		Map<String, String> tableColumns = new HashMap<>();
-    		
-            LOG.debug("Found table: '{}'.", tableName);
-            ResultSet columnResultSet = databaseMetaData.getColumns(null, schemaName, tableName, null);
-        	while (columnResultSet.next()) {
-        		tableColumns.put(columnResultSet.getString("COLUMN_NAME").toLowerCase(), columnResultSet.getString("TYPE_NAME").toLowerCase());
-        	}
 
-        	tableColumnsMap.put(tableName, tableColumns);
-    	}
-    	
         LOG.info("Detecting engine types...");
     	PreparedStatement preparedStatement = con.prepareStatement(QUERY_ENGINE_TYPE);
     	preparedStatement.setString(1, schemaName);
@@ -224,6 +213,30 @@ public class SqlConnectionProvider {
     		String engineName = tableEnginesResultSet.getString("ENGINE");
 
         	tableEnginesMap.put(tableName, engineName);
+    	}
+
+        LOG.info("Scanning DB metadata...");
+        ResultSet tableResultSet = databaseMetaData.getTables(null, schemaName, null, new String[]{"TABLE"});
+    	while (tableResultSet.next()) {
+    		String tableName = tableResultSet.getString("TABLE_NAME");
+    		Map<String, String> tableColumns = new HashMap<>();
+    		
+    		String engineType = tableEnginesMap.get(tableName);
+    		
+            LOG.debug("Found table: '{}'.", tableName);
+            ResultSet columnResultSet = databaseMetaData.getColumns(null, schemaName, tableName, null);
+        	while (columnResultSet.next()) {
+        		String columnName = columnResultSet.getString("COLUMN_NAME").toLowerCase();
+				String columTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
+
+				String remark = columnResultSet.getString("REMARKS");
+        		if ("mariadb".equalsIgnoreCase(engineType) && "json".equalsIgnoreCase(remark)) {
+        			columTypeName = JSON_TYPE_NAME;
+        		}
+				tableColumns.put(columnName, columTypeName);
+        	}
+
+        	tableColumnsMap.put(tableName, tableColumns);
     	}
 
     	takes = System.currentTimeMillis() - takes;
