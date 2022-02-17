@@ -118,7 +118,7 @@ public interface PersistenceEntryManager extends EntityManager {
 	@Deprecated
     List<AttributeData> exportEntry(String dn);
 
-	<T> List<AttributeData> exportEntry(String dn, Class<T> entryClass);
+	<T> List<AttributeData> exportEntry(String dn, String objectClass);
 
     <T> void importEntry(String dn, Class<T> entryClass, List<AttributeData> data);
 

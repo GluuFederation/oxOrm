@@ -775,22 +775,15 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
     }
 
 	@Override
-	public <T> List<AttributeData> exportEntry(String dn, Class<T> entryClass) {
-		String[] objectClasses = null;
-		
-		if (entryClass != null) {
-			// Check entry class
-			checkEntryClass(entryClass, false);
-			objectClasses = getTypeObjectClasses(entryClass);
-		}
-		if (ArrayHelper.isEmpty(objectClasses)) {
+	public <T> List<AttributeData> exportEntry(String dn, String objectClass) {
+		if (StringHelper.isEmpty(objectClass)) {
 			throw new MappingException("Object class isn't defined!");
 		}
 
 		try {
             // Load entry
             ParsedKey keyWithInum = toSQLKey(dn);
-            List<AttributeData> entry = getOperationService().lookup(keyWithInum.getKey(), objectClasses[0]);
+            List<AttributeData> entry = getOperationService().lookup(keyWithInum.getKey(), objectClass);
 
             if (entry != null) {
                 return entry;
