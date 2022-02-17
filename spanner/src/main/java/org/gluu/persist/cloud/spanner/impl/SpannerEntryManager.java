@@ -290,11 +290,11 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
 		// Remove entry
         try {
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onBeforeRemove(dn);
+                subscriber.onBeforeRemove(dn, objectClasses);
             }
             getOperationService().delete(toSQLKey(dn).getKey(), getBaseObjectClass(objectClasses));
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn);
+                subscriber.onAfterRemove(dn, objectClasses);
             }
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: '%s'", dn), ex);
@@ -311,11 +311,11 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
 
 		try {
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onBeforeRemove(dn);
+                subscriber.onBeforeRemove(dn, objectClasses);
             }
             getOperationService().deleteRecursively(toSQLKey(dn).getKey(), getBaseObjectClass(objectClasses));
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn);
+                subscriber.onAfterRemove(dn, objectClasses);
             }
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: '%s'", dn), ex);
