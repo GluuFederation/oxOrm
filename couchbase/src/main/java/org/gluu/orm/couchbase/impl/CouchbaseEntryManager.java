@@ -802,7 +802,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
 	@Override
-	public <T> List<AttributeData> exportEntry(String dn, Class<T> entryClass) {
+	public <T> List<AttributeData> exportEntry(String dn, String[] objectClasses) {
 		return exportEntry(dn);
 	}
 

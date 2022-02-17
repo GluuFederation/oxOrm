@@ -882,7 +882,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-	public <T> List<AttributeData> exportEntry(String dn, Class<T> entryClass) {
+	public <T> List<AttributeData> exportEntry(String dn, String objectClass) {
     	return exportEntry(dn);
 	}
 
