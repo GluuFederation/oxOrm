@@ -801,7 +801,12 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         }
     }
 
-    private ConvertedExpression toCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
+	@Override
+	public <T> List<AttributeData> exportEntry(String dn, Class<T> entryClass) {
+		return exportEntry(dn);
+	}
+
+	private ConvertedExpression toCouchbaseFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
         return FILTER_CONVERTER.convertToCouchbaseFilter(genericFilter, propertiesAnnotationsMap);
     }
 
@@ -1052,5 +1057,6 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 //		
 //		return resultAttributeNames;
 	}
+
 
 }

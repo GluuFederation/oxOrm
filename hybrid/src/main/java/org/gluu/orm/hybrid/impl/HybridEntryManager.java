@@ -190,6 +190,12 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
     }
 
 	@Override
+	public <T> List<AttributeData> exportEntry(String dn, Class<T> entryClass) {
+    	PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(dn);
+    	return persistenceEntryManager.exportEntry(dn, entryClass);
+	}
+
+	@Override
 	public <T> void importEntry(String dn, Class<T> entryClass, List<AttributeData> data) {
 		throw new UnsupportedOperationException("Method not implemented.");
 	}
@@ -447,5 +453,6 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	protected Object getNativeDateAttributeValue(Date dateValue) {
         throw new UnsupportedOperationException("Method not implemented.");
 	}
+
 
 }
