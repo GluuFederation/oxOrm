@@ -283,11 +283,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
         // Remove entry
         try {
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onBeforeRemove(dn);
+                subscriber.onBeforeRemove(dn, objectClasses);
             }
             getOperationService().delete(toCouchbaseKey(dn).getKey());
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn);
+                subscriber.onAfterRemove(dn, objectClasses);
             }
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: %s", dn), ex);
@@ -298,11 +298,11 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     public <T> void removeRecursivelyFromDn(String dn, String[] objectClasses) {
         try {
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onBeforeRemove(dn);
+                subscriber.onBeforeRemove(dn, objectClasses);
             }
             getOperationService().deleteRecursively(toCouchbaseKey(dn).getKey());
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn);
+                subscriber.onAfterRemove(dn, objectClasses);
             }
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: %s", dn), ex);
