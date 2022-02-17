@@ -771,10 +771,26 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
 
     @Override
     public List<AttributeData> exportEntry(String dn) {
-        try {
+        throw new EntryPersistenceException("This is deprectated method. Use exportEntry(String dn, Class<T> entryClass) instead of it!");
+    }
+
+	@Override
+	public <T> List<AttributeData> exportEntry(String dn, Class<T> entryClass) {
+		String[] objectClasses = null;
+		
+		if (entryClass != null) {
+			// Check entry class
+			checkEntryClass(entryClass, false);
+			objectClasses = getTypeObjectClasses(entryClass);
+		}
+		if (ArrayHelper.isEmpty(objectClasses)) {
+			throw new MappingException("Object class isn't defined!");
+		}
+
+		try {
             // Load entry
             ParsedKey keyWithInum = toSQLKey(dn);
-            List<AttributeData> entry = getOperationService().lookup(keyWithInum.getKey(), null);
+            List<AttributeData> entry = getOperationService().lookup(keyWithInum.getKey(), objectClasses[0]);
 
             if (entry != null) {
                 return entry;
@@ -785,7 +801,6 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
             throw new EntryPersistenceException(String.format("Failed to find entry: '%s'", dn), ex);
         }
     }
-
     
     private ConvertedExpression toSqlFilter(String key, String objectClass, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
     	TableMapping tableMapping = getOperationService().getTabeMapping(key, objectClass);

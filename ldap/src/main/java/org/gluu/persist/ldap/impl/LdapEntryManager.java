@@ -881,6 +881,11 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         }
     }
 
+    @Override
+	public <T> List<AttributeData> exportEntry(String dn, Class<T> entryClass) {
+    	return exportEntry(dn);
+	}
+
     public int getSupportedLDAPVersion() {
         return getOperationService().getSupportedLDAPVersion();
     }
