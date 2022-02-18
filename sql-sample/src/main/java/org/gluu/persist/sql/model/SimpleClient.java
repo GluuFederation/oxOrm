@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.AttributesList;
 import org.gluu.persist.annotation.CustomObjectClass;
 import org.gluu.persist.annotation.DN;
@@ -22,13 +23,19 @@ import org.gluu.orm.util.StringHelper;
 * @author Yuriy Movchan Date: 01/15/2020
  */
 @DataEntry
-@ObjectClass(value = "gluuClnt")
+@ObjectClass(value = "oxAuthClient")
 public class SimpleClient implements Serializable {
 
     private static final long serialVersionUID = -2534191420188575733L;
 
     @DN
     private String dn;
+
+    @AttributeName(name = "displayName")
+    private String clientName;
+
+    @AttributeName(name = "oxAuthDefaultAcrValues")
+    private String[] defaultAcrValues;
 
     @AttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
@@ -48,7 +55,23 @@ public class SimpleClient implements Serializable {
         return customAttributes;
     }
 
-    public void setCustomAttributes(List<CustomAttribute> customAttributes) {
+	public String[] getDefaultAcrValues() {
+		return defaultAcrValues;
+	}
+
+	public void setDefaultAcrValues(String[] defaultAcrValues) {
+		this.defaultAcrValues = defaultAcrValues;
+	}
+
+    public String getClientName() {
+		return clientName;
+	}
+
+	public void setClientName(String clientName) {
+		this.clientName = clientName;
+	}
+
+	public void setCustomAttributes(List<CustomAttribute> customAttributes) {
         this.customAttributes = customAttributes;
     }
 
