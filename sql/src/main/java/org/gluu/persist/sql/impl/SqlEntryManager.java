@@ -299,8 +299,6 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
     	if (ArrayHelper.isEmpty(objectClasses)) {
     		throw new UnsupportedOperationException("Entry class is manadatory for recursive remove operation!");
     	}
-		
-    	removeByDn(dn, objectClasses);
 
 		try {
             for (DeleteNotifier subscriber : subscribers) {
