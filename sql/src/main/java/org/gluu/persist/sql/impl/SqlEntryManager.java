@@ -283,11 +283,11 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
 		// Remove entry
         try {
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onBeforeRemove(dn);
+                subscriber.onBeforeRemove(dn, objectClasses);
             }
             getOperationService().delete(toSQLKey(dn).getKey(), getBaseObjectClass(objectClasses));
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn);
+                subscriber.onAfterRemove(dn, objectClasses);
             }
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: '%s'", dn), ex);
@@ -302,11 +302,11 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
 
 		try {
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onBeforeRemove(dn);
+                subscriber.onBeforeRemove(dn, objectClasses);
             }
             getOperationService().deleteRecursively(toSQLKey(dn).getKey(), getBaseObjectClass(objectClasses));
             for (DeleteNotifier subscriber : subscribers) {
-                subscriber.onAfterRemove(dn);
+                subscriber.onAfterRemove(dn, objectClasses);
             }
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: '%s'", dn), ex);
@@ -756,10 +756,19 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
 
     @Override
     public List<AttributeData> exportEntry(String dn) {
-        try {
+        throw new EntryPersistenceException("This is deprectated method. Use exportEntry(String dn, Class<T> entryClass) instead of it!");
+    }
+
+	@Override
+	public <T> List<AttributeData> exportEntry(String dn, String objectClass) {
+		if (StringHelper.isEmpty(objectClass)) {
+			throw new MappingException("Object class isn't defined!");
+		}
+
+		try {
             // Load entry
             ParsedKey keyWithInum = toSQLKey(dn);
-            List<AttributeData> entry = getOperationService().lookup(keyWithInum.getKey(), null);
+            List<AttributeData> entry = getOperationService().lookup(keyWithInum.getKey(), objectClass);
 
             if (entry != null) {
                 return entry;
@@ -769,7 +778,7 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to find entry: '%s'", dn), ex);
         }
-    }
+	}
 
     private ConvertedExpression toSqlFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
         return filterConverter.convertToSqlFilter(excludeObjectClassFilters(genericFilter), propertiesAnnotationsMap);
