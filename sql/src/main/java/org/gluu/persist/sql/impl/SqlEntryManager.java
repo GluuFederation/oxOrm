@@ -295,7 +295,7 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
     }
 
     @Override
-    protected <T> void removeRecursivelyFromDn(String dn, String[] objectClasses) {
+    public <T> void removeRecursivelyFromDn(String dn, String[] objectClasses) {
     	if (ArrayHelper.isEmpty(objectClasses)) {
     		throw new UnsupportedOperationException("Entry class is manadatory for recursive remove operation!");
     	}

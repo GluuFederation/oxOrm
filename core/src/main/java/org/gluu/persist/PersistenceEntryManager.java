@@ -95,6 +95,7 @@ public interface PersistenceEntryManager extends EntityManager {
     void removeRecursively(String primaryKey);
 
 	<T> void removeRecursively(String primaryKey, Class<T> entryClass);
+	<T> void removeRecursivelyFromDn(String primaryKey, String[] objectClasses);
 
     boolean hasBranchesSupport(String primaryKey);
     boolean hasExpirationSupport(String primaryKey);

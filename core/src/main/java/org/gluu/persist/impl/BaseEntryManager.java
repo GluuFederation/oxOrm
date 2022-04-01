@@ -484,7 +484,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		removeByDn(primaryKey, objectClasses);
 	}
 
-	protected abstract <T> void removeRecursivelyFromDn(String primaryKey, String[] objectClasses);
+	public abstract <T> void removeRecursivelyFromDn(String primaryKey, String[] objectClasses);
 
 	@Deprecated
 	public void removeRecursively(String primaryKey) {
