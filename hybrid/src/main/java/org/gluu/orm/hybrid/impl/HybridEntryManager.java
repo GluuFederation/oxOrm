@@ -383,7 +383,7 @@ public class HybridEntryManager extends BaseEntryManager implements Serializable
 	@Override
 	public <T> void removeByDn(String primaryKey, String[] objectClasses) {
 		PersistenceEntryManager persistenceEntryManager = getEntryManagerForDn(primaryKey);
-    	persistenceEntryManager.remove(primaryKey);
+    	persistenceEntryManager.removeByDn(primaryKey, objectClasses);
 	}
 
 	@Override

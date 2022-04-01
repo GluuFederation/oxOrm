@@ -155,7 +155,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 
         LOG.debug(String.format("LDAP entry to remove: %s", dnValue.toString()));
 
-        remove(dnValue.toString());
+        remove(dnValue.toString(), entryClass);
     }
 
     @Override
@@ -358,14 +358,14 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
                     subscriber.onAfterRemove(dn, objectClasses);
                 }
             } else {
-                removeSubtreeThroughIteration(dn);
+                removeSubtreeThroughIteration(dn, objectClasses);
             }
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to remove entry: %s", dn), ex);
         }
     }
 
-    private void removeSubtreeThroughIteration(String dn) {
+    private void removeSubtreeThroughIteration(String dn, String[] objectClasses) {
     	SearchScope scope = SearchScope.SUB;
 
     	SearchResult searchResult = null;
@@ -388,7 +388,7 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
         Collections.sort(removeEntriesDn, LINE_LENGHT_COMPARATOR);
 
         for (String removeEntryDn : removeEntriesDn) {
-            remove(removeEntryDn);
+            removeByDn(removeEntryDn, objectClasses);
         }
     }
 
@@ -988,11 +988,13 @@ public class LdapEntryManager extends BaseEntryManager implements Serializable {
 		public void performAction(List<T> entries) {
 			for (T entity : entries) {
 				try {
-					String dnValue = ldapEntryManager.getDNValue(entity).toString();
+					Class<?> entryClass = entity.getClass();
+					
+					String dnValue = ldapEntryManager.getDNValue(entity, entryClass).toString();
 					if (ldapEntryManager.hasBranchesSupport(dnValue)) {
-						ldapEntryManager.removeRecursively(dnValue);
+						ldapEntryManager.removeRecursively(dnValue, entryClass);
 					} else {
-						ldapEntryManager.remove(dnValue);
+						ldapEntryManager.remove(dnValue, entryClass);
 					}
 					LOG.trace("Removed {}", dnValue);
 				} catch (Exception e) {

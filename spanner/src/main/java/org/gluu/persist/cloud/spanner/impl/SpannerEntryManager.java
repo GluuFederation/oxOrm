@@ -282,7 +282,7 @@ public class SpannerEntryManager extends BaseEntryManager implements Serializabl
     }
 
     @Override
-    protected <T> void removeByDn(String dn, String[] objectClasses) {
+    public <T> void removeByDn(String dn, String[] objectClasses) {
     	if (ArrayHelper.isEmpty(objectClasses)) {
     		throw new UnsupportedOperationException("Entry class is manadatory for remove operation!");
     	}

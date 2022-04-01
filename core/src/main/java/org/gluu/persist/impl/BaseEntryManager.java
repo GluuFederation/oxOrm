@@ -464,7 +464,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 	protected abstract void merge(String dn, String[] objectClasses, List<AttributeDataModification> attributeDataModifications, Integer expiration);
 
-	protected abstract <T> void removeByDn(String dn, String[] objectClasses);
+	public abstract <T> void removeByDn(String dn, String[] objectClasses);
 
 	@Deprecated
 	public void remove(String primaryKey) {
@@ -1886,9 +1886,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		return result;
 	}
 
-	protected <T> Object getDNValue(Object entry) {
-		Class<?> entryClass = entry.getClass();
-		
+	protected <T> Object getDNValue(Class<?> entryClass, Object entry) {
 		return getDNValue(entry, entryClass);
 	}
 

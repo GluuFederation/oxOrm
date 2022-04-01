@@ -176,7 +176,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
 
         LOG.debug("LDAP entry to remove: '{}'", dnValue.toString());
 
-        remove(dnValue.toString());
+        remove(dnValue.toString(), entryClass);
     }
 
     @Override
@@ -279,7 +279,7 @@ public class CouchbaseEntryManager extends BaseEntryManager implements Serializa
     }
 
     @Override
-    protected <T> void removeByDn(String dn, String[] objectClasses) {
+    public <T> void removeByDn(String dn, String[] objectClasses) {
         // Remove entry
         try {
             for (DeleteNotifier subscriber : subscribers) {

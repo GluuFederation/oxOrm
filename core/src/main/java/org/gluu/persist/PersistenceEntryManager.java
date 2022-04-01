@@ -86,6 +86,7 @@ public interface PersistenceEntryManager extends EntityManager {
 
 	@Deprecated
 	void remove(String dn);
+	<T> void removeByDn(String dn, String[] objectClasses);
 	<T> void remove(String primaryKey, Class<T> entryClass);
 
 	<T> int remove(String primaryKey, Class<T> entryClass, Filter filter, int count);
