@@ -25,6 +25,8 @@ import java.util.Properties;
 import java.util.Set;
 
 import org.apache.commons.codec.binary.Hex;
+import org.gluu.orm.util.ArrayHelper;
+import org.gluu.orm.util.StringHelper;
 import org.gluu.persist.cloud.spanner.impl.SpannerBatchOperationWraper;
 import org.gluu.persist.cloud.spanner.model.ConvertedExpression;
 import org.gluu.persist.cloud.spanner.model.SearchReturnDataType;
@@ -43,16 +45,14 @@ import org.gluu.persist.exception.operation.PersistenceException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
+import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.EntryData;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.Sort;
 import org.gluu.persist.model.SortOrder;
-import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
 import org.gluu.persist.operation.auth.PasswordEncryptionHelper;
-import org.gluu.orm.util.ArrayHelper;
-import org.gluu.orm.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -623,7 +623,7 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
 
 	                    // Change limit and offset
 	    	    		limit.setRowCount(new LongValue(currentLimit));
-	    	    		offset.setOffset(start + resultCount);
+	    	    		offset.setOffset(new LongValue(start + resultCount));
 	                    
 	    				Statement.Builder statementBuilder = Statement.newBuilder(sqlSelectQuery.toString());
 	    				applyParametersBinding(statementBuilder, expression);
@@ -672,7 +672,7 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
 
     	    		if (start > 0) {
 	    	    		Offset offset = new Offset();
-	    	    		offset.setOffset(start);
+	    	    		offset.setOffset(new LongValue(start));
 	    	    		sqlSelectQuery.setOffset(offset);
 	                }
 	
