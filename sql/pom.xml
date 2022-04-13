@@ -51,6 +51,11 @@
 		    <groupId>org.postgresql</groupId>
 		    <artifactId>postgresql</artifactId>
 		</dependency>
+		<!-- Check if we can remove this after mysql/postgresql/spanner libs upgrade -->
+		<dependency>
+		    <groupId>com.google.protobuf</groupId>
+		    <artifactId>protobuf-java</artifactId>
+		</dependency>
 
 		<!-- SQL Query -->
 		<dependency>
