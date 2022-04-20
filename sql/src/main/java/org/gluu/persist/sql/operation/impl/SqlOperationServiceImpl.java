@@ -422,6 +422,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	            boolean collectSearchResult;
 	
 	            SQLQuery<?> query;
+	            ResultSet resultSet = null;
 	            int currentLimit;
 	    		try {
 	                int resultCount = 0;
@@ -439,9 +440,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	                    queryStr = query.getSQL().getSQL();
 	                    LOG.debug("Executing query: '" + queryStr + "'");
 
-	                    try (ResultSet resultSet = query.getResults()) {
-	                    	lastResult = getEntryDataList(tableMapping, resultSet);
-	                    }
+	                    resultSet = query.getResults();
+	                    lastResult = getEntryDataList(tableMapping, resultSet);
 
 		    			lastCountRows = lastResult.size();
 		    			
@@ -463,10 +463,18 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	                        break;
 	                    }
 	                } while (lastCountRows > 0);
-        		} catch (QueryException ex) {
+        		} catch (QueryException ex) {ex.printStackTrace();
         			throw new SearchException(String.format("Failed to build search entries query. Key: '%s', expression: '%s'", key, expression.expression()), ex);
 	    		} catch (SQLException | EntryConvertationException ex) {
 	    			throw new SearchException(String.format("Failed to execute query '%s'  with key: '%s'", queryStr, key), ex);
+	    		} finally {
+	    			if (resultSet != null) {
+	    				try {
+							resultSet.close();
+						} catch (SQLException ex) {
+			    			throw new SearchException(String.format("Failed to close query after paged result collection. Query '%s'  with key: '%s'", queryStr, key), ex);
+						}
+	    			}
 	    		}
 	        } else {
 	    		try {
