@@ -113,7 +113,6 @@ public class SqlConnectionProvider {
             }
 
             LOG.error("Failed to create connection pool with properties: '{}'. Exception: {}", clonedProperties, ex);
-            ex.printStackTrace();
         }
     }
 
