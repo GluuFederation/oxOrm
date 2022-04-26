@@ -954,6 +954,10 @@ public class SqlEntryManager extends BaseEntryManager implements Serializable {
 		if (ArrayHelper.isEmpty(objectClasses)) {
 			throw new MappingException("Object class isn't defined!");
 		}
+
+		if (StringHelper.isEmpty(objectClasses[0])) {
+			throw new MappingException("First object class is invalid!");
+		}
 		
 		return objectClasses[0];
 	}
