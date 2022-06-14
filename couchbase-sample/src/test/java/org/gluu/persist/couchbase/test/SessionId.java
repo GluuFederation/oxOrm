@@ -6,18 +6,21 @@
 
 package org.gluu.persist.couchbase.test;
 
-import com.couchbase.client.java.cluster.User;
-import com.google.common.collect.Maps;
-
-import javax.inject.Named;
-import javax.persistence.Transient;
-
-import org.gluu.persist.annotation.*;
-import org.gluu.persist.model.base.Deletable;
-
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Map;
+
+import javax.persistence.Transient;
+
+import org.gluu.persist.annotation.AttributeName;
+import org.gluu.persist.annotation.DN;
+import org.gluu.persist.annotation.DataEntry;
+import org.gluu.persist.annotation.Expiration;
+import org.gluu.persist.annotation.JsonObject;
+import org.gluu.persist.annotation.ObjectClass;
+import org.gluu.persist.model.base.Deletable;
+
+import com.google.common.collect.Maps;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -75,9 +78,6 @@ public class SessionId implements Deletable, Serializable {
 
     @Transient
     private transient boolean persisted;
-
-    @Transient
-    private User user;
 
     @Expiration
     private int ttl;
@@ -155,14 +155,6 @@ public class SessionId implements Deletable, Serializable {
 
     public void setUserDn(String p_userDn) {
         userDn = p_userDn != null ? p_userDn : "";
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public Date getAuthenticationTime() {

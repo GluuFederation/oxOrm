@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yuriy Movchan Date: 01/12/2020
  */
-public class SpannerEntryManager extends BaseEntryManager implements Serializable {
+public class SpannerEntryManager extends BaseEntryManager<SpannerOperationService> implements Serializable {
 
 	private static final long serialVersionUID = 2127241817126412574L;
 

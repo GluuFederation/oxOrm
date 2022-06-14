@@ -37,7 +37,7 @@ import org.gluu.persist.annotation.SchemaEntry;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.exception.InvalidArgumentException;
 import org.gluu.persist.exception.MappingException;
-import org.gluu.persist.exception.extension.PersistenceExtension;
+import org.gluu.persist.extension.PersistenceExtension;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.SearchScope;
@@ -60,11 +60,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */
-public abstract class BaseEntryManager implements PersistenceEntryManager {
+public abstract class BaseEntryManager<O extends PersistenceOperationService> implements PersistenceEntryManager {
 
 	private static final Logger LOG = LoggerFactory.getLogger(BaseEntryManager.class);
 
-	private static final Class<?>[] LDAP_ENTRY_TYPE_ANNOTATIONS = { DataEntry.class, SchemaEntry.class,
+	private static final Class<?>[] LDAP_ENTRY_TYPE_ANNOTATIONS = { DataEntry.class, SchemaEntry.class, 
 			ObjectClass.class };
 	private static final Class<?>[] LDAP_ENTRY_PROPERTY_ANNOTATIONS = { AttributeName.class, AttributesList.class,
 			JsonObject.class };
@@ -97,7 +97,7 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 
 	protected static final int DEFAULT_PAGINATION_SIZE = 100;
 	
-	protected PersistenceOperationService operationService = null;
+	protected O operationService = null;
 	protected PersistenceExtension persistenceExtension = null;
 
 	@Override

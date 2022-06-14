@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.gluu.persist.annotation.AttributeEnum;
-import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.ldap.impl.LdapFilterConverter;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
@@ -177,24 +176,21 @@ public class SqlFilterConverter {
             }
         }
 
-        if (FilterType.EQUALITY == type) {
-    		if (isMultiValue(currentGenericFilter, propertiesAnnotationsMap)) {
-    			Expression expression = buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
+        boolean multiValued = isMultiValue(currentGenericFilter, propertiesAnnotationsMap);
 
+        if (FilterType.EQUALITY == type) {
+        	Expression expression = buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
+    		if (multiValued) {
 				Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_CONTAINS, expression,
 						buildTypedExpression(currentGenericFilter, true), Expressions.constant("$.v"));
 
         		return ConvertedExpression.build(operation, jsonAttributes);
-            } else {
-            	Filter usedFilter = currentGenericFilter;
-            	Expression expression = buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
-
-            	return ConvertedExpression.build(ExpressionUtils.eq(expression, buildTypedExpression(usedFilter)), jsonAttributes);
             }
+        	return ConvertedExpression.build(ExpressionUtils.eq(expression, buildTypedExpression(currentGenericFilter)), jsonAttributes);
         }
 
         if (FilterType.LESS_OR_EQUAL == type) {
-            if (isMultiValue(currentGenericFilter, propertiesAnnotationsMap)) {
+            if (multiValued) {
             	if (currentGenericFilter.getMultiValuedCount() > 1) {
                 	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
             		for (int i = 0; i < currentGenericFilter.getMultiValuedCount(); i++) {
@@ -221,7 +217,7 @@ public class SqlFilterConverter {
         }
 
         if (FilterType.GREATER_OR_EQUAL == type) {
-            if (isMultiValue(currentGenericFilter, propertiesAnnotationsMap)) {
+            if (multiValued) {
             	if (currentGenericFilter.getMultiValuedCount() > 1) {
                 	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
             		for (int i = 0; i < currentGenericFilter.getMultiValuedCount(); i++) {
@@ -248,7 +244,7 @@ public class SqlFilterConverter {
 
         if (FilterType.PRESENCE == type) {
         	Expression expression;
-            if (isMultiValue(currentGenericFilter, propertiesAnnotationsMap)) {
+            if (multiValued) {
             	if (currentGenericFilter.getMultiValuedCount() > 1) {
                 	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
             		for (int i = 0; i < currentGenericFilter.getMultiValuedCount(); i++) {
@@ -294,7 +290,7 @@ public class SqlFilterConverter {
             }
 
             Expression expression;
-            if (isMultiValue(currentGenericFilter, propertiesAnnotationsMap)) {
+            if (multiValued) {
             	if (currentGenericFilter.getMultiValuedCount() > 1) {
                 	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
             		for (int i = 0; i < currentGenericFilter.getMultiValuedCount(); i++) {

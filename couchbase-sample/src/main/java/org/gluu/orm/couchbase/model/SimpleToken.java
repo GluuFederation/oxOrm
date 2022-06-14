@@ -12,6 +12,7 @@ import org.gluu.orm.util.StringHelper;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -19,10 +20,22 @@ import java.util.List;
  */
 @DataEntry
 @ObjectClass(value = "token")
-public class SimpleTokenCouchbase implements Serializable {
+public class SimpleToken implements Serializable {
 
     private static final long serialVersionUID = 6726419630327625172L;
 
+    @AttributeName(name = "tknCde", consistency = true)
+    private String code;
+
+    @AttributeName(name = "iat")
+    private Date creationDate;
+    
+    @AttributeName(name = "exp")
+    private Date expirationDate;
+
+    @AttributeName(name = "del")
+    private boolean deletable = true;
+    
     @AttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
 
@@ -40,7 +53,39 @@ public class SimpleTokenCouchbase implements Serializable {
         this.dn = dn;
     }
 
-    public List<CustomAttribute> getCustomAttributes() {
+    public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	public Date getExpirationDate() {
+		return expirationDate;
+	}
+
+	public void setExpirationDate(Date expirationDate) {
+		this.expirationDate = expirationDate;
+	}
+
+	public boolean isDeletable() {
+		return deletable;
+	}
+
+	public void setDeletable(boolean deletable) {
+		this.deletable = deletable;
+	}
+
+	public List<CustomAttribute> getCustomAttributes() {
         return customAttributes;
     }
 

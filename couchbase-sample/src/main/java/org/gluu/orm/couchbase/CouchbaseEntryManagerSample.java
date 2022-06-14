@@ -23,17 +23,19 @@ public class CouchbaseEntryManagerSample {
     private Properties getSampleConnectionProperties() {
         Properties connectionProperties = new Properties();
 
-        connectionProperties.put("couchbase#servers", "localhost");
+        connectionProperties.put("couchbase#servers", "u204.gluu.info");
         connectionProperties.put("couchbase#auth.userName", "admin");
-        connectionProperties.put("couchbase#auth.userPassword", "secret");
-//        connectionProperties.put("couchbase#buckets", "gluu");
-        connectionProperties.put("couchbase#buckets", "gluu, jans_user, jans_token");
+        connectionProperties.put("couchbase#auth.userPassword", "Secret1!");
+        connectionProperties.put("couchbase#buckets", "gluu, gluu_user, gluu_site, gluu_cache, gluu_token, gluu_session");
 
         connectionProperties.put("couchbase#bucket.default", "gluu");
-        connectionProperties.put("couchbase#bucket.jans_user.mapping", "people, groups");
-        connectionProperties.put("couchbase#bucket.jans_token.mapping", "sessions");
-
-        connectionProperties.put("couchbase#password.encryption.method", "CRYPT-SHA-256");
+        connectionProperties.put("couchbase#bucket.gluu_user.mapping", "people, groups, authorizations");
+        connectionProperties.put("couchbase#bucket.gluu_site.mapping", "cache-refresh");
+        connectionProperties.put("couchbase#bucket.gluu_cache.mapping", "cache");
+        connectionProperties.put("couchbase#bucket.gluu_token.mapping", "tokens");
+        connectionProperties.put("couchbase#bucket.gluu_session.mapping", "sessions");
+        
+        connectionProperties.put("couchbase#password.encryption.method", "SSHA-256");
 
         return connectionProperties;
     }

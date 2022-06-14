@@ -58,7 +58,7 @@ import com.querydsl.core.types.dsl.Expressions;
  *
  * @author Yuriy Movchan Date: 01/12/2020
  */
-public class SqlEntryManager extends BaseEntryManager implements Serializable {
+public class SqlEntryManager extends BaseEntryManager<SqlOperationService> implements Serializable {
 
 	private static final long serialVersionUID = 2127241817126412574L;
 

@@ -6,9 +6,11 @@
 
 package org.gluu.orm.couchbase.operation;
 
+import java.util.Date;
 import java.util.List;
 
 import org.gluu.orm.couchbase.impl.CouchbaseBatchOperationWraper;
+import org.gluu.orm.couchbase.model.ConvertedExpression;
 import org.gluu.orm.couchbase.model.SearchReturnDataType;
 import org.gluu.orm.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.exception.operation.DeleteException;
@@ -18,13 +20,12 @@ import org.gluu.persist.exception.operation.PersistenceException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
+import org.gluu.persist.model.Sort;
 import org.gluu.persist.operation.PersistenceOperationService;
 
-import com.couchbase.client.java.document.json.JsonObject;
-import com.couchbase.client.java.query.consistency.ScanConsistency;
-import com.couchbase.client.java.query.dsl.Expression;
-import com.couchbase.client.java.query.dsl.Sort;
-import com.couchbase.client.java.subdoc.MutationSpec;
+import com.couchbase.client.java.json.JsonObject;
+import com.couchbase.client.java.kv.MutateInSpec;
+import com.couchbase.client.java.query.QueryScanConsistency;
 
 /**
  * Couchbase operation service interface
@@ -46,15 +47,15 @@ public interface CouchbaseOperationService extends PersistenceOperationService {
     boolean addEntry(String key, JsonObject atts) throws DuplicateEntryException, PersistenceException;
 	boolean addEntry(String key, JsonObject jsonObject, Integer expiration) throws DuplicateEntryException, PersistenceException;
 
-    boolean updateEntry(String key, List<MutationSpec> mods, Integer expiration) throws UnsupportedOperationException, PersistenceException;
+    boolean updateEntry(String key, List<MutateInSpec> mods, Integer expiration) throws UnsupportedOperationException, PersistenceException;
 
     boolean delete(String key) throws EntryNotFoundException;
-	int delete(String key, ScanConsistency scanConsistency, Expression expression, int count) throws DeleteException;
-    boolean deleteRecursively(String key) throws EntryNotFoundException, SearchException;
+    int delete(String key, QueryScanConsistency scanConsistency, ConvertedExpression expression, int count) throws DeleteException;
+    boolean deleteRecursively(String key) throws EntryNotFoundException, DeleteException;
 
-    JsonObject lookup(String key, ScanConsistency scanConsistency, String... attributes) throws SearchException;
+    JsonObject lookup(String key, String... attributes) throws SearchException;
 
-    <O> PagedResult<JsonObject> search(String key, ScanConsistency scanConsistency, Expression expression, SearchScope scope,
+    <O> PagedResult<JsonObject> search(String key, QueryScanConsistency scanConsistency, ConvertedExpression expression, SearchScope scope,
             String[] attributes, Sort[] orderBy, CouchbaseBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType,
             int start, int count, int pageSize) throws SearchException;
 
@@ -63,6 +64,15 @@ public interface CouchbaseOperationService extends PersistenceOperationService {
     boolean isBinaryAttribute(String attribute);
     boolean isCertificateAttribute(String attribute);
 
+	String toInternalAttribute(String attributeName);
+	String[] toInternalAttributes(String[] attributeNames);
+
+	String fromInternalAttribute(String internalAttributeName);
+	String[] fromInternalAttributes(String[] internalAttributeNames);
+
     boolean destroy();
+
+	String encodeTime(Date date);
+	Date decodeTime(String date, boolean silent);
 
 }

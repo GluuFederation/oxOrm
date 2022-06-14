@@ -1,4 +1,4 @@
-package org.gluu.persist.exception.extension;
+package org.gluu.persist.extension;
 
 /**
  * Base interface for persistence script

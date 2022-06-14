@@ -63,7 +63,7 @@ import com.unboundid.util.StaticUtils;
  *
  * @author Yuriy Movchan Date: 10.07.2010
  */
-public class LdapEntryManager extends BaseEntryManager implements Serializable {
+public class LdapEntryManager extends BaseEntryManager<LdapOperationService> implements Serializable {
 
     private static final long serialVersionUID = -2544614410981223105L;
 

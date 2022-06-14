@@ -13,7 +13,7 @@ import org.apache.logging.log4j.status.StatusLogger;
 import org.gluu.orm.couchbase.impl.CouchbaseEntryManager;
 import org.gluu.orm.couchbase.model.SimpleClient;
 import org.gluu.orm.couchbase.model.SimpleSession;
-import org.gluu.orm.couchbase.model.SimpleTokenCouchbase;
+import org.gluu.orm.couchbase.model.SimpleToken;
 import org.gluu.persist.exception.EntryPersistenceException;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.DefaultBatchOperation;
@@ -48,12 +48,12 @@ public final class CouchbaseBatchJobSample {
         // Create Couchbase entry manager
         final CouchbaseEntryManager couchbaseEntryManager = couchbaseEntryManagerSample.createCouchbaseEntryManager();
 
-        BatchOperation<SimpleTokenCouchbase> tokenCouchbaseBatchOperation = new ProcessBatchOperation<SimpleTokenCouchbase>() {
+        BatchOperation<SimpleToken> tokenCouchbaseBatchOperation = new ProcessBatchOperation<SimpleToken>() {
             private int processedCount = 0;
 
             @Override
-            public void performAction(List<SimpleTokenCouchbase> objects) {
-                for (SimpleTokenCouchbase simpleTokenCouchbase : objects) {
+            public void performAction(List<SimpleToken> objects) {
+                for (SimpleToken simpleTokenCouchbase : objects) {
                     try {
                         CustomAttribute customAttribute = getUpdatedAttribute(couchbaseEntryManager, simpleTokenCouchbase.getDn(), "exp",
                                 simpleTokenCouchbase.getAttribute("exp"));
@@ -70,7 +70,7 @@ public final class CouchbaseBatchJobSample {
         };
 
         final Filter filter1 = Filter.createPresenceFilter("exp");
-        couchbaseEntryManager.findEntries("o=gluu", SimpleTokenCouchbase.class, filter1, SearchScope.SUB, new String[] {"exp"},
+        couchbaseEntryManager.findEntries("o=gluu", SimpleToken.class, filter1, SearchScope.SUB, new String[] {"exp"},
                 tokenCouchbaseBatchOperation, 0, 0, 100);
 
         BatchOperation<SimpleSession> sessionBatchOperation = new ProcessBatchOperation<SimpleSession>() {

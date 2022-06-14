@@ -11,8 +11,8 @@ import java.util.List;
 
 import org.gluu.orm.couchbase.impl.CouchbaseEntryManager;
 import org.gluu.orm.couchbase.model.SimpleAttribute;
-import org.gluu.orm.couchbase.model.SimpleGrant;
 import org.gluu.orm.couchbase.model.SimpleSession;
+import org.gluu.orm.couchbase.model.SimpleToken;
 import org.gluu.orm.couchbase.model.SimpleUser;
 import org.gluu.orm.couchbase.operation.impl.CouchbaseConnectionProvider;
 import org.gluu.persist.model.PagedResult;
@@ -48,11 +48,8 @@ public final class CouchbaseSample {
         newUser.getCustomAttributes().add(new CustomObjectAttribute("test", "test_value"));
         couchbaseEntryManager.persist(newUser);
 
-//        SimpleUser dummyUser = couchbaseEntryManager.find(SimpleUser.class, "inum=test,o=test,o=gluu");
-//        LOG.info("Dummy User '{}'", dummyUser);
-
         // Find all users which have specified object classes defined in SimpleUser
-        List<SimpleUser> users = couchbaseEntryManager.findEntries("o=@!5304.5F36.0E64.E1AC!0001!179C.62D7,o=gluu", SimpleUser.class, null);
+        List<SimpleUser> users = couchbaseEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, null);
         for (SimpleUser user : users) {
             LOG.info("User with uid: '{}' with DN: '{}'", user.getUserId(), user.getDn());
         }
@@ -76,26 +73,28 @@ public final class CouchbaseSample {
         for (SimpleUser user : users) {
             boolean result1 = couchbaseEntryManager.authenticate(user.getDn(), "test");
             boolean result2 = couchbaseEntryManager.authenticate("ou=people,o=gluu", SimpleUser.class, user.getUserId(), "test");
-            System.out.println("authetication result: " + result1 + ", " + result2);
+            System.out.println("authetication result: " + result1 + ", " + result2 + ", user: " + user.getDn());
         }
 
-        Filter filter = Filter.createEqualityFilter("status", "active");
-        List<SimpleAttribute> attributes = couchbaseEntryManager.findEntries("o=gluu", SimpleAttribute.class, filter, SearchScope.SUB, null, null, 10,
+        Filter filterAttributes = Filter.createEqualityFilter("gluuStatus", "active");
+        List<SimpleAttribute> attributes = couchbaseEntryManager.findEntries("ou=attributes,o=gluu", SimpleAttribute.class, filterAttributes, SearchScope.SUB, null, null, 10,
                 0, 0);
+        LOG.info("Found attributes: " + attributes.size());
         for (SimpleAttribute attribute : attributes) {
             LOG.info("Attribute with displayName: " + attribute.getCustomAttributes().get(1));
         }
 
-        List<SimpleSession> sessions = couchbaseEntryManager.findEntries("o=gluu", SimpleSession.class, filter, SearchScope.SUB, null, null, 10, 0,
+        Filter filterSessions = Filter.createEqualityFilter("oxState", "authenticated");
+        List<SimpleSession> sessions = couchbaseEntryManager.findEntries("ou=sessions,o=gluu", SimpleSession.class, filterSessions, SearchScope.SUB, null, null, 0, 1,
                 0);
         LOG.info("Found sessions: " + sessions.size());
 
-        List<SimpleGrant> grants = couchbaseEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB,
-                new String[] { "grtId" }, null, 1, 0, 0);
-        LOG.info("Found grants: " + grants.size());
+        List<SimpleToken> tokens = couchbaseEntryManager.findEntries("ou=tokens,o=gluu", SimpleToken.class, null, SearchScope.SUB,
+                new String[] { "code" }, null, 1, 0, 0);
+        LOG.info("Found tokens: " + tokens.size());
 
         try {
-            PagedResult<SimpleUser> listViewResponse = couchbaseEntryManager.findPagedEntries("o=gluu", SimpleUser.class, null,
+            PagedResult<SimpleUser> listViewResponse = couchbaseEntryManager.findPagedEntries("ou=people,o=gluu", SimpleUser.class, null,
                     new String[] { "uid", "displayName", "status" }, "uid", SortOrder.ASCENDING, 0, 6, 4);
 
             LOG.info("Found persons: " + listViewResponse.getEntriesCount() + ", total persons: " + listViewResponse.getTotalEntriesCount());
@@ -107,7 +106,7 @@ public final class CouchbaseSample {
         }
 
         try {
-            PagedResult<SimpleUser> listViewResponse = couchbaseEntryManager.findPagedEntries("o=gluu", SimpleUser.class, null,
+            PagedResult<SimpleUser> listViewResponse = couchbaseEntryManager.findPagedEntries("ou=people,o=gluu", SimpleUser.class, null,
                     new String[] { "uid", "displayName", "status" }, "uid", SortOrder.DESCENDING, 0, 6, 4);
 
             LOG.info("Found persons: " + listViewResponse.getEntriesCount() + ", total persons: " + listViewResponse.getTotalEntriesCount());

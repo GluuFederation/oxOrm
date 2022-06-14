@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yuriy Movchan Date: 07/10/2019
  */
-public class HybridEntryManager extends BaseEntryManager implements Serializable {
+public class HybridEntryManager extends BaseEntryManager<HybridPersistenceOperationService> implements Serializable {
 
     private static final long serialVersionUID = -1544664410881103105L;
 

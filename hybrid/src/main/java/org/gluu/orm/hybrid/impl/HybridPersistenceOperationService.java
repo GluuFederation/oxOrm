@@ -9,9 +9,9 @@ package org.gluu.orm.hybrid.impl;
 import java.util.List;
 
 import org.gluu.persist.exception.AuthenticationException;
-import org.gluu.persist.exception.extension.PersistenceExtension;
 import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.exception.operation.SearchException;
+import org.gluu.persist.extension.PersistenceExtension;
 import org.gluu.persist.operation.PersistenceOperationService;
 
 /**
