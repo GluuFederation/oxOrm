@@ -83,6 +83,13 @@ public class CouchbaseEntryManagerFactory extends Initializable implements Persi
         	LOG.info("Configuring builder to override connectTimeout from properties");
         }
 
+        String connectDnsUseLookupString = couchbaseConnectionProperties.getProperty("connection.dns.use-lookup");
+        if (StringHelper.isNotEmpty(connectDnsUseLookupString)) {
+        	boolean connectDnsUseLookup = Boolean.valueOf(connectDnsUseLookupString);
+           	clusterEnvironmentBuilder.ioConfig().enableDnsSrv(connectDnsUseLookup);
+        	LOG.info("Configuring builder to override enableDnsSrv from properties");
+        }
+
         String kvTimeoutString = couchbaseConnectionProperties.getProperty("connection.kv-timeout");
         if (StringHelper.isNotEmpty(kvTimeoutString)) {
         	int kvTimeout = Integer.valueOf(kvTimeoutString);

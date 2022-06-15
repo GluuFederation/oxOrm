@@ -26,6 +26,9 @@ public class CouchbaseEntryManagerSample {
         connectionProperties.put("couchbase#servers", "u204.gluu.info");
         connectionProperties.put("couchbase#auth.userName", "admin");
         connectionProperties.put("couchbase#auth.userPassword", "Secret1!");
+
+        connectionProperties.put("couchbase#connection.dns.use-lookup", "false");
+        
         connectionProperties.put("couchbase#buckets", "gluu, gluu_user, gluu_site, gluu_cache, gluu_token, gluu_session");
 
         connectionProperties.put("couchbase#bucket.default", "gluu");
