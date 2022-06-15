@@ -15,9 +15,12 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.Set;
 
 import org.gluu.orm.couchbase.impl.CouchbaseBatchOperationWraper;
 import org.gluu.orm.couchbase.model.BucketMapping;
@@ -39,6 +42,7 @@ import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.Sort;
+import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.operation.auth.PasswordEncryptionHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -362,16 +366,32 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
                 if (doc != null) {
                     return doc;
                 }
-
             } else {
-            	GetOptions options = GetOptions.getOptions().project(Arrays.asList(attributes));
-                JsonObject doc = bucket.defaultCollection().get(key, options).contentAsObject();
-                if (doc != null) {
+            	// Server allows to request only max 16 fields 
+            	if (attributes.length > 16) {
+	                JsonObject doc = bucket.defaultCollection().get(key).contentAsObject();
+
+	                Set<String> docAtributesKeep = new HashSet<String>(Arrays.asList(attributes));
+//                	docAtributesKeep.add(CouchbaseOperationService.DN);
+
+                	for (Iterator<String> it = doc.getNames().iterator(); it.hasNext();) {
+						String docAtribute = (String) it.next();
+						if (!docAtributesKeep.contains(docAtribute)) {
+							it.remove();
+						}
+					}
+
                 	return doc;
-                }
+            	} else {
+	            	GetOptions options = GetOptions.getOptions().project(Arrays.asList(attributes));
+	                JsonObject doc = bucket.defaultCollection().get(key, options).contentAsObject();
+	                if (doc != null) {
+	                	return doc;
+	                }
+            	}
             }
         } catch (CouchbaseException ex) {
-        	if (ResponseStatus.SUBDOC_FAILURE ==  ex.context().responseStatus()) {
+        	if (ResponseStatus.SUBDOC_FAILURE == ex.context().responseStatus()) {
         		// No fields for return
         		return JsonObject.create();
         	}
@@ -478,7 +498,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         		}
         		Sort order = orderBy[i];
         		baseQueryWithOrder.append(order.getName());
-            	if (order.getSortOrder() != null) {
+            	if ((order.getSortOrder() != null) && (SortOrder.DEFAULT != order.getSortOrder())) {
             		baseQueryWithOrder.append(" ").append(order.getSortOrder().getShortValue());
             	}
         	}
