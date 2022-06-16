@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
 
 import org.gluu.orm.couchbase.impl.CouchbaseEntryManager;
+import org.gluu.orm.couchbase.model.SimpleCache;
 import org.gluu.orm.couchbase.model.SimpleClient;
 import org.gluu.orm.couchbase.model.SimpleSession;
 import org.gluu.orm.couchbase.model.SimpleToken;
@@ -63,14 +64,14 @@ public final class CouchbaseBatchJobSample {
                     } catch (EntryPersistenceException ex) {
                         LOG.error("Failed to update entry", ex);
                     }
-                }
+                } 
 
                 LOG.info("Total processed: " + processedCount);
             }
         };
 
         final Filter filter1 = Filter.createPresenceFilter("exp");
-        couchbaseEntryManager.findEntries("o=gluu", SimpleToken.class, filter1, SearchScope.SUB, new String[] {"exp"},
+        couchbaseEntryManager.findEntries("ou=tokens,o=gluu", SimpleToken.class, filter1, SearchScope.SUB, new String[] {"exp"},
                 tokenCouchbaseBatchOperation, 0, 0, 100);
 
         BatchOperation<SimpleSession> sessionBatchOperation = new ProcessBatchOperation<SimpleSession>() {
@@ -95,34 +96,59 @@ public final class CouchbaseBatchJobSample {
         };
 
         final Filter filter2 = Filter.createPresenceFilter("gluuLastAccessTime");
-        couchbaseEntryManager.findEntries("o=gluu", SimpleSession.class, filter2, SearchScope.SUB, new String[] {"gluuLastAccessTime"},
+        couchbaseEntryManager.findEntries("ou=sessions,o=gluu", SimpleSession.class, filter2, SearchScope.SUB, new String[] {"gluuLastAccessTime"},
                 sessionBatchOperation, 0, 0, 100);
 
-        BatchOperation<SimpleClient> clientBatchOperation = new ProcessBatchOperation<SimpleClient>() {
+        if (false) {
+            Calendar calendar = Calendar.getInstance();
+            Date jansLastAccessTimeDate = new Date();
+            calendar.setTime(jansLastAccessTimeDate);
+            calendar.add(Calendar.SECOND, 60);
+            Date date = calendar.getTime();
+
+            for (int i = 0; i < 1111; i++) {
+	            String id = String.format("cache_%06d", i);
+	            String dn = String.format("id=%s,ou=cache,o=gluu", id);
+	
+	            SimpleCache newCache = new SimpleCache();
+	            newCache.setDn(dn);
+	            newCache.setId(id);
+	            newCache.setData("{'sample_data': 'sample_data_value'}");
+	            newCache.setExpirationDate(date);
+	            newCache.setDeletable(true);
+	
+	    		try {
+	                couchbaseEntryManager.persist(newCache);
+	            } catch (Throwable e) {
+	                e.printStackTrace();
+	            }
+	        }
+        }
+
+        BatchOperation<SimpleCache> clientBatchOperation = new ProcessBatchOperation<SimpleCache>() {
             private int processedCount = 0;
 
             @Override
-            public void performAction(List<SimpleClient> objects) {
-                for (SimpleClient simpleClient : objects) {
+            public void performAction(List<SimpleCache> objects) {
+                for (SimpleCache simpleCache : objects) {
                     processedCount++;
                 }
 
                 LOG.info("Total processed: " + processedCount);
             }
         };
-
         final Filter filter3 = Filter.createPresenceFilter("exp");
-        List<SimpleClient> result3 = couchbaseEntryManager.findEntries("o=gluu", SimpleClient.class, filter3, SearchScope.SUB,
-                new String[] {"exp"}, clientBatchOperation, 0, 0, 1000);
+        List<SimpleCache> result3 = couchbaseEntryManager.findEntries("ou=cache,o=gluu", SimpleCache.class, filter3, SearchScope.SUB,
+                new String[] {"exp"}, clientBatchOperation, 0, 0, 333);
 
         LOG.info("Result count (without collecting results): " + result3.size());
 
-        BatchOperation<SimpleClient> clientBatchOperation2 = new DefaultBatchOperation<SimpleClient>() {
+        BatchOperation<SimpleCache> clientBatchOperation2 = new DefaultBatchOperation<SimpleCache>() {
             private int processedCount = 0;
 
             @Override
-            public void performAction(List<SimpleClient> objects) {
-                for (SimpleClient simpleClient : objects) {
+            public void performAction(List<SimpleCache> objects) {
+                for (SimpleCache simpleCache : objects) {
                     processedCount++;
                 }
 
@@ -131,8 +157,8 @@ public final class CouchbaseBatchJobSample {
         };
 
         final Filter filter4 = Filter.createPresenceFilter("exp");
-        List<SimpleClient> result4 = couchbaseEntryManager.findEntries("o=gluu", SimpleClient.class, filter4, SearchScope.SUB,
-                new String[] {"exp"}, clientBatchOperation2, 0, 0, 1000);
+        List<SimpleCache> result4 = couchbaseEntryManager.findEntries("ou=cache,o=gluu", SimpleCache.class, filter4, SearchScope.SUB,
+                new String[] {"exp"}, clientBatchOperation2, 0, 0, 333);
 
         LOG.info("Result count (with collecting results): " + result4.size());
     }
@@ -140,7 +166,7 @@ public final class CouchbaseBatchJobSample {
     private static CustomAttribute getUpdatedAttribute(CouchbaseEntryManager couchbaseEntryManager, String baseDn, String attributeName, String attributeValue) {
         try {
             Calendar calendar = Calendar.getInstance();
-            Date jansLastAccessTimeDate = new Date(); //TODO: Fix it StaticUtils.decodeGeneralizedTime(attributeValue);
+            Date jansLastAccessTimeDate = new Date();
             calendar.setTime(jansLastAccessTimeDate);
             calendar.add(Calendar.SECOND, -1);
 

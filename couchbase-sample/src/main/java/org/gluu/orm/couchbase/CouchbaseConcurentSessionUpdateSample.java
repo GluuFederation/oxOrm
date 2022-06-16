@@ -44,7 +44,7 @@ public final class CouchbaseConcurentSessionUpdateSample {
             String sessionId = "xyzcyzxy-a41a-45ad-8a83-61485dbad561";
             final String sessionDn = "uniqueIdentifier=" + sessionId + ",ou=session,o=gluu";
             final String userDn =
-                    "inum=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163!0000!A8F2.DE1E.D7FB,ou=people,o=gluu";
+                    "inum=sample_concurrent_user_1,ou=people,o=gluu";
 
             final SimpleSessionState simpleSessionState = new SimpleSessionState();
             simpleSessionState.setDn(sessionDn);

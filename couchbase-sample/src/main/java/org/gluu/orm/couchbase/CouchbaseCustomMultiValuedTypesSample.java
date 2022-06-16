@@ -75,8 +75,8 @@ public final class CouchbaseCustomMultiValuedTypesSample {
 
 		LOG.info("Cusom attributes '{}'", foundUpdatedUser.getCustomAttributes());
 
-		Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("givenName"), StringHelper.toLowerCase("jon"));
-		List<SimpleUser> foundUpdatedUsers = couchbaseEntryManager.findEntries("o=gluu", SimpleUser.class, filter);
+		Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("givenName"), StringHelper.toLowerCase("john"));
+		List<SimpleUser> foundUpdatedUsers = couchbaseEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, filter);
 		System.out.println(foundUpdatedUsers);
 		
 	}

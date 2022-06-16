@@ -294,7 +294,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         	query.append("AND META().id LIKE ").append(key).append("%");
         }
 
-        query.append(" LIMIT ").append(count);
+        query.append(" LIMIT ").append(count).append(" RETURNING default.*");
         LOG.debug("Execution query: '" + query + "'");
 
         QueryOptions queryOptions = QueryOptions.queryOptions().scanConsistency(queryScanConsistency).parameters(expression.getQueryParameters());
@@ -419,6 +419,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 						returnDataType, start, count, pageSize);
 				break;
 			} catch (SearchException ex) {
+				// TODO: Check if it's not needed in CB 7.x and SDK 3.x
 				if (ex.getErrorCode() != 5000) {
 					throw ex;
 				}
@@ -429,7 +430,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 				} catch (InterruptedException ex2) {}
 			}
         } while (attemps > 0);
-        if ((result == null) || (result.getEntriesCount() == 0)) {
+        if ((result == null) || (result.getTotalEntriesCount() == 0)) {
         	QueryScanConsistency useQueryScanConsistency2 = getQueryScanConsistency(queryScanConsistency, false);
         	if (!useQueryScanConsistency2.equals(useQueryScanConsistency)) {
         		useQueryScanConsistency = useQueryScanConsistency2;
@@ -508,6 +509,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 
         List<JsonObject> searchResultList = new ArrayList<JsonObject>();
 
+        int totalEntriesCount = 0;
         if ((SearchReturnDataType.SEARCH == returnDataType) || (SearchReturnDataType.SEARCH_COUNT == returnDataType)) {
         	QueryResult lastResult = null;
 	        if (pageSize > 0) {
@@ -515,18 +517,18 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 	
 	            StringBuilder query = null;
 	            int currentLimit;
+	            int lastResultCount = 0;
 	            try {
 	                List<JsonObject> lastSearchResultList;
-	                int resultCount = 0;
-	                do {
+					do {
 	                    collectSearchResult = true;
 	
 	                    currentLimit = pageSize;
 	                    if (count > 0) {
-	                        currentLimit = Math.min(pageSize, count - resultCount);
+	                        currentLimit = Math.min(pageSize, count - totalEntriesCount);
 	                    }
 	
-	                    query = new StringBuilder(baseQueryWithOrder).append(" LIMIT ").append(currentLimit).append(" OFFSET ").append(start + resultCount);
+	                    query = new StringBuilder(baseQueryWithOrder).append(" LIMIT ").append(currentLimit).append(" OFFSET ").append(start + totalEntriesCount);
 
 	                    LOG.debug("Execution query: '" + query + "'");
 
@@ -536,25 +538,26 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
 	    	            }
 	
 	                    lastSearchResultList = lastResult.rowsAsObject();
-	
+		                lastResultCount = lastSearchResultList.size();
+
 	                    if (batchOperation != null) {
-	                        collectSearchResult = batchOperation.collectSearchResult(lastSearchResultList.size());
+	                        collectSearchResult = batchOperation.collectSearchResult(lastResultCount);
 	                    }
 	                    if (collectSearchResult) {
 	                        searchResultList.addAll(lastSearchResultList);
 	                    }
 	
-	                    if (batchOperation != null) {
+	                    if ((batchOperation != null) && (lastResultCount > 0)) {
 	                        List<O> entries = batchOperationWraper.createEntities(lastSearchResultList);
 	                        batchOperation.performAction(entries);
 	                    }
 	
-	                    resultCount += lastSearchResultList.size();
+	                    totalEntriesCount += lastResultCount;
 	
-	                    if ((count > 0) && (resultCount >= count)) {
+	                    if ((count > 0) && (totalEntriesCount >= count)) {
 	                        break;
 	                    }
-	                } while (lastSearchResultList.size() > 0);
+	                } while (lastResultCount > 0);
 	            } catch (CouchbaseException ex) {
 	                throw new SearchException("Failed to search entries. Query: '" + query + "'", ex);
 	            }
@@ -606,6 +609,8 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
             } catch (CouchbaseException ex) {
                 throw new SearchException("Failed to calculate count entries. Query: '" + selectCountQuery.toString() + "'", ex);
             }
+        } else {
+        	result.setTotalEntriesCount(totalEntriesCount);
         }
 
         return result;

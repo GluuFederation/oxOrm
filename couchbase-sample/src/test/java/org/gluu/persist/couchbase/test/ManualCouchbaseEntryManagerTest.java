@@ -17,6 +17,9 @@ import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.json.JsonObject;
 import com.couchbase.client.java.kv.GetOptions;
 import com.couchbase.client.java.kv.GetResult;
+import com.couchbase.client.java.kv.LookupInMacro;
+import com.couchbase.client.java.kv.LookupInResult;
+import com.couchbase.client.java.kv.LookupInSpec;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,19 +30,19 @@ import java.util.*;
  */
 public class ManualCouchbaseEntryManagerTest {
 
-    @Test(enabled = true) // manual
+    @Test(enabled = false) // manual
     public void sample() throws IOException {
         CouchbaseEntryManager manager = createCouchbaseEntryManager();
 
         try {
-            List<SimpleClient> attributeList = manager.findEntries("o=gluu", SimpleClient.class, null);
-            System.out.println(attributeList);
+            List<SimpleClient> resultList = manager.findEntries("ou=clietns,o=gluu", SimpleClient.class, null);
+            System.out.println(resultList);
         } finally {
             manager.destroy();
         }
     }
 
-    @Test(enabled = true) // manual
+    @Test(enabled = false) // manual
     public void sampleSessionId() throws IOException, SearchException {
         CouchbaseEntryManager manager = createCouchbaseEntryManager();
 
@@ -55,9 +58,9 @@ public class ManualCouchbaseEntryManagerTest {
             final GetResult lookup = sessionBucket.defaultCollection().get(key, getOptions1);
             System.out.println("expiry: " + lookup.expiryTime());
 
-            GetOptions getOptions2 = GetOptions.getOptions().project("$document.exptime").withExpiry(true);
-            final GetResult ttl = sessionBucket.defaultCollection().get(key, getOptions2);
-//            System.out.println("ttl: " + ttl.contentAsObject().get("meta").getLong("$document.exptime"));
+            final LookupInResult ttl = sessionBucket.defaultCollection().lookupIn(key, Collections.singletonList(
+                    LookupInSpec.get(LookupInMacro.EXPIRY_TIME).xattr()));
+            System.out.println("ttl: " + ttl.contentAs(0, Long.class));
 
             updateSession(sessionId);
             manager.merge(sessionId);
@@ -97,7 +100,7 @@ public class ManualCouchbaseEntryManagerTest {
     }
 
     // MODIFY ACCORDING TO YOUR SERVER
-    public static Properties loadProperties() throws IOException {
+    private static Properties loadProperties() throws IOException {
         Properties properties = new Properties();
         properties.put("couchbase.auth.userPassword", "secret");
 
@@ -106,12 +109,13 @@ public class ManualCouchbaseEntryManagerTest {
             return properties;
         }
     }
+    
     private static Properties getSampleConnectionProperties() {
         Properties connectionProperties = new Properties();
 
-        connectionProperties.put("couchbase#servers", "u204.gluu.info");
+        connectionProperties.put("couchbase#servers", "localhost");
         connectionProperties.put("couchbase#auth.userName", "admin");
-        connectionProperties.put("couchbase#auth.userPassword", "Secret1!");
+        connectionProperties.put("couchbase#auth.userPassword", "secret");
         connectionProperties.put("couchbase#buckets", "gluu, gluu_user, gluu_site, gluu_cache, gluu_token, gluu_session");
 
         connectionProperties.put("couchbase#bucket.default", "gluu");
@@ -129,7 +133,7 @@ public class ManualCouchbaseEntryManagerTest {
         CouchbaseEntryManagerFactory couchbaseEntryManagerFactory = new CouchbaseEntryManagerFactory();
         couchbaseEntryManagerFactory.create();
 
-        CouchbaseEntryManager couchbaseEntryManager = couchbaseEntryManagerFactory.createEntryManager(getSampleConnectionProperties());
+        CouchbaseEntryManager couchbaseEntryManager = couchbaseEntryManagerFactory.createEntryManager(getSampleConnectionProperties() /* loadProperties() */);
         System.out.println("Created CouchbaseEntryManager: " + couchbaseEntryManager);
 
         return couchbaseEntryManager;

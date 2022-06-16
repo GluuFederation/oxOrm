@@ -47,6 +47,7 @@ public final class CouchbaseUpateMissingEntrySample {
 			System.out.println("Updated");
 		} catch (EntryPersistenceException ex) {
             LOG.info("Failed to update, root case exception: {}", ex.getCause().getClass(), ex);
+            LOG.info("Test Passed :) It's right behaviour.");
 		}
     }
 
