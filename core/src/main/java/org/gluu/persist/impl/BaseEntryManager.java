@@ -42,6 +42,7 @@ import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
+import org.gluu.persist.model.AttributeType;
 import org.gluu.persist.operation.PersistenceOperationService;
 import org.gluu.persist.reflect.property.Getter;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
@@ -2154,6 +2155,11 @@ public abstract class BaseEntryManager implements PersistenceEntryManager {
 		if (this.operationService != null) {
 			this.operationService.setPersistenceExtension(persistenceExtension);
 		}
+	}
+
+	@Override
+	public <T> AttributeType getAttributeType(String primaryKey, Class<T> entryClass, String propertyName) {
+        throw new UnsupportedOperationException("Method not implemented.");
 	}
 
 	protected static final class PropertyComparator<T> implements Comparator<T>, Serializable {

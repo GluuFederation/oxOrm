@@ -19,6 +19,7 @@ import javax.persistence.Query;
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.exception.extension.PersistenceExtension;
 import org.gluu.persist.model.AttributeData;
+import org.gluu.persist.model.AttributeType;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
@@ -128,6 +129,8 @@ public interface PersistenceEntryManager extends EntityManager {
     PersistenceEntryManager getPersistenceEntryManager(String persistenceType);
 
     void setPersistenceExtension(PersistenceExtension persistenceExtension);
+
+    <T> AttributeType getAttributeType(String primaryKey, Class<T> entryClass, String propertyName);
 
     boolean destroy();
 
