@@ -90,4 +90,6 @@ public interface SqlOperationService extends PersistenceOperationService {
 
 	DatabaseMetaData getMetadata();
 
+	boolean isJsonColumn(String tableName, String attributeType);
+
 }

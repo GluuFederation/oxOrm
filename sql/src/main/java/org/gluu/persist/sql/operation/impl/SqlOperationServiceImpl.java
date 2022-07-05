@@ -35,6 +35,7 @@ import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
+import org.gluu.persist.model.AttributeType;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.EntryData;
 import org.gluu.persist.model.PagedResult;
@@ -171,13 +172,13 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private boolean addEntryImpl(TableMapping tableMapping, String key, Collection<AttributeData> attributes) throws PersistenceException {
 		try {
-			Map<String, String> columTypes = tableMapping.getColumTypes();
+			Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
 
 			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
 			SQLInsertClause sqlInsertQuery = this.sqlQueryFactory.insert(tableRelationalPath);
 
 			for (AttributeData attribute : attributes) {
-				String attributeType = columTypes.get(attribute.getName().toLowerCase());
+				String attributeType = columTypes.get(attribute.getName().toLowerCase()).getType();
 				boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType);
 
 				sqlInsertQuery.columns(Expressions.stringPath(attribute.getName()));
@@ -211,7 +212,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private boolean updateEntryImpl(TableMapping tableMapping, String key, List<AttributeDataModification> mods) throws PersistenceException {
 		try {
-			Map<String, String> columTypes = tableMapping.getColumTypes();
+			Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
 
 			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
 			SQLUpdateClause sqlUpdateQuery = this.sqlQueryFactory.update(tableRelationalPath);
@@ -220,7 +221,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 				AttributeData attribute = attributeMod.getAttribute();
 				Path path = Expressions.stringPath(attribute.getName());
 
-				String attributeType = columTypes.get(attribute.getName().toLowerCase());
+				String attributeType = columTypes.get(attribute.getName().toLowerCase()).getType();
 				boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType);
 				
 				AttributeModificationType type = attributeMod.getModificationType();
@@ -876,7 +877,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		}
 	}
 
-	private boolean isJsonColumn(String tableName, String columnTypeName) {
+	public boolean isJsonColumn(String tableName, String columnTypeName) {
 		if (columnTypeName == null) {
 			return false;
 		}
@@ -886,7 +887,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 //			return "longtext".equals(columnTypeName);
 //		}
 
-		return "json".equals(columnTypeName);
+		return SqlConnectionProvider.JSON_TYPE_NAME.equals(columnTypeName);
 		
 	}
 
