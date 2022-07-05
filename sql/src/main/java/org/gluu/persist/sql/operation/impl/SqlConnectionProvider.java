@@ -34,6 +34,7 @@ import org.gluu.orm.util.StringHelper;
 import org.gluu.persist.exception.KeyConversionException;
 import org.gluu.persist.exception.operation.ConfigurationException;
 import org.gluu.persist.exception.operation.ConnectionException;
+import org.gluu.persist.model.AttributeType;
 import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
 import org.gluu.persist.sql.dsl.template.SqlJsonMySQLTemplates;
 import org.gluu.persist.sql.model.ResultCode;
@@ -54,7 +55,7 @@ import com.querydsl.sql.SQLTemplatesRegistry;
  */
 public class SqlConnectionProvider {
 
-    private static final String JSON_TYPE_NAME = "json";
+    protected static final String JSON_TYPE_NAME = "json";
 
 	private static final Logger LOG = LoggerFactory.getLogger(SqlConnectionProvider.class);
 
@@ -88,7 +89,7 @@ public class SqlConnectionProvider {
 
 	private SQLQueryFactory sqlQueryFactory;
 	
-	private Map<String, Map<String, String>> tableColumnsMap;
+	private Map<String, Map<String, AttributeType>> tableColumnsMap;
 	private Map<String, String> tableEnginesMap = new HashMap<>();
 
 
@@ -227,7 +228,7 @@ public class SqlConnectionProvider {
         ResultSet tableResultSet = databaseMetaData.getTables(null, schemaName, null, new String[]{"TABLE"});
     	while (tableResultSet.next()) {
     		String tableName = tableResultSet.getString("TABLE_NAME");
-    		Map<String, String> tableColumns = new HashMap<>();
+    		Map<String, AttributeType> tableColumns = new HashMap<>();
     		
     		String engineType = tableEnginesMap.get(tableName);
     		
@@ -235,13 +236,17 @@ public class SqlConnectionProvider {
             ResultSet columnResultSet = databaseMetaData.getColumns(null, schemaName, tableName, null);
         	while (columnResultSet.next()) {
         		String columnName = columnResultSet.getString("COLUMN_NAME").toLowerCase();
-				String columTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
+				String columnTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
 
 				String remark = columnResultSet.getString("REMARKS");
-        		if (mariaDb && "longtext".equalsIgnoreCase(columTypeName) && "json".equalsIgnoreCase(remark)) {
-        			columTypeName = JSON_TYPE_NAME;
+        		if (mariaDb && "longtext".equalsIgnoreCase(columnTypeName) && "json".equalsIgnoreCase(remark)) {
+        			columnTypeName = JSON_TYPE_NAME;
         		}
-				tableColumns.put(columnName, columTypeName);
+
+        		boolean multiValued = SqlConnectionProvider.JSON_TYPE_NAME.equals(columnTypeName);
+
+        		AttributeType attributeType = new AttributeType(columnName, columnTypeName, multiValued);
+        		tableColumns.put(columnName, attributeType);
         	}
 
         	tableColumnsMap.put(StringHelper.toLowerCase(tableName), tableColumns);
@@ -396,7 +401,7 @@ public class SqlConnectionProvider {
 
 	public TableMapping getTableMappingByKey(String key, String objectClass) {
 		String tableName = objectClass;
-		Map<String, String> columTypes = tableColumnsMap.get(StringHelper.toLowerCase(tableName));
+		Map<String, AttributeType> columTypes = tableColumnsMap.get(StringHelper.toLowerCase(tableName));
 		if ("_".equals(key)) {
 			return new TableMapping("", tableName, objectClass, columTypes);
 		}

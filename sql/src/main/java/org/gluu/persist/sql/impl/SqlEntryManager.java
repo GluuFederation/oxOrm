@@ -34,6 +34,7 @@ import org.gluu.persist.impl.GenericKeyConverter;
 import org.gluu.persist.impl.model.ParsedKey;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
+import org.gluu.persist.model.AttributeType;
 import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.EntryData;
@@ -43,7 +44,9 @@ import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.persist.sql.model.ConvertedExpression;
 import org.gluu.persist.sql.model.SearchReturnDataType;
+import org.gluu.persist.sql.model.TableMapping;
 import org.gluu.persist.sql.operation.SqlOperationService;
+import org.gluu.persist.sql.operation.impl.SqlConnectionProvider;
 import org.gluu.search.filter.Filter;
 import org.gluu.search.filter.FilterProcessor;
 import org.slf4j.Logger;
@@ -51,7 +54,10 @@ import org.slf4j.LoggerFactory;
 
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
+import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.sql.RelationalPathBase;
+import com.querydsl.sql.dml.SQLUpdateClause;
 
 /**
  * SQL Entry Manager
@@ -944,6 +950,20 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
 	public String[] fromInternalAttributes(String[] internalAttributeNames) {
 		return ((SqlOperationService) operationService).fromInternalAttributes(internalAttributeNames);
+	}
+
+	@Override
+	public <T> AttributeType getAttributeType(String primaryKey, Class<T> entryClass, String propertyName) {
+        // Check entry class
+        checkEntryClass(entryClass, false);
+        String[] objectClasses = getTypeObjectClasses(entryClass);
+
+        SqlConnectionProvider sqlConnectionProvider = operationService.getConnectionProvider();
+		TableMapping tableMapping = sqlConnectionProvider.getTableMappingByKey(primaryKey, getBaseObjectClass(objectClasses));
+		Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
+		AttributeType attributeType = columTypes.get(propertyName.toLowerCase());
+		
+		return attributeType;
 	}
 
 	protected boolean isSupportForceUpdate() {
