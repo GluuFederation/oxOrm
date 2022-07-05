@@ -958,7 +958,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         checkEntryClass(entryClass, false);
         String[] objectClasses = getTypeObjectClasses(entryClass);
 
-        SqlConnectionProvider sqlConnectionProvider = operationService.getConnectionProvider();
+        SqlConnectionProvider sqlConnectionProvider = getOperationService().getConnectionProvider();
 		TableMapping tableMapping = sqlConnectionProvider.getTableMappingByKey(primaryKey, getBaseObjectClass(objectClasses));
 		Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
 		AttributeType attributeType = columTypes.get(propertyName.toLowerCase());
