@@ -349,11 +349,19 @@ public final class StringHelper {
     }
 
     public static boolean isEmptyString(Object string) {
+    	if (string == null) {
+    		return false;
+    	}
+
         return !(string instanceof String) || isEmpty((String) string);
     }
 
     public static boolean isNotEmptyString(Object string) {
-        return !(string instanceof String) || isNotEmpty((String) string);
+    	if (string == null) {
+    		return false;
+    	}
+
+    	return !(string instanceof String) || isNotEmpty((String) string);
     }
 
     public static String toString(Object object) {
