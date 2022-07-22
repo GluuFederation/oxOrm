@@ -83,6 +83,8 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private boolean disableAttributeMapping = false;
 
+	private boolean mariaDb = false;
+
 	private PersistenceExtension persistenceExtension;
 
 	private SQLQueryFactory sqlQueryFactory;
@@ -104,6 +106,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	private void init() {
 		this.sqlQueryFactory = connectionProvider.getSqlQueryFactory();
 		this.schemaName = connectionProvider.getSchemaName();
+		this.mariaDb = connectionProvider.isMariaDb();
 	}
 
     @Override
@@ -464,7 +467,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	                        break;
 	                    }
 	                } while (lastCountRows > 0);
-        		} catch (QueryException ex) {ex.printStackTrace();
+        		} catch (QueryException ex) {
         			throw new SearchException(String.format("Failed to build search entries query. Key: '%s', expression: '%s'", key, expression.expression()), ex);
 	    		} catch (SQLException | EntryConvertationException ex) {
 	    			throw new SearchException(String.format("Failed to execute query '%s'  with key: '%s'", queryStr, key), ex);
@@ -881,7 +884,11 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 		if (columnTypeName == null) {
 			return false;
 		}
-		
+
+		if (mariaDb && SqlConnectionProvider.LONGTEXT_TYPE_NAME.equals(columnTypeName)) {
+			return true;
+		}
+
 //		String engineType = connectionProvider.getEngineType(tableName);
 //		if ((engineType != null) && engineType.equalsIgnoreCase("mariadb")) {
 //			return "longtext".equals(columnTypeName);

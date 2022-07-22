@@ -56,6 +56,7 @@ import com.querydsl.sql.SQLTemplatesRegistry;
 public class SqlConnectionProvider {
 
     protected static final String JSON_TYPE_NAME = "json";
+    protected static final String LONGTEXT_TYPE_NAME = "longtext";
 
 	private static final Logger LOG = LoggerFactory.getLogger(SqlConnectionProvider.class);
 
@@ -239,7 +240,7 @@ public class SqlConnectionProvider {
 				String columnTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
 
 				String remark = columnResultSet.getString("REMARKS");
-        		if (mariaDb && "longtext".equalsIgnoreCase(columnTypeName) && "json".equalsIgnoreCase(remark)) {
+        		if (mariaDb && LONGTEXT_TYPE_NAME.equalsIgnoreCase(columnTypeName) && JSON_TYPE_NAME.equalsIgnoreCase(remark)) {
         			columnTypeName = JSON_TYPE_NAME;
         		}
 
@@ -438,5 +439,9 @@ public class SqlConnectionProvider {
         	throw new ConnectionException("Failed to get database metadata", ex);
         }
 	}
-	
+
+	public boolean isMariaDb() {
+		return mariaDb;
+	}
+
 }
