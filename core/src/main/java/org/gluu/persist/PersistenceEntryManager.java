@@ -6,6 +6,7 @@
 
 package org.gluu.persist;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.Query;
 
+import org.gluu.persist.annotation.AttributesList;
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.extension.PersistenceExtension;
 import org.gluu.persist.model.AttributeData;
@@ -131,6 +133,12 @@ public interface PersistenceEntryManager extends EntityManager {
     void setPersistenceExtension(PersistenceExtension persistenceExtension);
 
     <T> AttributeType getAttributeType(String primaryKey, Class<T> entryClass, String propertyName);
+
+	Class<?> getCustomAttributesListItemType(Object entry, AttributesList attributesList, String propertyName);
+	List<AttributeData> getAttributeDataListFromCustomAttributesList(Object entry, AttributesList attributesList,
+			String propertyName);
+	List<Object> getCustomAttributesListFromAttributeDataList(Object entry, AttributesList attributesList,
+			String propertyName, Collection<AttributeData> attributes);
 
     boolean destroy();
 
