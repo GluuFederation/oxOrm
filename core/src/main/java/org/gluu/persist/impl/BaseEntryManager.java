@@ -18,6 +18,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -1030,9 +1031,13 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 					}
 
 					// Process objectClass first
-					for (Entry<String, AttributeData> attributeEntry : attributesMap.entrySet()) {
+					for (Iterator<Entry<String, AttributeData>> it = attributesMap.entrySet().iterator(); it.hasNext();) {
+						Entry<String, AttributeData> attributeEntry = it.next();
+
 						AttributeData entryAttribute = attributeEntry.getValue(); 
 						if (OBJECT_CLASS.equalsIgnoreCase(entryAttribute.getName())) {
+							it.remove();
+
 							String[] objectClasses = entryAttribute.getStringValues();
 							if (ArrayHelper.isEmpty(objectClasses)) {
 								continue;
@@ -1053,9 +1058,6 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 									customObjectClasses.add(objectClass);
 								}
 							}
-
-							attributesMap.remove(attributeEntry.getKey());
-							continue;
 						}
 					}
 
