@@ -651,7 +651,7 @@ public class SpannerOperationServiceImpl implements SpannerOperationService {
 	
 	                    resultCount += lastCountRows;
 	
-	                    if ((count > 0) && (resultCount >= count)) {
+	                    if ((count > 0) && (resultCount >= count) || (lastCountRows < currentLimit)) {
 	                        break;
 	                    }
 	                } while (lastCountRows > 0);
