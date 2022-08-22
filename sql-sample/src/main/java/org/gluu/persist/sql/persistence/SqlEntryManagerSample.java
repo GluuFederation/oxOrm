@@ -20,12 +20,18 @@ public class SqlEntryManagerSample {
     private static final Logger LOG = Logger.getLogger(SqlEntryManagerSample.class);
 
     private Properties getSampleConnectionProperties() {
-        Properties connectionProperties = new Properties();
+    	boolean mysql = true;
+
+    	Properties connectionProperties = new Properties();
 
         connectionProperties.put("sql#db.schema.name", "gluudb");
-        connectionProperties.put("sql#connection.uri", "jdbc:mysql://localhost:3306/gluudb?profileSQL=true");
+        if (mysql) {
+        	connectionProperties.put("sql#connection.uri", "jdbc:mysql://localhost:3306/gluudb?profileSQL=true");
+            connectionProperties.put("sql#connection.driver-property.serverTimezone", "GMT+2");
+        } else {
+        	connectionProperties.put("sql#connection.uri", "jdbc:postgresql://localhost:5432/gluudb");
+        }
 
-        connectionProperties.put("sql#connection.driver-property.serverTimezone", "GMT+2");
         connectionProperties.put("sql#connection.pool.max-total", "300");
         connectionProperties.put("sql#connection.pool.max-idle", "300");
 
