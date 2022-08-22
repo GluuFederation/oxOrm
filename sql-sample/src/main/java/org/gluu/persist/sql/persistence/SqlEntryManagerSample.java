@@ -23,7 +23,7 @@ public class SqlEntryManagerSample {
         Properties connectionProperties = new Properties();
 
         connectionProperties.put("sql#db.schema.name", "gluudb");
-        connectionProperties.put("sql#connection.uri", "jdbc:mysql://localhost:3306/jans?profileSQL=true");
+        connectionProperties.put("sql#connection.uri", "jdbc:mysql://localhost:3306/gluudb?profileSQL=true");
 
         connectionProperties.put("sql#connection.driver-property.serverTimezone", "GMT+2");
         connectionProperties.put("sql#connection.pool.max-total", "300");
