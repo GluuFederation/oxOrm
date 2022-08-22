@@ -22,7 +22,7 @@ public class SqlEntryManagerSample {
     private Properties getSampleConnectionProperties() {
         Properties connectionProperties = new Properties();
 
-        connectionProperties.put("sql#db.schema.name", "gluu");
+        connectionProperties.put("sql#db.schema.name", "gluudb");
         connectionProperties.put("sql#connection.uri", "jdbc:mysql://localhost:3306/jans?profileSQL=true");
 
         connectionProperties.put("sql#connection.driver-property.serverTimezone", "GMT+2");
