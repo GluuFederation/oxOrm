@@ -10,6 +10,8 @@ import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.sql.dsl.template.MySQLJsonTemplates;
 import org.gluu.persist.sql.impl.SqlFilterConverter;
 import org.gluu.persist.sql.model.ConvertedExpression;
+import org.gluu.persist.sql.operation.impl.SqlConnectionProvider;
+import org.gluu.persist.sql.operation.impl.SqlOperationServiceImpl;
 import org.gluu.search.filter.Filter;
 import org.gluu.search.filter.FilterProcessor;
 import org.testng.annotations.BeforeClass;
@@ -39,7 +41,7 @@ public class SqlFilterConverterCheckExcludeFilterTest {
 
 	@BeforeClass
 	public void init() {
-		this.simpleConverter = new SqlFilterConverter(null);
+		this.simpleConverter = new SqlFilterConverter(new SqlOperationServiceImpl(null, new SqlConnectionProvider(null)));
 		this.filterProcessor = new FilterProcessor();
 		this.tablePath = ExpressionUtils.path(Object.class, "table");
 		this.docAlias = ExpressionUtils.path(Object.class, "doc");

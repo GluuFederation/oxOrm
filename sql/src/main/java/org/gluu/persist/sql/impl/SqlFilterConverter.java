@@ -384,8 +384,6 @@ public class SqlFilterConverter {
 		Object assertionValue = filter.getAssertionValue();
 		if (assertionValue instanceof AttributeEnum) {
 			assertionValue = ((AttributeEnum) assertionValue).getValue();
-		} else if (assertionValue instanceof Date) {
-			return Expressions.constant(assertionValue);
 		} else if (assertionValue instanceof String) {
 			if ((attributeType != null) && SqlOperationService.TIMESTAMP.equals(attributeType.getType())) {
 				Date dateValue = operationService.decodeTime((String) assertionValue, true);
@@ -393,12 +391,14 @@ public class SqlFilterConverter {
 					assertionValue = dateValue;
 				}
 			}
-			return Expressions.constant(assertionValue);
 		}
 
 		if (isArray && (assertionValue instanceof String)) {
 			assertionValue = "[\"" + assertionValue + "\"]";
 		} else if (Boolean.TRUE.equals(filter.getMultiValued())) {
+			if (assertionValue instanceof Date) {
+		        assertionValue = operationService.encodeTime((Date) assertionValue);
+			}
 			assertionValue = convertValueToJson(Arrays.asList(assertionValue));
 		}
 
