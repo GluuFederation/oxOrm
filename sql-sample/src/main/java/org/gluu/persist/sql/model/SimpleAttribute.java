@@ -22,7 +22,7 @@ import org.gluu.orm.util.StringHelper;
 * @author Yuriy Movchan Date: 01/15/2020
  */
 @DataEntry
-@ObjectClass(value = "gluuAttr")
+@ObjectClass(value = "gluuAttribute")
 public class SimpleAttribute implements Serializable {
 
     private static final long serialVersionUID = -1634191420188575733L;

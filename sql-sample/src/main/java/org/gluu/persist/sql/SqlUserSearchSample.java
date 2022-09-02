@@ -138,9 +138,9 @@ public final class SqlUserSearchSample {
 	        } else if (j % 5 == 0) {
 	        	jansExtUid = Arrays.asList(1, 11, 2, 22, 3, 33, 4, 44);
 	        }
-	        newUser.getCustomAttributes().add(new CustomObjectAttribute("gluuExtUid", jansExtUid));
+	        newUser.getCustomAttributes().add(new CustomObjectAttribute("oxExternalUid", jansExtUid));
 			newUser.getCustomAttributes().add(new CustomObjectAttribute("birthdate", new Date()));
-			newUser.getCustomAttributes().add(new CustomObjectAttribute("gluuActive", false));
+			newUser.getCustomAttributes().add(new CustomObjectAttribute("oxTrustActive", false));
 
 			sqlEntryManager.persist(newUser);
 

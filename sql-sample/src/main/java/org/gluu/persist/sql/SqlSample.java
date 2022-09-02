@@ -66,7 +66,7 @@ public final class SqlSample {
             String[] values = new String[] { "Somewhere: " + System.currentTimeMillis(), "Somewhere2: " + System.currentTimeMillis() };
             user.getCustomAttributes().add(new CustomObjectAttribute("address", Arrays.asList(values)));
             user.getCustomAttributes().add(new CustomObjectAttribute("transientId", "new_transientId"));
-            user.getCustomAttributes().add(new CustomObjectAttribute("gluuGuid", "test_guid"));
+            user.getCustomAttributes().add(new CustomObjectAttribute("oxGuid", "test_guid"));
             user.setUserId("user1");
             user.setUserPassword("test_pwd");
 
@@ -86,7 +86,7 @@ public final class SqlSample {
             LOG.info("Attribute with displayName: " + attribute.getCustomAttributes().get(1));
         }
 
-        Filter filter2 = Filter.createEqualityFilter("gluuState", "authenticated");
+        Filter filter2 = Filter.createEqualityFilter("oxState", "authenticated");
         List<SimpleSession> sessions = sqlEntryManager.findEntries("o=gluu", SimpleSession.class, filter2, SearchScope.SUB, null, null, 10, 0,
                 0);
         LOG.info("Found sessions: " + sessions.size());

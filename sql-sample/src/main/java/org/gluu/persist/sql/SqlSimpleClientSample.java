@@ -8,6 +8,7 @@ package org.gluu.persist.sql;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.gluu.orm.util.ArrayHelper;
 import org.gluu.persist.sql.impl.SqlEntryManager;
@@ -32,17 +33,18 @@ public final class SqlSimpleClientSample {
         // Prepare sample connection details
         SqlEntryManagerSample sqlEntryManagerSample = new SqlEntryManagerSample();
 
+        String uuid = UUID.randomUUID().toString();
         // Create SQL entry manager
         SqlEntryManager sqlEntryManager = sqlEntryManagerSample.createSqlEntryManager();
         
 		SimpleClient newClient = new SimpleClient();
-		newClient.setDn("inum=test_acr2,ou=client,o=gluu");
-		newClient.setDefaultAcrValues(new String[] {"test_acr2"});
-		newClient.setClientName("test_acr2");
+		newClient.setDn(String.format("inum=test_acr2_%s,ou=client,o=gluu", uuid));
+		newClient.setDefaultAcrValues(new String[] {"test_acr2_" + uuid});
+		newClient.setClientName("test_acr2_" + uuid);
 		
 		sqlEntryManager.persist(newClient);
 
-		Filter presenceFilter = Filter.createEqualityFilter("displayName", "test_acr2");
+		Filter presenceFilter = Filter.createSubstringFilter("displayName", null, new String[] { "test_acr2" }, null);
 		List<SimpleClient> results = sqlEntryManager.findEntries("ou=client,o=gluu", SimpleClient.class, presenceFilter);
 		for (SimpleClient client : results) {
 			String[] acrs = client.getDefaultAcrValues();
