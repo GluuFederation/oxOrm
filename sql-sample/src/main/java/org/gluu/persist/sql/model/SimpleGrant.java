@@ -22,7 +22,7 @@ import org.gluu.orm.util.StringHelper;
 * @author Yuriy Movchan Date: 01/15/2020
  */
 @DataEntry
-@ObjectClass(value = "gluuGrant")
+@ObjectClass(value = "oxAuthGrant")
 public class SimpleGrant implements Serializable {
 
     private static final long serialVersionUID = -1234191420188575733L;

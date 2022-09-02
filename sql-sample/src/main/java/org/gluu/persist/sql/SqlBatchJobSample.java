@@ -81,8 +81,8 @@ public final class SqlBatchJobSample {
             	int currentProcessedCount = 0;
                 for (SimpleSession simpleSession : objects) {
                     try {
-                        CustomAttribute customAttribute = getUpdatedAttribute(sqlEntryManager, simpleSession.getDn(), "gluuLastAccessTime",
-                                simpleSession.getAttribute("gluuLastAccessTime"));
+                        CustomAttribute customAttribute = getUpdatedAttribute(sqlEntryManager, simpleSession.getDn(), "authnTime",
+                                simpleSession.getAttribute("authnTime"));
                         simpleSession.setCustomAttributes(Arrays.asList(new CustomAttribute[] {customAttribute}));
                         sqlEntryManager.merge(simpleSession);
                         processedCount++;
@@ -97,8 +97,8 @@ public final class SqlBatchJobSample {
             }
         };
 
-        final Filter filter2 = Filter.createPresenceFilter("gluuLastAccessTime");
-        sqlEntryManager.findEntries("o=gluu", SimpleSession.class, filter2, SearchScope.SUB, new String[] {"gluuLastAccessTime"},
+        final Filter filter2 = Filter.createPresenceFilter("authnTime");
+        sqlEntryManager.findEntries("o=gluu", SimpleSession.class, filter2, SearchScope.SUB, new String[] {"authnTime"},
                 sessionBatchOperation, 0, 0, 100);
 
         BatchOperation<SimpleClient> clientBatchOperation = new ProcessBatchOperation<SimpleClient>() {

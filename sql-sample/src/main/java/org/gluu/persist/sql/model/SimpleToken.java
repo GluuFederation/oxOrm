@@ -22,7 +22,7 @@ import org.gluu.orm.util.StringHelper;
 * @author Yuriy Movchan Date: 01/15/2020
  */
 @DataEntry
-@ObjectClass(value = "gluuToken")
+@ObjectClass(value = "token")
 public class SimpleToken implements Serializable {
 
     private static final long serialVersionUID = 6726419630327625172L;

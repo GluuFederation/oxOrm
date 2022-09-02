@@ -6,6 +6,7 @@
 
 package org.gluu.persist.sql;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -16,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.status.StatusLogger;
 import org.gluu.persist.sql.impl.SqlEntryManager;
+import org.gluu.persist.sql.model.SimpleSession;
 import org.gluu.persist.sql.model.SimpleSessionState;
 import org.gluu.persist.sql.persistence.SqlEntryManagerSample;
 
@@ -44,16 +46,25 @@ public final class SqlConcurentSessionUpdateSample {
 
         try {
             String sessionId = UUID.randomUUID().toString();
-            final String sessionDn = "uniqueIdentifier=" + sessionId + ",ou=session,o=gluu";
+            final String sessionDn = "uniqueIdentifier=" + sessionId + ",ou=sessions,o=gluu";
             final String userDn =
                     "inum=@!E8F2.853B.1E7B.ACE2!0001!39A4.C163!0000!A8F2.DE1E.D7FB,ou=people,o=gluu";
 
-            final SimpleSessionState simpleSessionState = new SimpleSessionState();
-            simpleSessionState.setDn(sessionDn);
-            simpleSessionState.setId(sessionId);
-            simpleSessionState.setLastUsedAt(new Date());
+            Calendar expirationDate = Calendar.getInstance();
+            expirationDate.setTime(new Date());
+            expirationDate.add(Calendar.SECOND, 60);
 
-            sqlEntryManager.persist(simpleSessionState);
+            SimpleSession newSession = new SimpleSession();
+
+            newSession.setDn(String.format("oxId=%s,ou=sessions,o=gluu", sessionId));
+            newSession.setId(sessionId);
+            newSession.setDeletable(true);
+            newSession.setCreationDate(new Date());
+            newSession.setExpirationDate(expirationDate.getTime());
+            newSession.setLastUsedAt(new Date());
+            newSession.setUserDn(userDn);
+
+            sqlEntryManager.persist(newSession);
             System.out.println("Persisted");
 
             int threadCount = 500;
@@ -63,17 +74,17 @@ public final class SqlConcurentSessionUpdateSample {
                 executorService.execute(new Runnable() {
                     @Override
                     public void run() {
-                        final SimpleSessionState simpleSessionStateFromSQL = sqlEntryManager.find(SimpleSessionState.class, sessionDn);
-                        String beforeUserDn = simpleSessionStateFromSQL.getUserDn();
+                        final SimpleSession simpleSessionFromSQL = sqlEntryManager.find(SimpleSession.class, sessionDn);
+                        String beforeUserDn = simpleSessionFromSQL.getUserDn();
                         String randomUserDn = count % 2 == 0 ? userDn : "";
 
                         try {
-                            simpleSessionStateFromSQL.setUserDn(randomUserDn);
-                            simpleSessionStateFromSQL.setLastUsedAt(new Date());
-                            sqlEntryManager.merge(simpleSessionStateFromSQL);
+                        	simpleSessionFromSQL.setUserDn(randomUserDn);
+                        	simpleSessionFromSQL.setLastUsedAt(new Date());
+                            sqlEntryManager.merge(simpleSessionFromSQL);
                             System.out.println("Merged thread: " + count + ", userDn: " + randomUserDn + ", before userDn: " + beforeUserDn);
                         } catch (Throwable e) {
-                            System.out.println("ERROR !!!, thread: " + count + ", userDn: " + randomUserDn + ", before userDn: " + beforeUserDn
+                            System.err.println("ERROR !!!, thread: " + count + ", userDn: " + randomUserDn + ", before userDn: " + beforeUserDn
                                     + ", error:" + e.getMessage());
                             // e.printStackTrace();
                         }

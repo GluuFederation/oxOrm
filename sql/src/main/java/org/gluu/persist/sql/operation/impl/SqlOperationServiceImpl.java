@@ -12,11 +12,14 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -44,9 +47,11 @@ import org.gluu.persist.operation.auth.PasswordEncryptionHelper;
 import org.gluu.persist.sql.impl.SqlBatchOperationWraper;
 import org.gluu.persist.sql.model.ConvertedExpression;
 import org.gluu.persist.sql.model.JsonAttributeValue;
+import org.gluu.persist.sql.model.JsonString;
 import org.gluu.persist.sql.model.SearchReturnDataType;
 import org.gluu.persist.sql.model.TableMapping;
 import org.gluu.persist.sql.operation.SqlOperationService;
+import org.gluu.persist.sql.operation.SupportedDbType;
 import org.gluu.persist.sql.operation.watch.OperationDurationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +63,7 @@ import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.core.types.SubQueryExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.Wildcard;
 import com.querydsl.sql.RelationalPathBase;
@@ -92,6 +98,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	private String schemaName;
 
 	private Path<String> docAlias = ExpressionUtils.path(String.class, DOC_ALIAS);
+	private Path<String> docInnerAlias = ExpressionUtils.path(String.class, DOC_INNER_ALIAS);
 
     @SuppressWarnings("unused")
     private SqlOperationServiceImpl() {
@@ -181,13 +188,18 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			SQLInsertClause sqlInsertQuery = this.sqlQueryFactory.insert(tableRelationalPath);
 
 			for (AttributeData attribute : attributes) {
-				String attributeType = columTypes.get(attribute.getName().toLowerCase()).getType();
-				boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType);
+				AttributeType attributeType = getAttributeType(columTypes, attribute);
+				if (attributeType == null) {
+		            throw new PersistenceException(String.format("Failed to find attribute type for '%s'", attribute.getName()));
+				}
 
-				sqlInsertQuery.columns(Expressions.stringPath(attribute.getName()));
+				boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType.getType());
+
 				if (multiValued || Boolean.TRUE.equals(attribute.getMultiValued())) {
+					sqlInsertQuery.columns(Expressions.path(Object.class, attribute.getName()));
 					sqlInsertQuery.values(convertValueToDbJson(attribute.getValues()));
 				} else {
+					sqlInsertQuery.columns(Expressions.stringPath(attribute.getName()));
 					sqlInsertQuery.values(attribute.getValue());
 				}
 			}
@@ -224,8 +236,12 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 				AttributeData attribute = attributeMod.getAttribute();
 				Path path = Expressions.stringPath(attribute.getName());
 
-				String attributeType = columTypes.get(attribute.getName().toLowerCase()).getType();
-				boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType);
+				AttributeType attributeType = getAttributeType(columTypes, attribute);
+				if (attributeType == null) {
+		            throw new PersistenceException(String.format("Failed to find attribute type for '%s'", attribute.getName()));
+				}
+
+				boolean multiValued = (attributeType != null) && isJsonColumn(tableMapping.getTableName(), attributeType.getType());
 				
 				AttributeModificationType type = attributeMod.getModificationType();
                 if ((AttributeModificationType.ADD == type) || (AttributeModificationType.FORCE_UPDATE == type)) {
@@ -303,15 +319,26 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
     private long deleteImpl(TableMapping tableMapping, ConvertedExpression expression, int count) throws DeleteException {
 		try {
-			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
-			SQLDeleteClause sqlDeleteQuery = this.sqlQueryFactory.delete(tableRelationalPath);
-
 			Predicate exp = (Predicate) expression.expression();
-			sqlDeleteQuery.where(exp);
+			SQLDeleteClause sqlDeleteQuery;
 
-			if (count > 0) {
-				sqlDeleteQuery = sqlDeleteQuery.limit(count);
-            }
+			RelationalPathBase<Object> tableRelationalPath = buildTableRelationalPath(tableMapping);
+			if ((count > 0) && (SupportedDbType.POSTGRESQL == connectionProvider.getDbType())) {
+				// Workaround because PostgreSQL not supports limit in delete request
+
+				// Inner query
+				RelationalPathBase<Object> innerTableRelationalPath = new RelationalPathBase<>(Object.class, DOC_INNER_ALIAS, this.schemaName, tableMapping.getTableName());
+				SubQueryExpression<String> sqlSelectQuery = this.sqlQueryFactory.select(Expressions.path(String.class, docInnerAlias, DOC_ID)).from(innerTableRelationalPath)
+						.where(exp).limit(count);
+
+				Predicate deleteExp = ExpressionUtils.in(Expressions.stringPath(DOC_ID), sqlSelectQuery);
+				sqlDeleteQuery = this.sqlQueryFactory.delete(tableRelationalPath).where(deleteExp);
+			} else {
+				sqlDeleteQuery = this.sqlQueryFactory.delete(tableRelationalPath).where(exp);
+				if (count > 0) {
+					sqlDeleteQuery = sqlDeleteQuery.limit(count);
+	            }
+			}
 
 			long rowDeleted = sqlDeleteQuery.execute();
 
@@ -622,11 +649,11 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 						attributeValueObjects = new Object[] { attributeObject };
 					} else if (attributeObject instanceof String) {
 						Object value = attributeObject.toString();
-						try {
-							SimpleDateFormat jsonDateFormat = new SimpleDateFormat(SQL_DATA_FORMAT);
-							value = jsonDateFormat.parse(attributeObject.toString());
-						} catch (Exception ex) {
+						Date dateValue = decodeTime(attributeObject.toString(), true);
+						if (dateValue != null) {
+							value = dateValue;
 						}
+
 						attributeValueObjects = new Object[] { value };
 					} else if (attributeObject instanceof Timestamp) {
 						attributeValueObjects = new Object[] {
@@ -713,6 +740,13 @@ public class SqlOperationServiceImpl implements SqlOperationService {
     public DatabaseMetaData getMetadata() {
         return connectionProvider.getDatabaseMetaData();
     }
+
+	@Override
+	public TableMapping getTabeMapping(String key, String objectClass) {
+    	TableMapping tableMapping = connectionProvider.getTableMappingByKey(key, objectClass);
+    	
+    	return tableMapping;
+	}
 
 	@Override
 	public void setPersistenceExtension(PersistenceExtension persistenceExtension) {
@@ -838,7 +872,41 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 //		return resultAttributeNames;
 	}
 
-	private String convertValueToDbJson(Object propertyValue) {
+	@Override
+    public String encodeTime(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        SimpleDateFormat jsonDateFormat = new SimpleDateFormat(SqlOperationService.SQL_DATA_FORMAT);
+        return jsonDateFormat.format(date);
+    }
+
+    @Override
+    public Date decodeTime(String date, boolean silent) {
+        if (StringHelper.isEmpty(date)) {
+            return null;
+        }
+
+        // Add ending Z if necessary
+        String dateZ = date.endsWith("Z") ? date : date + "Z";
+        try {
+            SimpleDateFormat jsonDateFormat = new SimpleDateFormat(SqlOperationService.SQL_DATA_FORMAT);
+            return jsonDateFormat.parse(date);
+        } catch (ParseException ex) {
+	        try {
+	            return new Date(Instant.parse(dateZ).toEpochMilli());
+	        } catch (DateTimeParseException ex2) {
+	        	if (!silent) {
+		            LOG.error("Failed to decode generalized time '{}'", date, ex2);
+	        	}
+	
+	        	return null;
+	        }
+        }
+    }
+
+	private Object convertValueToDbJson(Object propertyValue) {
 		try {
 //			String value = JSON_OBJECT_MAPPER.writeValueAsString(propertyValue);
 
@@ -846,7 +914,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			if (propertyValue == null) {
 				attributeValue = new JsonAttributeValue();
 			} if (propertyValue instanceof List) {
-				attributeValue = new JsonAttributeValue(((List) propertyValue).toArray());
+				attributeValue = new JsonAttributeValue(((List<?>) propertyValue).toArray());
 			} else if (propertyValue.getClass().isArray()) {
 				attributeValue = new JsonAttributeValue((Object[]) propertyValue);
 			} else {
@@ -854,6 +922,10 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			}
 
 			String value = JSON_OBJECT_MAPPER.writeValueAsString(attributeValue);
+
+			if (SupportedDbType.POSTGRESQL == connectionProvider.getDbType()) {
+				return new JsonString(value);
+			}
 
 			return value;
 		} catch (Exception ex) {
@@ -885,7 +957,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 			return false;
 		}
 
-		if (mariaDb && SqlConnectionProvider.LONGTEXT_TYPE_NAME.equals(columnTypeName)) {
+		if (mariaDb && SqlOperationService.LONGTEXT_TYPE_NAME.equals(columnTypeName)) {
 			return true;
 		}
 
@@ -894,8 +966,12 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 //			return "longtext".equals(columnTypeName);
 //		}
 
-		return SqlConnectionProvider.JSON_TYPE_NAME.equals(columnTypeName);
+		return SqlOperationService.JSON_TYPE_NAME.equals(columnTypeName);
 		
+	}
+
+	private AttributeType getAttributeType(Map<String, AttributeType> columTypes, AttributeData attribute) {
+		return columTypes.get(attribute.getName().toLowerCase());
 	}
 
 }

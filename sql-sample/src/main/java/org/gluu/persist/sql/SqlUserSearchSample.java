@@ -50,7 +50,7 @@ public final class SqlUserSearchSample {
         List<SimpleUser> users = sqlEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, filter1);
         System.out.println(users);
         
-        int countUsers = 2000000;
+        int countUsers = 1000000;
         int threadCount = 200;
         int threadIterationCount = 200;
 
@@ -74,7 +74,12 @@ public final class SqlUserSearchSample {
 	                    	long userUid = Math.round(Math.random() * countUsers);
 	                    	String uid = "user" + userUid; /*String.format("user%06d", userUid);*/
 	                        try {
-		                        Filter filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("uid"), StringHelper.toLowerCase(uid));
+	                        	Filter filter;
+	                        	if (j % 2 == 0) {
+	                        		filter = Filter.createEqualityFilter("birthdate", new Date());
+	                        	} else {
+	                        		filter = Filter.createEqualityFilter(Filter.createLowercaseFilter("uid"), StringHelper.toLowerCase(uid));
+	                        	}
 //		                        Filter filter = Filter.createEqualityFilter("uid", uid);
 		                        List<SimpleUser> foundUsers = sqlEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, filter);
 		                        if (foundUsers.size() > 0) {
@@ -115,11 +120,11 @@ public final class SqlUserSearchSample {
 
     private static void addTestUsers(SqlEntryManager sqlEntryManager, int countUsers) {
     	long startTime = System.currentTimeMillis();
-        for (int j = 137; j <= countUsers; j++) {
+        for (int j = 1; j <= countUsers; j++) {
         	String uid = "user" + j; /*String.format("user%06d", userUid);*/
 
         	SimpleUser newUser = new SimpleUser();
-	        newUser.setDn(String.format("inum=%s,ou=people,o=gluu", System.currentTimeMillis()));
+	        newUser.setDn(String.format("inum=%s,ou=people,o=gluu", startTime + j));
 	        newUser.setUserId(uid);
 	        newUser.setUserPassword("topsecret" + uid);
 	        newUser.setUserRole(j % 2 == 0 ? UserRole.ADMIN : UserRole.USER);
@@ -130,17 +135,17 @@ public final class SqlUserSearchSample {
 	        newUser.getCustomAttributes().add(new CustomObjectAttribute("address", Arrays.asList("London", "Texas", "Kiev")));
 	        newUser.getCustomAttributes().add(new CustomObjectAttribute("transientId", "transientId"));
 
-	        List<Object> jansExtUid = Arrays.asList(1, 11);
+	        List<Object> oxExternalUid = Arrays.asList(1, 11);
 	        if (j % 2 == 0) {
-	        	jansExtUid = Arrays.asList(1, 11, 2, 22);
+	        	oxExternalUid = Arrays.asList(1, 11, 2, 22);
 	        } else if (j % 3 == 0) {
-	        	jansExtUid = Arrays.asList(2, 22, 3, 33);
+	        	oxExternalUid = Arrays.asList(2, 22, 3, 33);
 	        } else if (j % 5 == 0) {
-	        	jansExtUid = Arrays.asList(1, 11, 2, 22, 3, 33, 4, 44);
+	        	oxExternalUid = Arrays.asList(1, 11, 2, 22, 3, 33, 4, 44);
 	        }
-	        newUser.getCustomAttributes().add(new CustomObjectAttribute("gluuExtUid", jansExtUid));
+	        newUser.getCustomAttributes().add(new CustomObjectAttribute("oxExternalUid", oxExternalUid));
 			newUser.getCustomAttributes().add(new CustomObjectAttribute("birthdate", new Date()));
-			newUser.getCustomAttributes().add(new CustomObjectAttribute("gluuActive", false));
+			newUser.getCustomAttributes().add(new CustomObjectAttribute("oxTrustActive", false));
 
 			sqlEntryManager.persist(newUser);
 

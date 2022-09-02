@@ -6,7 +6,6 @@
 
 package org.gluu.persist.sql.impl;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,17 +15,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.gluu.orm.util.ArrayHelper;
+import org.gluu.orm.util.StringHelper;
 import org.gluu.persist.annotation.AttributeEnum;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.ldap.impl.LdapFilterConverter;
+import org.gluu.persist.model.AttributeType;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.persist.reflect.util.ReflectHelper;
 import org.gluu.persist.sql.model.ConvertedExpression;
+import org.gluu.persist.sql.model.TableMapping;
 import org.gluu.persist.sql.operation.SqlOperationService;
+import org.gluu.persist.sql.operation.impl.SqlConnectionProvider;
 import org.gluu.search.filter.Filter;
 import org.gluu.search.filter.FilterType;
-import org.gluu.orm.util.ArrayHelper;
-import org.gluu.orm.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,8 +49,7 @@ import com.querydsl.core.types.dsl.Expressions;
 public class SqlFilterConverter {
 
     private static final Logger LOG = LoggerFactory.getLogger(SqlFilterConverter.class);
-    
-    private static final String SQL_DATA_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS";
+
     private static final LdapFilterConverter ldapFilterConverter = new LdapFilterConverter();
 	private static final ObjectMapper JSON_OBJECT_MAPPER = new ObjectMapper();
 
@@ -58,33 +59,29 @@ public class SqlFilterConverter {
 	private Path<Boolean> booleanDocAlias = ExpressionUtils.path(Boolean.class, "doc");
 	private Path<Integer> integerDocAlias = ExpressionUtils.path(Integer.class, "doc");
 	private Path<Long> longDocAlias = ExpressionUtils.path(Long.class, "doc");
+	private Path<Date> dateDocAlias = ExpressionUtils.path(Date.class, "doc");
 	private Path<Object> objectDocAlias = ExpressionUtils.path(Object.class, "doc");
 
     public SqlFilterConverter(SqlOperationService operationService) {
     	this.operationService = operationService;
 	}
 
-	public ConvertedExpression convertToSqlFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
-    	return convertToSqlFilter(genericFilter, propertiesAnnotationsMap, false);
+	public ConvertedExpression convertToSqlFilter(TableMapping tableMapping, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
+    	return convertToSqlFilter(tableMapping, genericFilter, propertiesAnnotationsMap, false);
     }
 
-	public ConvertedExpression convertToSqlFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap, boolean skipAlias) throws SearchException {
-    	return convertToSqlFilter(genericFilter, propertiesAnnotationsMap, null, skipAlias);
+	public ConvertedExpression convertToSqlFilter(TableMapping tableMapping, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap, boolean skipAlias) throws SearchException {
+    	return convertToSqlFilter(tableMapping, genericFilter, propertiesAnnotationsMap, null, skipAlias);
     }
 
-	public ConvertedExpression convertToSqlFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap, Function<? super Filter, Boolean> processor) throws SearchException {
-    	return convertToSqlFilter(genericFilter, propertiesAnnotationsMap, processor, false);
-    }
-
-    @SuppressWarnings({ "unchecked", "rawtypes" })
-	public ConvertedExpression convertToSqlFilter(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap, Function<? super Filter, Boolean> processor, boolean skipAlias) throws SearchException {
+	public ConvertedExpression convertToSqlFilter(TableMapping tableMapping, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap, Function<? super Filter, Boolean> processor, boolean skipAlias) throws SearchException {
     	Map<String, Class<?>> jsonAttributes = new HashMap<>();
-    	ConvertedExpression convertedExpression = convertToSqlFilterImpl(genericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
+    	ConvertedExpression convertedExpression = convertToSqlFilterImpl(tableMapping, genericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
     	
     	return convertedExpression;
     }
 
-	private ConvertedExpression convertToSqlFilterImpl(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap,
+	private ConvertedExpression convertToSqlFilterImpl(TableMapping tableMapping, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap,
 			Map<String, Class<?>> jsonAttributes, Function<? super Filter, Boolean> processor, boolean skipAlias) throws SearchException {
 		if (genericFilter == null) {
 			return null;
@@ -113,7 +110,7 @@ public class SqlFilterConverter {
             	String joinOrAttributeName = null;
                 for (int i = 0; i < genericFilters.length; i++) {
                 	Filter tmpFilter = genericFilters[i];
-                    expFilters[i] = (Predicate) convertToSqlFilterImpl(tmpFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias).expression();
+                    expFilters[i] = (Predicate) convertToSqlFilterImpl(tableMapping, tmpFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias).expression();
 
                     // Check if we can replace OR with IN
                 	if (!canJoinOrFilters) {
@@ -168,7 +165,7 @@ public class SqlFilterConverter {
                 			rightObjs.add(assertionValue);
             			}
                 		
-                		return ConvertedExpression.build(ExpressionUtils.in(buildTypedPath(lastEqFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), rightObjs), jsonAttributes);
+                		return ConvertedExpression.build(ExpressionUtils.in(buildTypedPath(tableMapping, lastEqFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), rightObjs), jsonAttributes);
                 	} else {
                         return ConvertedExpression.build(ExpressionUtils.anyOf(expFilters), jsonAttributes);
                 	}
@@ -179,14 +176,14 @@ public class SqlFilterConverter {
         boolean multiValued = isMultiValue(currentGenericFilter, propertiesAnnotationsMap);
 
         if (FilterType.EQUALITY == type) {
-        	Expression expression = buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
+        	Expression expression = buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
     		if (multiValued) {
 				Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_CONTAINS, expression,
-						buildTypedExpression(currentGenericFilter, true), Expressions.constant("$.v"));
+						buildTypedExpression(tableMapping, currentGenericFilter, true), Expressions.constant("$.v"));
 
         		return ConvertedExpression.build(operation, jsonAttributes);
             }
-        	return ConvertedExpression.build(ExpressionUtils.eq(expression, buildTypedExpression(currentGenericFilter)), jsonAttributes);
+        	return ConvertedExpression.build(ExpressionUtils.eq(expression, buildTypedExpression(tableMapping, currentGenericFilter)), jsonAttributes);
         }
 
         if (FilterType.LESS_OR_EQUAL == type) {
@@ -195,8 +192,8 @@ public class SqlFilterConverter {
                 	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
             		for (int i = 0; i < currentGenericFilter.getMultiValuedCount(); i++) {
                 		Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
-                				buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), Expressions.constant("$.v[" + i + "]"));
-                		Predicate predicate = Expressions.asComparable(operation).loe(buildTypedExpression(currentGenericFilter));
+                				buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), Expressions.constant("$.v[" + i + "]"));
+                		Predicate predicate = Expressions.asComparable(operation).loe(buildTypedExpression(tableMapping, currentGenericFilter));
 
                 		expressions.add(predicate);
             		}
@@ -207,12 +204,12 @@ public class SqlFilterConverter {
             	}
 
             	Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
-        				buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), Expressions.constant("$.v[0]"));
-        		Expression expression = Expressions.asComparable(operation).loe(buildTypedExpression(currentGenericFilter));
+        				buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), Expressions.constant("$.v[0]"));
+        		Expression expression = Expressions.asComparable(operation).loe(buildTypedExpression(tableMapping, currentGenericFilter));
 
             	return ConvertedExpression.build(expression, jsonAttributes);
             } else {
-            	return ConvertedExpression.build(Expressions.asComparable(buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias)).loe(buildTypedExpression(currentGenericFilter)), jsonAttributes);
+            	return ConvertedExpression.build(Expressions.asComparable(buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias)).loe(buildTypedExpression(tableMapping, currentGenericFilter)), jsonAttributes);
             }
         }
 
@@ -222,8 +219,8 @@ public class SqlFilterConverter {
                 	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
             		for (int i = 0; i < currentGenericFilter.getMultiValuedCount(); i++) {
                 		Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
-                				buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), Expressions.constant("$.v[" + i + "]"));
-                		Predicate predicate = Expressions.asComparable(operation).goe(buildTypedExpression(currentGenericFilter));
+                				buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), Expressions.constant("$.v[" + i + "]"));
+                		Predicate predicate = Expressions.asComparable(operation).goe(buildTypedExpression(tableMapping, currentGenericFilter));
 
                 		expressions.add(predicate);
             		}
@@ -233,12 +230,12 @@ public class SqlFilterConverter {
             	}
 
             	Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
-        				buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), Expressions.constant("$.v[0]"));
-        		Expression expression = Expressions.asComparable(operation).goe(buildTypedExpression(currentGenericFilter));
+        				buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), Expressions.constant("$.v[0]"));
+        		Expression expression = Expressions.asComparable(operation).goe(buildTypedExpression(tableMapping, currentGenericFilter));
 
             	return ConvertedExpression.build(expression, jsonAttributes);
             } else {
-            	return ConvertedExpression.build(Expressions.asComparable(buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias)).goe(buildTypedExpression(currentGenericFilter)), jsonAttributes);
+            	return ConvertedExpression.build(Expressions.asComparable(buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias)).goe(buildTypedExpression(tableMapping, currentGenericFilter)), jsonAttributes);
             }
         }
 
@@ -249,7 +246,7 @@ public class SqlFilterConverter {
                 	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
             		for (int i = 0; i < currentGenericFilter.getMultiValuedCount(); i++) {
             			Predicate predicate = ExpressionUtils.isNotNull(ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
-                				buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), Expressions.constant("$.v[" + i + "]")));
+                				buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), Expressions.constant("$.v[" + i + "]")));
             			expressions.add(predicate);
             		}
             		Predicate predicate = ExpressionUtils.anyOf(expressions);
@@ -258,9 +255,9 @@ public class SqlFilterConverter {
             	}
 
             	expression = ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
-        				buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), Expressions.constant("$.v[0]"));
+        				buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), Expressions.constant("$.v[0]"));
             } else {
-            	expression = buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
+            	expression = buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
             }
 
             return ConvertedExpression.build(ExpressionUtils.isNotNull(expression), jsonAttributes);
@@ -295,7 +292,7 @@ public class SqlFilterConverter {
                 	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
             		for (int i = 0; i < currentGenericFilter.getMultiValuedCount(); i++) {
                 		Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
-                				buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), Expressions.constant("$.v[" + i + "]"));
+                				buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), Expressions.constant("$.v[" + i + "]"));
                 		Predicate predicate = Expressions.booleanOperation(Ops.LIKE, operation, Expressions.constant(like.toString()));
 
                 		expressions.add(predicate);
@@ -306,16 +303,16 @@ public class SqlFilterConverter {
             	}
 
             	expression = ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
-        				buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), Expressions.constant("$.v[0]"));
+        				buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), Expressions.constant("$.v[0]"));
             } else {
-            	expression = buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
+            	expression = buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
             }
 
             return ConvertedExpression.build(Expressions.booleanOperation(Ops.LIKE, expression, Expressions.constant(like.toString())), jsonAttributes);
         }
 
         if (FilterType.LOWERCASE == type) {
-        	return ConvertedExpression.build(ExpressionUtils.toLower(buildTypedPath(currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias)), jsonAttributes);
+        	return ConvertedExpression.build(ExpressionUtils.toLower(buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias)), jsonAttributes);
         }
 
         throw new SearchException(String.format("Unknown filter type '%s'", type));
@@ -328,6 +325,21 @@ public class SqlFilterConverter {
 		}
 
 		return false;
+	}
+
+	private AttributeType getAttributeType(TableMapping tableMapping, String attributeName) throws SearchException {
+		if ((tableMapping == null) || (attributeName == null)) {
+			return null;
+		}
+
+		String attributeNameLower = attributeName.toLowerCase();
+
+		AttributeType attributeType = tableMapping.getColumTypes().get(attributeNameLower);
+		if (attributeType == null) {
+	        throw new SearchException(String.format("Unknown column name '%s' in table/child table '%s'", attributeName, tableMapping.getTableName()));
+		}
+
+		return attributeType;
 	}
 
 	private String toInternalAttribute(Filter filter) {
@@ -354,42 +366,73 @@ public class SqlFilterConverter {
 		return operationService.toInternalAttribute(attributeName);
 	}
 
-	private Expression buildTypedExpression(Filter filter) throws SearchException {
-		return buildTypedExpression(filter, false);
+	private Expression buildTypedExpression(TableMapping tableMapping, Filter filter) throws SearchException {
+		return buildTypedExpression(tableMapping, filter, false);
 	}
 
-	private Expression buildTypedExpression(Filter filter, boolean isArray) throws SearchException {
+	private Expression buildTypedExpression(TableMapping tableMapping, Filter filter, boolean isArray) throws SearchException {
+		AttributeType attributeType = null;
+		if (StringHelper.isNotEmpty(filter.getAttributeName())) {
+			attributeType = getAttributeType(tableMapping, filter.getAttributeName());
+			if (attributeType == null) {
+				if (tableMapping != null) {
+					throw new SearchException(String.format(String.format("Failed to find attribute type for '%s'", filter.getAttributeName())));
+				}
+			}
+		}
+
 		Object assertionValue = filter.getAssertionValue();
 		if (assertionValue instanceof AttributeEnum) {
 			assertionValue = ((AttributeEnum) assertionValue).getValue();
-		} else if (assertionValue instanceof Date) {
-	        SimpleDateFormat jsonDateFormat = new SimpleDateFormat(SQL_DATA_FORMAT);
-	        assertionValue = jsonDateFormat.format(filter.getAssertionValue());
+		} else if (assertionValue instanceof String) {
+			if ((attributeType != null) && SqlOperationService.TIMESTAMP.equals(attributeType.getType())) {
+				Date dateValue = operationService.decodeTime((String) assertionValue, true);
+				if (dateValue != null) {
+					assertionValue = dateValue;
+				}
+			}
 		}
 
 		if (isArray && (assertionValue instanceof String)) {
 			assertionValue = "[\"" + assertionValue + "\"]";
 		} else if (Boolean.TRUE.equals(filter.getMultiValued())) {
+			if (assertionValue instanceof Date) {
+		        assertionValue = operationService.encodeTime((Date) assertionValue);
+			}
 			assertionValue = convertValueToJson(Arrays.asList(assertionValue));
 		}
 
 		return Expressions.constant(assertionValue);
 	}
 
-	private Expression buildTypedPath(Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap,
+	private Expression buildTypedPath(TableMapping tableMapping, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap,
 			Map<String, Class<?>> jsonAttributes, Function<? super Filter, Boolean> processor, boolean skipAlias) throws SearchException {
     	boolean hasSubFilters = ArrayHelper.isNotEmpty(genericFilter.getFilters());
 
 		if (hasSubFilters) {
-    		return convertToSqlFilterImpl(genericFilter.getFilters()[0], propertiesAnnotationsMap, jsonAttributes, processor, skipAlias).expression();
+    		return convertToSqlFilterImpl(tableMapping, genericFilter.getFilters()[0], propertiesAnnotationsMap, jsonAttributes, processor, skipAlias).expression();
 		}
 		
 		String internalAttribute = toInternalAttribute(genericFilter);
 		
-		return buildTypedPath(genericFilter, internalAttribute, skipAlias);
+		return buildTypedPath(tableMapping, genericFilter, internalAttribute, skipAlias);
 	}
 
-	private Expression buildTypedPath(Filter filter, String attributeName, boolean skipAlias) {
+	private Expression buildTypedPath(TableMapping tableMapping, Filter filter, String attributeName, boolean skipAlias) throws SearchException {
+		AttributeType attributeType = getAttributeType(tableMapping, filter.getAttributeName());
+		if (attributeType == null) {
+			if (tableMapping != null) {
+				throw new SearchException(String.format(String.format("Failed to find attribute type for '%s'", filter.getAttributeName())));
+			}
+		}
+
+		if ((attributeType != null) && SqlOperationService.TIMESTAMP.equals(attributeType.getType())) {
+   	    	if (skipAlias) {
+   	    		return Expressions.dateTimePath(Date.class, attributeName);
+   	    	} else {
+   	    		return Expressions.dateTimePath(Date.class, dateDocAlias, attributeName);
+   	    	}
+		}
    	    if (filter.getAssertionValue() instanceof String) {
    	    	if (skipAlias) {
    	    		return Expressions.stringPath(attributeName);
