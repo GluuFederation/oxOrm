@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import org.gluu.persist.exception.operation.SearchException;
-import org.gluu.persist.sql.dsl.template.SqlJsonMySQLTemplates;
+import org.gluu.persist.sql.dsl.template.MySQLJsonTemplates;
 import org.gluu.persist.sql.impl.SqlFilterConverter;
 import org.gluu.persist.sql.model.ConvertedExpression;
 import org.gluu.search.filter.Filter;
@@ -44,7 +44,7 @@ public class SqlFilterConverterTest {
 		this.allPath = Expressions.stringPath(docAlias, "*");
 
 //		this.sqlTemplates = MySQLTemplates.builder().printSchema().build();
-		this.sqlTemplates = SqlJsonMySQLTemplates.builder().printSchema().build();
+		this.sqlTemplates = MySQLJsonTemplates.builder().printSchema().build();
 		this.configuration = new Configuration(sqlTemplates);
 	}
 
@@ -52,28 +52,28 @@ public class SqlFilterConverterTest {
 	public void checkEqFilters() throws SearchException {
 		// EQ -- String
 		Filter filterEq1 = Filter.createEqualityFilter("uid", "test");
-		ConvertedExpression expressionEq1 = simpleConverter.convertToSqlFilter(filterEq1, null, null);
+		ConvertedExpression expressionEq1 = simpleConverter.convertToSqlFilter(null, filterEq1, null);
 
 		String queryEq1 = toSelectSQL(expressionEq1);
 		assertEquals(queryEq1, "select doc.`*` from `table` as doc where doc.uid = 'test'");
 
 		// EQ -- Integer
 		Filter filterEq2 = Filter.createEqualityFilter("age", 23);
-		ConvertedExpression expressionEq2 = simpleConverter.convertToSqlFilter(filterEq2, null, null);
+		ConvertedExpression expressionEq2 = simpleConverter.convertToSqlFilter(null, filterEq2, null);
 
 		String queryEq2 = toSelectSQL(expressionEq2);
 		assertEquals(queryEq2, "select doc.`*` from `table` as doc where doc.age = 23");
 
 		// EQ -- Long
 		Filter filterEq3 = Filter.createEqualityFilter("age", 23L);
-		ConvertedExpression expressionEq3 = simpleConverter.convertToSqlFilter(filterEq3, null, null);
+		ConvertedExpression expressionEq3 = simpleConverter.convertToSqlFilter(null, filterEq3, null);
 
 		String queryEq3 = toSelectSQL(expressionEq3);
 		assertEquals(queryEq3, "select doc.`*` from `table` as doc where doc.age = 23");
 
 		// EQ -- Date
 		Filter filterEq4 = Filter.createEqualityFilter("added", getUtcDateFromMillis(1608130698398L));
-		ConvertedExpression expressionEq4 = simpleConverter.convertToSqlFilter(filterEq4, null, null);
+		ConvertedExpression expressionEq4 = simpleConverter.convertToSqlFilter(null, filterEq4, null);
 
 		String queryEq4 = toSelectSQL(expressionEq4);
 		assertEquals(queryEq4, "select doc.`*` from `table` as doc where doc.added = '2020-12-16T14:58:18.398'");
