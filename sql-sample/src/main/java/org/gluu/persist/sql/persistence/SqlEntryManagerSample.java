@@ -24,19 +24,23 @@ public class SqlEntryManagerSample {
 
     	Properties connectionProperties = new Properties();
 
-        connectionProperties.put("sql#db.schema.name", "gluudb");
         if (mysql) {
+            connectionProperties.put("sql#db.schema.name", "gluudb");
         	connectionProperties.put("sql#connection.uri", "jdbc:mysql://localhost:3306/gluudb?profileSQL=true");
             connectionProperties.put("sql#connection.driver-property.serverTimezone", "GMT+2");
+
+            connectionProperties.put("sql#auth.userName", "root");
+            connectionProperties.put("sql#auth.userPassword", "Secret1!");
         } else {
-        	connectionProperties.put("sql#connection.uri", "jdbc:postgresql://localhost:5432/gluudb");
+            connectionProperties.put("sql#db.schema.name", "public");
+        	connectionProperties.put("sql#connection.uri", "jdbc:postgresql://u204.gluu.info:5432/gluudb");
+
+        	connectionProperties.put("sql#auth.userName", "postgres");
+            connectionProperties.put("sql#auth.userPassword", "Secret1!");
         }
 
         connectionProperties.put("sql#connection.pool.max-total", "300");
         connectionProperties.put("sql#connection.pool.max-idle", "300");
-
-        connectionProperties.put("sql#auth.userName", "gluu");
-        connectionProperties.put("sql#auth.userPassword", "secret");
         
         // Password hash method
         connectionProperties.put("sql#password.encryption.method", "SSHA-256");

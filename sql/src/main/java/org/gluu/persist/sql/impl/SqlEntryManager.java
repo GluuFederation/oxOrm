@@ -16,7 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 import javax.inject.Inject;
 
@@ -48,7 +47,6 @@ import org.gluu.persist.sql.model.TableMapping;
 import org.gluu.persist.sql.operation.SqlOperationService;
 import org.gluu.persist.sql.operation.impl.SqlConnectionProvider;
 import org.gluu.search.filter.Filter;
-import org.gluu.search.filter.FilterProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +71,6 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
     private Logger log;
 
     private final SqlFilterConverter filterConverter;
-	private FilterProcessor filterProcessor;
 
 	private static final GenericKeyConverter KEY_CONVERTER = new GenericKeyConverter(false);
 
@@ -82,7 +79,6 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
     protected SqlEntryManager(SqlOperationService operationService) {
         this.operationService = operationService;
         this.filterConverter = new SqlFilterConverter(operationService);
-        this.filterProcessor = new FilterProcessor();
         subscribers = new LinkedList<DeleteNotifier>();
     }
 
@@ -810,10 +806,6 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
     	}
 
     	return tableMapping;
-	}
-
-	private Filter excludeObjectClassFilters(Filter genericFilter) {
-		return filterProcessor.excludeFilter(genericFilter, FilterProcessor.OBJECT_CLASS_EQUALITY_FILTER, FilterProcessor.OBJECT_CLASS_PRESENCE_FILTER);
 	}
 
     private ParsedKey toSQLKey(String dn) {
