@@ -51,6 +51,7 @@ import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.persist.reflect.property.Setter;
 import org.gluu.persist.reflect.util.ReflectHelper;
 import org.gluu.search.filter.Filter;
+import org.gluu.search.filter.FilterProcessor;
 import org.gluu.orm.util.ArrayHelper;
 import org.gluu.orm.util.StringHelper;
 import org.slf4j.Logger;
@@ -102,6 +103,8 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 	
 	protected O operationService = null;
 	protected PersistenceExtension persistenceExtension = null;
+
+	protected FilterProcessor filterProcessor = new FilterProcessor();
 
 	@Override
 	public void persist(Object entry) {
@@ -2142,6 +2145,10 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		return addObjectClassFilter(attributesFilter, objectClasses);
 	}
 
+	protected Filter excludeObjectClassFilters(Filter genericFilter) {
+		return filterProcessor.excludeFilter(genericFilter, FilterProcessor.OBJECT_CLASS_EQUALITY_FILTER, FilterProcessor.OBJECT_CLASS_PRESENCE_FILTER);
+	}
+
 	protected Filter[] createAttributesFilter(List<AttributeData> attributes) {
 		if ((attributes == null) || (attributes.size() == 0)) {
 			return null;
@@ -2153,8 +2160,8 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			String attributeName = attribute.getName();
 			for (Object value : attribute.getValues()) {
 				Filter filter = Filter.createEqualityFilter(attributeName, value);
-				if ((attribute.getMultiValued() != null) && attribute.getMultiValued()) {
-					filter.multiValued();
+				if (attribute.getMultiValued() != null) {
+					filter.multiValued(attribute.getMultiValued());
 				}
 
 				results.add(filter);

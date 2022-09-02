@@ -48,6 +48,7 @@ import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.persist.reflect.util.ReflectHelper;
 import org.gluu.search.filter.Filter;
+import org.gluu.search.filter.FilterType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -838,6 +839,9 @@ public class CouchbaseEntryManager extends BaseEntryManager<CouchbaseOperationSe
 			return filter;
 		}
 		
+		// Make sure that there is only one objectClass in filter
+		filter = excludeObjectClassFilters(filter);
+
 		// In Couchbase implementation we need to use first one as entry type
 		Filter searchFilter = Filter.createEqualityFilter(OBJECT_CLASS, objectClasses[0]);
 		if (filter != null) {
