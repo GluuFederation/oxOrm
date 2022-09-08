@@ -1,6 +1,7 @@
 package org.gluu.persist.sql.dsl.template;
 
 import org.gluu.persist.sql.dsl.types.PostgreSQLJsonType;
+import org.gluu.persist.sql.impl.SqlOps;
 
 import com.querydsl.sql.PostgreSQLTemplates;
 import com.querydsl.sql.SQLTemplates;
@@ -25,6 +26,9 @@ public class PostgreSQLJsonTemplates extends PostgreSQLTemplates {
 		super(escape, quote);
 		
 		addCustomType(new PostgreSQLJsonType());
+
+		add(SqlOps.JSON_CONTAINS, "JSON_CONTAINS({0}->{2}, CAST({1} AS JSON))");
+		add(SqlOps.JSON_EXTRACT, "{0}->{1}");
 	}
 
 }
