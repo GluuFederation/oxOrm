@@ -249,8 +249,12 @@ public class SqlConnectionProvider {
 		        		if (mariaDb && SqlOperationService.LONGTEXT_TYPE_NAME.equalsIgnoreCase(columnTypeName) && SqlOperationService.JSON_TYPE_NAME.equalsIgnoreCase(remark)) {
 		        			columnTypeName = SqlOperationService.JSON_TYPE_NAME;
 		        		}
+
+		        		if (SqlOperationService.JSONB_TYPE_NAME.equalsIgnoreCase(columnTypeName)) {
+		        			columnTypeName = SqlOperationService.JSONB_TYPE_NAME;
+		        		}
 		
-		        		boolean multiValued = SqlOperationService.JSON_TYPE_NAME.equals(columnTypeName);
+		        		boolean multiValued = SqlOperationService.JSON_TYPE_NAME.equals(columnTypeName) || SqlOperationService.JSONB_TYPE_NAME.equals(columnTypeName);
 		
 		        		AttributeType attributeType = new AttributeType(columnName, columnTypeName, multiValued);
 		        		tableColumns.put(columnName, attributeType);

@@ -26,6 +26,7 @@ import org.gluu.persist.reflect.util.ReflectHelper;
 import org.gluu.persist.sql.model.ConvertedExpression;
 import org.gluu.persist.sql.model.TableMapping;
 import org.gluu.persist.sql.operation.SqlOperationService;
+import org.gluu.persist.sql.operation.SupportedDbType;
 import org.gluu.persist.sql.operation.impl.SqlConnectionProvider;
 import org.gluu.search.filter.Filter;
 import org.gluu.search.filter.FilterType;
@@ -54,6 +55,7 @@ public class SqlFilterConverter {
 	private static final ObjectMapper JSON_OBJECT_MAPPER = new ObjectMapper();
 
 	private SqlOperationService operationService;
+	private SupportedDbType dbType;
 
 	private Path<String> stringDocAlias = ExpressionUtils.path(String.class, "doc");
 	private Path<Boolean> booleanDocAlias = ExpressionUtils.path(Boolean.class, "doc");
@@ -62,8 +64,10 @@ public class SqlFilterConverter {
 	private Path<Date> dateDocAlias = ExpressionUtils.path(Date.class, "doc");
 	private Path<Object> objectDocAlias = ExpressionUtils.path(Object.class, "doc");
 
+
     public SqlFilterConverter(SqlOperationService operationService) {
     	this.operationService = operationService;
+    	this.dbType = operationService.getConnectionProvider().getDbType();
 	}
 
 	public ConvertedExpression convertToSqlFilter(TableMapping tableMapping, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
@@ -178,8 +182,15 @@ public class SqlFilterConverter {
         if (FilterType.EQUALITY == type) {
         	Expression expression = buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
     		if (multiValued) {
-				Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_CONTAINS, expression,
-						buildTypedExpression(tableMapping, currentGenericFilter, true), Expressions.constant("$.v"));
+    			if (SupportedDbType.POSTGRESQL == this.dbType) {
+        			Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.PGSQL_JSON_CONTAINS, expression,
+        					buildTypedArrayExpression(tableMapping, currentGenericFilter));
+
+            		return ConvertedExpression.build(operation, jsonAttributes);
+    			}
+
+    			Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_CONTAINS, expression,
+    					buildTypedArrayExpression(tableMapping, currentGenericFilter), Expressions.constant("$.v"));
 
         		return ConvertedExpression.build(operation, jsonAttributes);
             }
@@ -367,10 +378,22 @@ public class SqlFilterConverter {
 	}
 
 	private Expression buildTypedExpression(TableMapping tableMapping, Filter filter) throws SearchException {
-		return buildTypedExpression(tableMapping, filter, false);
+		return Expressions.constant(prepareTypedExpressionValue(tableMapping, filter));
 	}
 
-	private Expression buildTypedExpression(TableMapping tableMapping, Filter filter, boolean isArray) throws SearchException {
+	private Expression buildTypedArrayExpression(TableMapping tableMapping, Filter filter) throws SearchException {
+		Object assertionValue = prepareTypedExpressionValue(tableMapping, filter);
+
+		if (assertionValue instanceof Date) {
+	        assertionValue = operationService.encodeTime((Date) assertionValue);
+		}
+
+		assertionValue = convertValueToJson(Arrays.asList(assertionValue));
+
+		return Expressions.constant(assertionValue);
+	}
+
+	private Object prepareTypedExpressionValue(TableMapping tableMapping, Filter filter) throws SearchException {
 		AttributeType attributeType = null;
 		if (StringHelper.isNotEmpty(filter.getAttributeName())) {
 			attributeType = getAttributeType(tableMapping, filter.getAttributeName());
@@ -393,16 +416,7 @@ public class SqlFilterConverter {
 			}
 		}
 
-		if (isArray && (assertionValue instanceof String)) {
-			assertionValue = "[\"" + assertionValue + "\"]";
-		} else if (Boolean.TRUE.equals(filter.getMultiValued())) {
-			if (assertionValue instanceof Date) {
-		        assertionValue = operationService.encodeTime((Date) assertionValue);
-			}
-			assertionValue = convertValueToJson(Arrays.asList(assertionValue));
-		}
-
-		return Expressions.constant(assertionValue);
+		return assertionValue;
 	}
 
 	private Expression buildTypedPath(TableMapping tableMapping, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap,

@@ -40,6 +40,7 @@ import com.querydsl.core.types.OrderSpecifier;
 public interface SqlOperationService extends PersistenceOperationService {
 
 	String JSON_TYPE_NAME = "json";
+	String JSONB_TYPE_NAME = "jsonb";
 	String LONGTEXT_TYPE_NAME = "longtext";
 	String TIMESTAMP = "timestamp";
 

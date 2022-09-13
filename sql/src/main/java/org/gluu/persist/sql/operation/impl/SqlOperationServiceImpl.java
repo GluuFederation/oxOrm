@@ -908,26 +908,37 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private Object convertValueToDbJson(Object propertyValue) {
 		try {
-//			String value = JSON_OBJECT_MAPPER.writeValueAsString(propertyValue);
-
-			JsonAttributeValue attributeValue;
-			if (propertyValue == null) {
-				attributeValue = new JsonAttributeValue();
-			} if (propertyValue instanceof List) {
-				attributeValue = new JsonAttributeValue(((List<?>) propertyValue).toArray());
-			} else if (propertyValue.getClass().isArray()) {
-				attributeValue = new JsonAttributeValue((Object[]) propertyValue);
-			} else {
-				attributeValue = new JsonAttributeValue(new Object[] { propertyValue });
-			}
-
-			String value = JSON_OBJECT_MAPPER.writeValueAsString(attributeValue);
-
 			if (SupportedDbType.POSTGRESQL == connectionProvider.getDbType()) {
+				Object[] attributeValue;
+				if (propertyValue == null) {
+					attributeValue = new Object[0];
+				} if (propertyValue instanceof List) {
+					attributeValue = ((List<?>) propertyValue).toArray();
+				} else if (propertyValue.getClass().isArray()) {
+					attributeValue = (Object[]) propertyValue;
+				} else {
+					attributeValue = new Object[] { propertyValue };
+				}
+	
+				String value = JSON_OBJECT_MAPPER.writeValueAsString(attributeValue);
+	
 				return new JsonString(value);
-			}
+			} else {
+				JsonAttributeValue attributeValue;
+				if (propertyValue == null) {
+					attributeValue = new JsonAttributeValue();
+				} if (propertyValue instanceof List) {
+					attributeValue = new JsonAttributeValue(((List<?>) propertyValue).toArray());
+				} else if (propertyValue.getClass().isArray()) {
+					attributeValue = new JsonAttributeValue((Object[]) propertyValue);
+				} else {
+					attributeValue = new JsonAttributeValue(new Object[] { propertyValue });
+				}
 
-			return value;
+				String value = JSON_OBJECT_MAPPER.writeValueAsString(attributeValue);
+
+				return value;
+			}
 		} catch (Exception ex) {
 			LOG.error("Failed to convert '{}' to json value:", propertyValue, ex);
 			throw new MappingException(String.format("Failed to convert '%s' to json value", propertyValue));
@@ -937,15 +948,20 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	private Object[] convertDbJsonToValue(String jsonValue) {
 		try {
 //			Object[] values = JSON_OBJECT_MAPPER.readValue(jsonValue, Object[].class);
+			if (SupportedDbType.POSTGRESQL == connectionProvider.getDbType()) {
+				Object[] values = JSON_OBJECT_MAPPER.readValue(jsonValue, Object[].class);
 
-			JsonAttributeValue attributeValue = JSON_OBJECT_MAPPER.readValue(jsonValue, JsonAttributeValue.class);
-			
-			Object[] values = null;
-			if (attributeValue != null) {
-				values = attributeValue.getValues();
+				return values;
+			} else {
+				JsonAttributeValue attributeValue = JSON_OBJECT_MAPPER.readValue(jsonValue, JsonAttributeValue.class);
+				
+				Object[] values = null;
+				if (attributeValue != null) {
+					values = attributeValue.getValues();
+				}
+	
+				return values;
 			}
-
-			return values;
 		} catch (Exception ex) {
 			LOG.error("Failed to convert json value '{}' to array:", jsonValue, ex);
 			throw new MappingException(String.format("Failed to convert json value '%s' to array", jsonValue));
@@ -966,7 +982,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 //			return "longtext".equals(columnTypeName);
 //		}
 
-		return SqlOperationService.JSON_TYPE_NAME.equals(columnTypeName);
+		return SqlOperationService.JSON_TYPE_NAME.equals(columnTypeName) || SqlOperationService.JSONB_TYPE_NAME.equals(columnTypeName);
 		
 	}
 
