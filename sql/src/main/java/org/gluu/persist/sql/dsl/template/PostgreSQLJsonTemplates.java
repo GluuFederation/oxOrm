@@ -1,6 +1,7 @@
 package org.gluu.persist.sql.dsl.template;
 
 import org.gluu.persist.sql.dsl.types.PostgreSQLJsonType;
+import org.gluu.persist.sql.impl.SqlOps;
 
 import com.querydsl.sql.PostgreSQLTemplates;
 import com.querydsl.sql.SQLTemplates;
@@ -25,6 +26,10 @@ public class PostgreSQLJsonTemplates extends PostgreSQLTemplates {
 		super(escape, quote);
 		
 		addCustomType(new PostgreSQLJsonType());
+
+		add(SqlOps.PGSQL_JSON_CONTAINS, "{0} @> {1}::jsonb");
+		add(SqlOps.PGSQL_JSON_PATH_QUERY_ARRAY, "jsonb_path_query_array({0}, '$[*] ? (@ >= {1}::jsonb)'");
+		add(SqlOps.PGSQL_JSON_ARRAY_LENGTH, "jsonb_array_length({0})");
 	}
 
 }
