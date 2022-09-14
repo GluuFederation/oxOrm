@@ -28,8 +28,10 @@ public class PostgreSQLJsonTemplates extends PostgreSQLTemplates {
 		addCustomType(new PostgreSQLJsonType());
 
 		add(SqlOps.PGSQL_JSON_CONTAINS, "{0} @> {1}::jsonb");
-		add(SqlOps.PGSQL_JSON_PATH_QUERY_ARRAY, "jsonb_path_query_array({0}, '$[*] ? (@ >= {1}::jsonb)'");
-		add(SqlOps.PGSQL_JSON_ARRAY_LENGTH, "jsonb_array_length({0})");
+//		add(SqlOps.PGSQL_JSON_PATH_QUERY_ARRAY, "jsonb_array_length(jsonb_path_query_array({0}, CONCAT('$[*] ? (@', {1}, {2}, ')')::jsonpath)) > 0");
+		add(SqlOps.PGSQL_JSON_PATH_QUERY_ARRAY, "jsonb_path_query_array({0}, CONCAT('$[*] ? (@', {1}, {2}, ')')::jsonpath)");
+		
+		add(SqlOps.PGSQL_JSON_NOT_EMPTY_ARRAY, "jsonb_array_length({0}) > 0");
 	}
 
 }
