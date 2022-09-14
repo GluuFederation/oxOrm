@@ -8,7 +8,7 @@ public enum SqlOps implements Operator {
 	JSON_EXTRACT(Object.class),
 	PGSQL_JSON_CONTAINS(Object.class),
 	PGSQL_JSON_PATH_QUERY_ARRAY(Object.class),
-	PGSQL_JSON_ARRAY_LENGTH(Object.class);
+	PGSQL_JSON_NOT_EMPTY_ARRAY(Object.class);
 
     private final Class<?> type;
 
