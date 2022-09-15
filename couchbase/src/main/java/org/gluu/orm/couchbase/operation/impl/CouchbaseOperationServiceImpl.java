@@ -475,7 +475,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         }
 
         String[] select = attributes;
-        if (select == null) {
+        if (ArrayHelper.isEmpty(select)) {
             select = new String[] { "gluu_doc.*", CouchbaseOperationService.DN };
         } else if ((select.length == 1) && StringHelper.isEmpty(select[0])) {
         	// Compatibility with base persistence layer when application pass filter new String[] { "" }
@@ -487,7 +487,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
             }
         }
 
-        StringBuilder baseQuery = new StringBuilder("SELECT ").append(StringHelper.toString(backticksAttributes(select))).append(" FROM `").append(bucketMapping.getBucketName()).append("` AS jans_doc ").
+        StringBuilder baseQuery = new StringBuilder("SELECT ").append(StringHelper.toString(backticksAttributes(select))).append(" FROM `").append(bucketMapping.getBucketName()).append("` AS gluu_doc ").
         		append("WHERE ").append(finalExpression);
 
         StringBuilder baseQueryWithOrder = new StringBuilder(baseQuery);
