@@ -3,6 +3,11 @@ package org.gluu.persist.sql.operation;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Supported SQL DB types
+ *
+ * @author Yuriy Movchan Date: 09/16/2022
+ */
 public enum SupportedDbType {
 
 	MYSQL("mysql"),

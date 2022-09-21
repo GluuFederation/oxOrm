@@ -1,5 +1,11 @@
 package org.gluu.persist.sql.model;
 
+/**
+ * PostgreSQL JSON column type support
+ *
+ * @author Yuriy Movchan Date: 09/01/2022
+ */
+
 public class JsonString {
 	
 	private String value;
