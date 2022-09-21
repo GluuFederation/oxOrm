@@ -596,7 +596,7 @@ public class CouchbaseOperationServiceImpl implements CouchbaseOperationService 
         result.setStart(start);
 
         if ((SearchReturnDataType.COUNT == returnDataType) || (SearchReturnDataType.SEARCH_COUNT == returnDataType)) {
-            StringBuilder selectCountQuery = new StringBuilder("SELECT COUNT(*) as TOTAL").append(" FROM `").append(bucketMapping.getBucketName()).append("` AS jans_doc ").
+            StringBuilder selectCountQuery = new StringBuilder("SELECT COUNT(*) as TOTAL").append(" FROM `").append(bucketMapping.getBucketName()).append("` AS gluu_doc ").
             		append("WHERE ").append(finalExpression);
             try {
                 LOG.debug("Calculating count. Execution query: '" + selectCountQuery + "'");
