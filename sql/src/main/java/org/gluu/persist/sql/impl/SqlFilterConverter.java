@@ -179,7 +179,7 @@ public class SqlFilterConverter {
             }
         }
 
-        boolean multiValued = isMultiValue(currentGenericFilter, propertiesAnnotationsMap);
+        boolean multiValued = isMultiValue(tableMapping, currentGenericFilter, propertiesAnnotationsMap);
     	Expression columnExpression = buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
 
     	if (FilterType.EQUALITY == type) {
@@ -382,9 +382,16 @@ public class SqlFilterConverter {
 		return ConvertedExpression.build(operation, jsonAttributes);
 	}
 
-	protected Boolean isMultiValue(Filter currentGenericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) {
-		Boolean isMultiValuedDetected = determineMultiValuedByType(currentGenericFilter.getAttributeName(), propertiesAnnotationsMap);
-		if (Boolean.TRUE.equals(currentGenericFilter.getMultiValued()) || Boolean.TRUE.equals(isMultiValuedDetected)) {
+	protected Boolean isMultiValue(TableMapping tableMapping, Filter filter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
+		AttributeType attributeType = getAttributeType(tableMapping, filter.getAttributeName());
+		if (attributeType == null) {
+			if (tableMapping != null) {
+				throw new SearchException(String.format(String.format("Failed to find attribute type for '%s'", filter.getAttributeName())));
+			}
+		}
+
+		Boolean isMultiValuedDetected = determineMultiValuedByType(filter.getAttributeName(), propertiesAnnotationsMap);
+		if (Boolean.TRUE.equals(attributeType.getMultiValued()) && (Boolean.TRUE.equals(filter.getMultiValued()) || Boolean.TRUE.equals(isMultiValuedDetected))) {
 			return true;
 		}
 
