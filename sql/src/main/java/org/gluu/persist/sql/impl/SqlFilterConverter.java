@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.gluu.orm.util.ArrayHelper;
 import org.gluu.orm.util.StringHelper;
 import org.gluu.persist.annotation.AttributeEnum;
@@ -201,7 +202,7 @@ public class SqlFilterConverter {
             if (multiValued) {
     			if (SupportedDbType.POSTGRESQL == this.dbType) {
 	            	return buildPostgreSqlMultivaluedComparisionExpression(tableMapping, jsonAttributes,
-							currentGenericFilter, type, columnExpression);
+							currentGenericFilter, columnExpression);
     			} else {
 	            	if (currentGenericFilter.getMultiValuedCount() > 1) {
 	                	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
@@ -233,7 +234,7 @@ public class SqlFilterConverter {
             if (multiValued) {
     			if (SupportedDbType.POSTGRESQL == this.dbType) {
 	            	return buildPostgreSqlMultivaluedComparisionExpression(tableMapping, jsonAttributes,
-							currentGenericFilter, type, columnExpression);
+							currentGenericFilter, columnExpression);
     			} else {
 	            	if (currentGenericFilter.getMultiValuedCount() > 1) {
 	                	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
@@ -295,17 +296,18 @@ public class SqlFilterConverter {
         }
 
         if (FilterType.SUBSTRING == type) {
+        	String matchChar = SupportedDbType.POSTGRESQL == this.dbType ? ".*" : "%";
         	StringBuilder like = new StringBuilder();
             if (currentGenericFilter.getSubInitial() != null) {
                 like.append(currentGenericFilter.getSubInitial());
             }
-            like.append("%");
+            like.append(matchChar);
 
             String[] subAny = currentGenericFilter.getSubAny();
             if ((subAny != null) && (subAny.length > 0)) {
                 for (String any : subAny) {
                     like.append(any);
-                    like.append("%");
+                    like.append(matchChar);
                 }
             }
 
@@ -316,8 +318,10 @@ public class SqlFilterConverter {
             Expression expression;
             if (multiValued) {
     			if (SupportedDbType.POSTGRESQL == this.dbType) {
+    				String likeString = "\"" + StringEscapeUtils.escapeJava(like.toString()) + "\"";
 	            	return buildPostgreSqlMultivaluedComparisionExpression(tableMapping, jsonAttributes,
-							currentGenericFilter, type, columnExpression);
+							currentGenericFilter, columnExpression, Expressions.constant("like_regex"),
+							likeString);
     			} else {
 	            	if (currentGenericFilter.getMultiValuedCount() > 1) {
 	                	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
@@ -351,14 +355,20 @@ public class SqlFilterConverter {
 	}
 
 	private ConvertedExpression buildPostgreSqlMultivaluedComparisionExpression(TableMapping tableMapping,
-			Map<String, Class<?>> jsonAttributes, Filter currentGenericFilter, FilterType type,
+			Map<String, Class<?>> jsonAttributes, Filter currentGenericFilter,
 			Expression columnExpression) throws SearchException {
 		Object typedArrayExpressionValue = prepareTypedArrayExpressionValue(tableMapping, currentGenericFilter);		
-		Expression<?> typedArrayExpression = typedArrayExpressionValue == null ? Expressions.nullExpression() : Expressions.constant(typedArrayExpressionValue); 
+		return buildPostgreSqlMultivaluedComparisionExpression(tableMapping, jsonAttributes, currentGenericFilter, columnExpression,
+				Expressions.constant(currentGenericFilter.getType().getSign()), typedArrayExpressionValue);
+	}
+
+	private ConvertedExpression buildPostgreSqlMultivaluedComparisionExpression(TableMapping tableMapping,
+			Map<String, Class<?>> jsonAttributes, Filter currentGenericFilter, Expression columnExpression, Expression operationExpession, Object expressionValue) {
+		Expression<?> typedArrayExpression = expressionValue == null ? Expressions.nullExpression() : Expressions.constant(expressionValue); 
 
 		Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.PGSQL_JSON_NOT_EMPTY_ARRAY,
 				ExpressionUtils.predicate(SqlOps.PGSQL_JSON_PATH_QUERY_ARRAY,
-				columnExpression, Expressions.constant(type.getSign()),
+				columnExpression, operationExpession,
 				typedArrayExpression));
 		return ConvertedExpression.build(operation, jsonAttributes);
 	}
