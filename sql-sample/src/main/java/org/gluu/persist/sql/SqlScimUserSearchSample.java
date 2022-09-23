@@ -30,6 +30,11 @@ public final class SqlScimUserSearchSample {
         // Prepare sample connection details
     	final SqlEntryManagerSample sqlEntryManagerSample = new SqlEntryManagerSample();
         final SqlEntryManager sqlEntryManager = sqlEntryManagerSample.createSqlEntryManager();
+        
+        Filter filter0 = Filter.createEqualityFilter(Filter.createLowercaseFilter("uid"),"test-0.8372945581513689");
+        System.out.println(filter0);
+        List<SimpleUser> users0 = sqlEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, filter0);
+        System.out.println(users0);
 
         Filter filter1 = Filter.createORFilter(Filter.createSubstringFilter("oxTrustImsValue",null, new String[] {"\"value\":\"Skype\""}, null).multiValued(),
         		Filter.createEqualityFilter("nickname", null), Filter.createSubstringFilter("nickname", null, new String[] {}, null));

@@ -383,16 +383,22 @@ public class SqlFilterConverter {
 	}
 
 	protected Boolean isMultiValue(TableMapping tableMapping, Filter filter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
-		AttributeType attributeType = getAttributeType(tableMapping, filter.getAttributeName());
-		if (attributeType == null) {
-			if (tableMapping != null) {
-				throw new SearchException(String.format(String.format("Failed to find attribute type for '%s'", filter.getAttributeName())));
+		String attributeName = filter.getAttributeName();
+		AttributeType attributeType = null;
+		if (StringHelper.isNotEmpty(attributeName)) {
+			attributeType = getAttributeType(tableMapping, filter.getAttributeName());
+			if (attributeType == null) {
+				if (tableMapping != null) {
+					throw new SearchException(String.format(String.format("Failed to find attribute type for '%s'", filter.getAttributeName())));
+				}
 			}
 		}
 
 		Boolean isMultiValuedDetected = determineMultiValuedByType(filter.getAttributeName(), propertiesAnnotationsMap);
-		if (Boolean.TRUE.equals(attributeType.getMultiValued()) && (Boolean.TRUE.equals(filter.getMultiValued()) || Boolean.TRUE.equals(isMultiValuedDetected))) {
-			return true;
+		if ((Boolean.TRUE.equals(filter.getMultiValued()) || Boolean.TRUE.equals(isMultiValuedDetected))) {
+			if ((attributeType != null) && Boolean.TRUE.equals(attributeType.getMultiValued())) {
+				return true;
+			}
 		}
 
 		return false;
