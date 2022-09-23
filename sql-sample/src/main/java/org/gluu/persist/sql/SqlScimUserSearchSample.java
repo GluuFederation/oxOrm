@@ -31,11 +31,14 @@ public final class SqlScimUserSearchSample {
     	final SqlEntryManagerSample sqlEntryManagerSample = new SqlEntryManagerSample();
         final SqlEntryManager sqlEntryManager = sqlEntryManagerSample.createSqlEntryManager();
 
-        Filter filter1 = Filter.createSubstringFilter("oxTrustImsValue",null, new String[] {"\"value\":\"Skype\""}, null).multiValued();
+        Filter filter1 = Filter.createORFilter(Filter.createSubstringFilter("oxTrustImsValue",null, new String[] {"\"value\":\"Skype\""}, null).multiValued(),
+        		Filter.createEqualityFilter("nickname", null), Filter.createSubstringFilter("nickname",null, new String[] {}, null));
+        System.out.println(filter1);
         List<SimpleUser> users = sqlEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, filter1);
         System.out.println(users);
 
         Filter filter2 = Filter.createGreaterOrEqualFilter("oxCreationTimestamp","2022-09-23T09:01:28.637");
+        System.out.println(filter2);
         List<SimpleUser> users2 = sqlEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, filter2);
         System.out.println(users2);
     }
