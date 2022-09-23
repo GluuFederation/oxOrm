@@ -353,10 +353,13 @@ public class SqlFilterConverter {
 	private ConvertedExpression buildPostgreSqlMultivaluedComparisionExpression(TableMapping tableMapping,
 			Map<String, Class<?>> jsonAttributes, Filter currentGenericFilter, FilterType type,
 			Expression columnExpression) throws SearchException {
+		Object typedArrayExpressionValue = prepareTypedArrayExpressionValue(tableMapping, currentGenericFilter);		
+		Expression<?> typedArrayExpression = typedArrayExpressionValue == null ? Expressions.nullExpression() : Expressions.constant(typedArrayExpressionValue); 
+
 		Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.PGSQL_JSON_NOT_EMPTY_ARRAY,
 				ExpressionUtils.predicate(SqlOps.PGSQL_JSON_PATH_QUERY_ARRAY,
 				columnExpression, Expressions.constant(type.getSign()),
-				Expressions.constant(prepareTypedArrayExpressionValue(tableMapping, currentGenericFilter))));
+				typedArrayExpression));
 		return ConvertedExpression.build(operation, jsonAttributes);
 	}
 
