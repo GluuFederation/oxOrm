@@ -427,7 +427,9 @@ public class SqlFilterConverter {
 	}
 
 	private Expression buildTypedExpression(TableMapping tableMapping, Filter filter) throws SearchException {
-		return Expressions.constant(prepareTypedExpressionValue(tableMapping, filter));
+		Object expressionValue = prepareTypedExpressionValue(tableMapping, filter);
+		Expression<?> expression = expressionValue == null ? Expressions.nullExpression() : Expressions.constant(expressionValue); 
+		return expression;
 	}
 
 	private Expression buildTypedArrayExpression(TableMapping tableMapping, Filter filter) throws SearchException {
