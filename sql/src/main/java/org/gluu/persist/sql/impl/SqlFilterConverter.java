@@ -308,7 +308,11 @@ public class SqlFilterConverter {
             if ((subAny != null) && (subAny.length > 0)) {
                 for (String any : subAny) {
         			if (SupportedDbType.POSTGRESQL == this.dbType) {
-        				like.append(escapeRegex(any));
+        				if (multiValued) {
+        					like.append(escapeRegex(any));
+        				} else {
+        					like.append(any);
+        				}
         			} else {
         				like.append(any);
         			}
