@@ -34,6 +34,10 @@ public final class SqlScimUserSearchSample {
         Filter filter1 = Filter.createSubstringFilter("oxTrustImsValue",null, new String[] {"\"value\":\"Skype\""}, null).multiValued();
         List<SimpleUser> users = sqlEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, filter1);
         System.out.println(users);
+
+        Filter filter2 = Filter.createGreaterOrEqualFilter("oxCreationTimestamp","2022-09-23T09:01:28.637");
+        List<SimpleUser> users2 = sqlEntryManager.findEntries("ou=people,o=gluu", SimpleUser.class, filter2);
+        System.out.println(users2);
     }
 
 }
