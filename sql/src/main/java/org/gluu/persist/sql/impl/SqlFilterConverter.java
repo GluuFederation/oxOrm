@@ -297,7 +297,7 @@ public class SqlFilterConverter {
         }
 
         if (FilterType.SUBSTRING == type) {
-        	String matchChar = SupportedDbType.POSTGRESQL == this.dbType ? ".*" : "%";
+        	String matchChar = multiValued && (SupportedDbType.POSTGRESQL == this.dbType) ? ".*" : "%";
         	StringBuilder like = new StringBuilder();
             if (currentGenericFilter.getSubInitial() != null) {
                 like.append(currentGenericFilter.getSubInitial());
