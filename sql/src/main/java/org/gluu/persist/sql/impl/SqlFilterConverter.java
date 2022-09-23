@@ -28,7 +28,6 @@ import org.gluu.persist.sql.model.ConvertedExpression;
 import org.gluu.persist.sql.model.TableMapping;
 import org.gluu.persist.sql.operation.SqlOperationService;
 import org.gluu.persist.sql.operation.SupportedDbType;
-import org.gluu.persist.sql.operation.impl.SqlConnectionProvider;
 import org.gluu.search.filter.Filter;
 import org.gluu.search.filter.FilterType;
 import org.slf4j.Logger;
@@ -64,6 +63,8 @@ public class SqlFilterConverter {
 	private Path<Long> longDocAlias = ExpressionUtils.path(Long.class, "doc");
 	private Path<Date> dateDocAlias = ExpressionUtils.path(Date.class, "doc");
 	private Path<Object> objectDocAlias = ExpressionUtils.path(Object.class, "doc");
+	
+	public static String[] SPECIAL_REGEX_CHARACTERS = new String[] { "\\", "/", ".", "*", "+", "?", "|", "(", ")", "[", "]", "{", "}" };
 
 
     public SqlFilterConverter(SqlOperationService operationService) {
@@ -306,7 +307,11 @@ public class SqlFilterConverter {
             String[] subAny = currentGenericFilter.getSubAny();
             if ((subAny != null) && (subAny.length > 0)) {
                 for (String any : subAny) {
-                    like.append(any);
+        			if (SupportedDbType.POSTGRESQL == this.dbType) {
+        				like.append(escapeRegex(any));
+        			} else {
+        				like.append(any);
+        			}
                     like.append(matchChar);
                 }
             }
@@ -560,6 +565,15 @@ public class SqlFilterConverter {
 			LOG.error("Failed to convert '{}' to json value:", propertyValue, ex);
 			throw new SearchException(String.format("Failed to convert '%s' to json value", propertyValue));
 		}
+	}
+
+	private Object escapeRegex(String str) {
+		String result = str;
+		for (String ch : SPECIAL_REGEX_CHARACTERS) {
+			result = result.replace(ch, "\\" + ch);
+		}
+
+		return result;
 	}
 
 }
