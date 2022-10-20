@@ -464,7 +464,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 	                        break;
 	                    }
 	                } while (lastCountRows > 0);
-        		} catch (QueryException ex) {ex.printStackTrace();
+        		} catch (QueryException ex) {
         			throw new SearchException(String.format("Failed to build search entries query. Key: '%s', expression: '%s'", key, expression.expression()), ex);
 	    		} catch (SQLException | EntryConvertationException ex) {
 	    			throw new SearchException(String.format("Failed to execute query '%s'  with key: '%s'", queryStr, key), ex);
