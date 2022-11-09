@@ -14,6 +14,8 @@ import org.gluu.persist.exception.operation.DuplicateEntryException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.ldap.impl.LdapBatchOperationWraper;
 import org.gluu.persist.ldap.operation.impl.LdapConnectionProvider;
+import org.gluu.persist.model.AttributeData;
+import org.gluu.persist.model.EntryData;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SortOrder;
 import org.gluu.persist.operation.PersistenceOperationService;
@@ -54,26 +56,22 @@ public interface LdapOperationService extends PersistenceOperationService {
 
     void releaseConnection(LDAPConnection connection);
 
-    <T> SearchResult search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
-                            int searchLimit, int count, Control[] controls, String... attributes) throws SearchException;
+    <T> PagedResult<EntryData> search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
+                            int count, int pageSize, Control[] controls, String... attributes) throws SearchException;
 
     List<SearchResultEntry> searchSearchResultEntryList(String dn, Filter filter, SearchScope scope, int startIndex,
                                                         int count, int pageSize, String sortBy, SortOrder sortOrder,
                                                         PagedResult vlvResponse, String... attributes) throws Exception;
-
-    SearchResult searchVirtualListView(String dn, Filter filter, SearchScope scope, int start, int count,
-            String sortBy, SortOrder sortOrder, PagedResult vlvResponse, String... attributes)
-            throws Exception;
 
     /**
      * Lookup entry in the directory
      *
      * @param dn
      * @param attributes
-     * @return SearchResultEntry
+     * @return List<AttributeData>
      * @throws ConnectionException
      */
-    SearchResultEntry lookup(String dn, String... attributes) throws ConnectionException, SearchException;
+    List<AttributeData> lookup(String dn, String... attributes) throws ConnectionException, SearchException;
 
     /**
      * Use this method to add new entry

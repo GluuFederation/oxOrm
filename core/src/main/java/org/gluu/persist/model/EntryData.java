@@ -29,7 +29,7 @@ public class EntryData {
 		return "EntryData [attributeData=" + attributeData + "]";
 	}
 
-	public AttributeData getAttributeDate(String internalAttribute) {
+	public AttributeData getAttributeData(String internalAttribute) {
 		if (attributeData == null) {
 			return null;
 		}

@@ -38,6 +38,7 @@ import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.DefaultBatchOperation;
+import org.gluu.persist.model.EntryData;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
@@ -328,19 +329,13 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
         }
 
         DeleteBatchOperation batchOperation = new DeleteBatchOperation<T>(this);
-        SearchResult searchResult = null;
         try {
             LdapBatchOperationWraper<T> batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation, this, entryClass,
                     propertiesAnnotations);
-            searchResult = getOperationService().search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB), batchOperationWraper,
-                    0, 100, count, null, LdapOperationService.DN);
-
+            getOperationService().search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB), batchOperationWraper,
+                    0, count, 100, null, LdapOperationService.DN);
         } catch (Exception ex) {
             throw new EntryDeleteException(String.format("Failed to delete entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
-        }
-
-        if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-            throw new EntryDeleteException(String.format("Failed to delete entries with baseDN: %s, filter: %s", baseDN, searchFilter));
         }
 
         return batchOperation.getCountEntries();
@@ -368,21 +363,19 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
     private void removeSubtreeThroughIteration(String dn, String[] objectClasses) {
     	SearchScope scope = SearchScope.SUB;
 
-    	SearchResult searchResult = null;
+    	PagedResult<EntryData> searchResult = null;
         try {
             searchResult = getOperationService().search(dn, toLdapFilter(Filter.createPresenceFilter("objectClass")), toLdapSearchScope(scope), null, 0, 0, 0, null, "dn");
-            if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-                throw new EntryPersistenceException(String.format("Failed to find sub-entries of entry '%s' for removal", dn));
-            }
         } catch (SearchScopeException ex) {
             throw new AuthenticationException(String.format("Failed to convert scope: %s", scope), ex);
         } catch (SearchException ex) {
             throw new EntryDeleteException(String.format("Failed to find sub-entries of entry '%s' for removal", dn), ex);
         }
 
-        List<String> removeEntriesDn = new ArrayList<String>(searchResult.getEntryCount());
-        for (SearchResultEntry searchResultEntry : searchResult.getSearchEntries()) {
-            removeEntriesDn.add(searchResultEntry.getDN());
+        List<String> removeEntriesDn = new ArrayList<String>(searchResult.getEntriesCount());
+        for (EntryData entry : searchResult.getEntries()) {
+        	// TODO: Check during QA
+            removeEntriesDn.add(entry.getAttributeData(LdapOperationService.DN).getStringValues()[0]);
         }
 
         Collections.sort(removeEntriesDn, LINE_LENGHT_COMPARATOR);
@@ -396,8 +389,7 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
     protected List<AttributeData> find(String dn, String[] objectClasses, Map<String, PropertyAnnotation> propertiesAnnotationsMap, String... ldapReturnAttributes) {
         try {
             // Load entry
-            SearchResultEntry entry = getOperationService().lookup(dn, ldapReturnAttributes);
-            List<AttributeData> result = getAttributeDataList(entry);
+        	List<AttributeData> result = getOperationService().lookup(dn, ldapReturnAttributes);
             if (result != null) {
                 return result;
             }
@@ -431,21 +423,17 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
         } else {
             searchFilter = filter;
         }
-        SearchResult searchResult = null;
+        PagedResult<EntryData> searchResult = null;
         try {
             LdapBatchOperationWraper<T> batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation, this, entryClass,
                     propertiesAnnotations);
             searchResult = getOperationService().search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), batchOperationWraper,
-                    start, chunkSize, count, null, currentLdapReturnAttributes);
+                    start, count, chunkSize, null, currentLdapReturnAttributes);
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
         }
 
-        if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-            throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
-        }
-
-        if (searchResult.getEntryCount() == 0) {
+        if (searchResult.getEntriesCount() == 0) {
             return new ArrayList<T>(0);
         }
 
@@ -499,55 +487,6 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
 
         return vlvResponse;
 
-    }
-
-    @Deprecated
-    public <T> List<T> findEntriesVirtualListView(String baseDN, Class<T> entryClass, Filter filter, int start, int count, String sortBy,
-            SortOrder sortOrder, PagedResult vlvResponse, String[] ldapReturnAttributes) {
-
-        if (StringHelper.isEmptyString(baseDN)) {
-            throw new MappingException("Base DN to find entries is null");
-        }
-
-        // Check entry class
-        checkEntryClass(entryClass, false);
-        String[] objectClasses = getTypeObjectClasses(entryClass);
-        List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
-        String[] currentLdapReturnAttributes = ldapReturnAttributes;
-        if (ArrayHelper.isEmpty(currentLdapReturnAttributes)) {
-            currentLdapReturnAttributes = getAttributes(null, propertiesAnnotations, false);
-        }
-
-        // Find entries
-        Filter searchFilter;
-        if (objectClasses.length > 0) {
-            searchFilter = addObjectClassFilter(filter, objectClasses);
-        } else {
-            searchFilter = filter;
-        }
-
-        SearchResult searchResult = null;
-        try {
-
-            searchResult = getOperationService().searchVirtualListView(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(SearchScope.SUB),
-                    start, count, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
-
-            if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-                throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter));
-            }
-
-        } catch (Exception ex) {
-            throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
-        }
-
-        if (searchResult.getEntryCount() == 0) {
-            return new ArrayList<T>(0);
-        }
-
-        List<T> entries = createEntitiesVirtualListView(entryClass, propertiesAnnotations,
-                searchResult.getSearchEntries().toArray(new SearchResultEntry[searchResult.getSearchEntries().size()]));
-
-        return entries;
     }
 
     @Override
@@ -613,7 +552,6 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
         return result;
     }
 
-    @Deprecated
     private <T> List<T> createEntitiesVirtualListView(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations,
             SearchResultEntry... searchResultEntries) {
 
@@ -622,7 +560,6 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
 
         int count = 0;
         for (int i = 0; i < searchResultEntries.length; i++) {
-
             count++;
 
             SearchResultEntry entry = searchResultEntries[i];
@@ -648,52 +585,6 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
 
         List<T> currentResult = createEntities(entryClass, propertiesAnnotations, entriesAttributes, false);
         result.addAll(currentResult);
-
-        return result;
-    }
-
-    private List<AttributeData> getAttributeDataList(SearchResultEntry entry) {
-        if (entry == null) {
-            return null;
-        }
-
-        List<AttributeData> result = new ArrayList<AttributeData>();
-        for (Attribute attribute : entry.getAttributes()) {
-            String[] attributeValueStrings = NO_STRINGS;
-            String attributeName = attribute.getName();
-            if (LOG.isTraceEnabled()) {
-                if (attribute.needsBase64Encoding()) {
-                    LOG.trace("Found binary attribute: " + attributeName + ". Is defined in LDAP config: "
-                            + getOperationService().isBinaryAttribute(attributeName));
-                }
-            }
-
-            attributeValueStrings = attribute.getValues();
-            if (attribute.needsBase64Encoding()) {
-                boolean binaryAttribute = getOperationService().isBinaryAttribute(attributeName);
-                boolean certificateAttribute = getOperationService().isCertificateAttribute(attributeName);
-
-                if (binaryAttribute || certificateAttribute) {
-                    byte[][] attributeValues = attribute.getValueByteArrays();
-                    if (attributeValues != null) {
-                        attributeValueStrings = new String[attributeValues.length];
-                        for (int i = 0; i < attributeValues.length; i++) {
-                            attributeValueStrings[i] = Base64.encodeBase64String(attributeValues[i]);
-                            LOG.trace("Binary attribute: " + attribute.getName() + " value (hex): "
-                                    + org.apache.commons.codec.binary.Hex.encodeHexString(attributeValues[i]) + " value (base64): "
-                                    + attributeValueStrings[i]);
-                        }
-                    }
-                }
-                if (certificateAttribute) {
-                    attributeName = getOperationService().getCertificateAttributeName(attributeName);
-                }
-            }
-
-            boolean multiValued = attributeValueStrings.length > 1;
-            AttributeData tmpAttribute = new AttributeData(attributeName, attributeValueStrings, multiValued);
-            result.add(tmpAttribute);
-        }
 
         return result;
     }
@@ -786,13 +677,13 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
             batchOperation = new CountBatchOperation<T>();
         }
 
-        SearchResult searchResult;
+        PagedResult<EntryData> searchResult;
         try {
             LdapBatchOperationWraper<T> batchOperationWraper = null;
             if (batchOperation != null) {
                 batchOperationWraper = new LdapBatchOperationWraper<T>(batchOperation);
             }
-            searchResult = getOperationService().search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(searchScope), batchOperationWraper, 0, 100, 0, null,
+            searchResult = getOperationService().search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(searchScope), batchOperationWraper, 0, 0, 100, null,
                     ldapReturnAttributes);
         } catch (Exception ex) {
             throw new EntryPersistenceException(
@@ -803,11 +694,12 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
             return batchOperation.getCountEntries();
         }
 
-        if (searchResult.getEntryCount() != 1) {
+        if (searchResult.getEntriesCount() != 1) {
             throw new EntryPersistenceException(String.format("Failed to calculate the number of entries due to missing result entry with baseDN: %s, filter: %s", baseDN, searchFilter));
         }
 
-        Long result = searchResult.getSearchEntries().get(0).getAttributeValueAsLong("numsubordinates");
+        // TODO: Check this!
+        Integer result = (Integer) searchResult.getEntries().get(0).getAttributeData("numsubordinates").getValue();
         if (result == null) {
             throw new EntryPersistenceException(String.format("Failed to calculate the number of entries due to missing attribute 'numsubordinates' with baseDN: %s, filter: %s", baseDN, searchFilter));
         }
@@ -868,9 +760,7 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
     @Override
     public List<AttributeData> exportEntry(String dn) {
         try {
-        	SearchResultEntry searchResultEntry = getOperationService().lookup(dn, (String[]) null);
-
-            List<AttributeData> result = getAttributeDataList(searchResultEntry);
+        	List<AttributeData> result = getOperationService().lookup(dn, (String[]) null);
             if (result != null) {
                 return result;
             }
