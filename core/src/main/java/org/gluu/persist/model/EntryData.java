@@ -15,18 +15,23 @@ import java.util.List;
  */
 public class EntryData {
     private final List<AttributeData> attributeData;
+	private String dn;
 
     public EntryData(List<AttributeData> attributeData) {
         this.attributeData = attributeData;
+    }
+
+    public EntryData(List<AttributeData> attributeData, String dn) {
+        this.attributeData = attributeData;
+        this.dn = dn;
     }
 
 	public List<AttributeData> getAttributeData() {
 		return attributeData;
 	}
 
-	@Override
-	public String toString() {
-		return "EntryData [attributeData=" + attributeData + "]";
+	public String getDN() {
+		return dn;
 	}
 
 	public AttributeData getAttributeData(String internalAttribute) {
@@ -41,6 +46,11 @@ public class EntryData {
 		}
 
 		return null;
+	}
+
+	@Override
+	public String toString() {
+		return "EntryData [attributeData=" + attributeData + ", dn=" + dn + "]";
 	}
 
 }

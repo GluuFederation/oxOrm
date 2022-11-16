@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.codec.binary.Base64;
+import org.gluu.orm.util.ArrayHelper;
+import org.gluu.orm.util.StringHelper;
 import org.gluu.persist.PersistenceEntryManager;
 import org.gluu.persist.event.DeleteNotifier;
 import org.gluu.persist.exception.AuthenticationException;
@@ -36,17 +37,15 @@ import org.gluu.persist.ldap.operation.LdapOperationService;
 import org.gluu.persist.ldap.operation.impl.LdapOperationServiceImpl;
 import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.AttributeDataModification;
+import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
 import org.gluu.persist.model.BatchOperation;
 import org.gluu.persist.model.DefaultBatchOperation;
 import org.gluu.persist.model.EntryData;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
-import org.gluu.persist.model.AttributeDataModification.AttributeModificationType;
 import org.gluu.persist.reflect.property.PropertyAnnotation;
 import org.gluu.search.filter.Filter;
-import org.gluu.orm.util.ArrayHelper;
-import org.gluu.orm.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +54,6 @@ import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.Modification;
 import com.unboundid.ldap.sdk.ModificationType;
 import com.unboundid.ldap.sdk.ResultCode;
-import com.unboundid.ldap.sdk.SearchResult;
 import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.util.StaticUtils;
 
@@ -437,8 +435,7 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
             return new ArrayList<T>(0);
         }
 
-        List<T> entries = createEntities(entryClass, propertiesAnnotations,
-                searchResult.getSearchEntries().toArray(new SearchResultEntry[searchResult.getSearchEntries().size()]));
+        List<T> entries = createEntities(entryClass, propertiesAnnotations, searchResult.getEntries());
 
         // Default sort if needed
         sortEntriesIfNeeded(entryClass, entries);
@@ -471,21 +468,26 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
         }
 
         List<SearchResultEntry> searchResultEntries;
-        PagedResult<T> vlvResponse = new PagedResult<T>();
+        PagedResult<EntryData> searchResponse;
         try {
-            searchResultEntries = getOperationService().searchSearchResultEntryList(baseDN, toLdapFilter(searchFilter),
-                    toLdapSearchScope(SearchScope.SUB), start, count, chunkSize, sortBy, sortOrder, vlvResponse, currentLdapReturnAttributes);
+        	searchResponse = getOperationService().searchSearchResultEntryList(baseDN, toLdapFilter(searchFilter),
+                    toLdapSearchScope(SearchScope.SUB), start, count, chunkSize, sortBy, sortOrder, currentLdapReturnAttributes);
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
         }
 
-        List<T> entries = new ArrayList<T>(0);
-        if (searchResultEntries.size() > 0) {
-            entries = createEntitiesVirtualListView(entryClass, propertiesAnnotations, searchResultEntries.toArray(new SearchResultEntry[]{}));
-        }
-        vlvResponse.setEntries(entries);
+        PagedResult<T> result = new PagedResult<T>();
+        result.setEntriesCount(searchResponse.getEntriesCount());
+        result.setTotalEntriesCount(searchResponse.getTotalEntriesCount());
+        result.setStart(start);
 
-        return vlvResponse;
+        List<T> entries = new ArrayList<T>(0);
+        if (searchResponse.getEntriesCount() > 0) {
+            entries = createEntitiesVirtualListView(entryClass, propertiesAnnotations, searchResponse.getEntries());
+        }
+        result.setEntries(entries);
+
+        return result;
 
     }
 
@@ -505,12 +507,9 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
 
         SearchScope scope = SearchScope.SUB;
 
-        SearchResult searchResult = null;
+        PagedResult<EntryData> searchResult = null;
         try {
             searchResult = getOperationService().search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), null, 0, 1, 1, null, ldapReturnAttributes);
-            if ((searchResult == null) || !ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-                throw new EntryPersistenceException(String.format("Failed to find entry with baseDN: %s, filter: %s", baseDN, searchFilter));
-            }
         } catch (SearchScopeException ex) {
             throw new AuthenticationException(String.format("Failed to convert scope: %s", scope), ex);
         } catch (SearchException ex) {
@@ -519,22 +518,18 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
             }
         }
 
-        return (searchResult != null) && (searchResult.getEntryCount() > 0);
+        return (searchResult != null) && (searchResult.getEntriesCount() > 0);
     }
 
     protected <T> List<T> createEntities(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations,
-            SearchResultEntry... searchResultEntries) {
-        List<T> result = new ArrayList<T>(searchResultEntries.length);
+            List<EntryData> searchResultEntries) {
+        List<T> result = new ArrayList<T>(searchResultEntries.size());
         Map<String, List<AttributeData>> entriesAttributes = new HashMap<String, List<AttributeData>>(100);
 
         int count = 0;
-        for (int i = 0; i < searchResultEntries.length; i++) {
+        for (EntryData entry : searchResultEntries) {
             count++;
-            SearchResultEntry entry = searchResultEntries[i];
-            entriesAttributes.put(entry.getDN(), getAttributeDataList(entry));
-
-            // Remove reference to allow java clean up object
-            searchResultEntries[i] = null;
+            entriesAttributes.put(entry.getDN(), entry.getAttributeData());
 
             // Allow java to clean up temporary objects
             if (count >= 100) {
@@ -553,23 +548,18 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
     }
 
     private <T> List<T> createEntitiesVirtualListView(Class<T> entryClass, List<PropertyAnnotation> propertiesAnnotations,
-            SearchResultEntry... searchResultEntries) {
+            List<EntryData> searchResultEntries) {
 
         List<T> result = new LinkedList<T>();
         Map<String, List<AttributeData>> entriesAttributes = new LinkedHashMap<String, List<AttributeData>>(100);
 
         int count = 0;
-        for (int i = 0; i < searchResultEntries.length; i++) {
+        for (EntryData entry : searchResultEntries) {
             count++;
 
-            SearchResultEntry entry = searchResultEntries[i];
-
             LinkedList<AttributeData> attributeDataLinkedList = new LinkedList<AttributeData>();
-            attributeDataLinkedList.addAll(getAttributeDataList(entry));
+            attributeDataLinkedList.addAll(entry.getAttributeData());
             entriesAttributes.put(entry.getDN(), attributeDataLinkedList);
-
-            // Remove reference to allow java clean up object
-            searchResultEntries[i] = null;
 
             // Allow java to clean up temporary objects
             if (count >= 100) {
@@ -607,12 +597,12 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
 
     	SearchScope scope = SearchScope.SUB;
         try {
-            SearchResult searchResult = getOperationService().search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), null, 0, 1, 1, null, LdapOperationService.UID_ARRAY);
-            if ((searchResult == null) || (searchResult.getEntryCount() != 1)) {
+        	PagedResult<EntryData> searchResult = getOperationService().search(baseDN, toLdapFilter(searchFilter), toLdapSearchScope(scope), null, 0, 1, 1, null, LdapOperationService.UID_ARRAY);
+            if ((searchResult == null) || (searchResult.getEntriesCount() != 1)) {
                 return false;
             }
 
-            String bindDn = searchResult.getSearchEntries().get(0).getDN();
+            String bindDn = searchResult.getEntries().get(0).getDN();
 
             return getOperationService().authenticate(bindDn, password, null);
         } catch (ConnectionException ex) {

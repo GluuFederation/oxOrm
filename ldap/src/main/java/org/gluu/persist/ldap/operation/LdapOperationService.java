@@ -59,9 +59,9 @@ public interface LdapOperationService extends PersistenceOperationService {
     <T> PagedResult<EntryData> search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
                             int count, int pageSize, Control[] controls, String... attributes) throws SearchException;
 
-    List<SearchResultEntry> searchSearchResultEntryList(String dn, Filter filter, SearchScope scope, int startIndex,
+    <T> PagedResult<EntryData> searchSearchResultEntryList(String dn, Filter filter, SearchScope scope, int startIndex,
                                                         int count, int pageSize, String sortBy, SortOrder sortOrder,
-                                                        PagedResult vlvResponse, String... attributes) throws Exception;
+                                                        String... attributes) throws Exception;
 
     /**
      * Lookup entry in the directory
