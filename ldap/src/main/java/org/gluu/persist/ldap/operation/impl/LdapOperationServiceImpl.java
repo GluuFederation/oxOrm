@@ -450,7 +450,7 @@ public class LdapOperationServiceImpl implements LdapOperationService {
     }
 
     @Override
-    public <T> PagedResult<EntryData> searchSearchResultEntryList(String dn, Filter filter, SearchScope scope, int startIndex,
+    public <T> PagedResult<EntryData> searchPagedEntries(String dn, Filter filter, SearchScope scope, int startIndex,
                                                                int count, int pageSize, String sortBy, SortOrder sortOrder,
                                                                String... attributes) throws Exception {
         Instant startTime = OperationDurationUtil.instance().now();

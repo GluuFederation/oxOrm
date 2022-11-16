@@ -27,8 +27,6 @@ import com.unboundid.ldap.sdk.LDAPConnection;
 import com.unboundid.ldap.sdk.LDAPConnectionPool;
 import com.unboundid.ldap.sdk.LDAPException;
 import com.unboundid.ldap.sdk.Modification;
-import com.unboundid.ldap.sdk.SearchResult;
-import com.unboundid.ldap.sdk.SearchResultEntry;
 import com.unboundid.ldap.sdk.SearchScope;
 import com.unboundid.ldif.LDIFChangeRecord;
 
@@ -59,7 +57,7 @@ public interface LdapOperationService extends PersistenceOperationService {
     <T> PagedResult<EntryData> search(String dn, Filter filter, SearchScope scope, LdapBatchOperationWraper<T> batchOperationWraper, int start,
                             int count, int pageSize, Control[] controls, String... attributes) throws SearchException;
 
-    <T> PagedResult<EntryData> searchSearchResultEntryList(String dn, Filter filter, SearchScope scope, int startIndex,
+    <T> PagedResult<EntryData> searchPagedEntries(String dn, Filter filter, SearchScope scope, int startIndex,
                                                         int count, int pageSize, String sortBy, SortOrder sortOrder,
                                                         String... attributes) throws Exception;
 

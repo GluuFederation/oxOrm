@@ -470,7 +470,7 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
         List<SearchResultEntry> searchResultEntries;
         PagedResult<EntryData> searchResponse;
         try {
-        	searchResponse = getOperationService().searchSearchResultEntryList(baseDN, toLdapFilter(searchFilter),
+        	searchResponse = getOperationService().searchPagedEntries(baseDN, toLdapFilter(searchFilter),
                     toLdapSearchScope(SearchScope.SUB), start, count, chunkSize, sortBy, sortOrder, currentLdapReturnAttributes);
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to find entries with baseDN: %s, filter: %s", baseDN, searchFilter), ex);
