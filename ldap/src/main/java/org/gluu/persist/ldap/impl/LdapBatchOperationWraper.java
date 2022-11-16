@@ -6,9 +6,6 @@
 
 package org.gluu.persist.ldap.impl;
 
-import com.unboundid.ldap.sdk.SearchResult;
-import com.unboundid.ldap.sdk.SearchResultEntry;
-
 import java.util.ArrayList;
 import java.util.List;
 

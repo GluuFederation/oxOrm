@@ -14,7 +14,6 @@ import org.gluu.persist.exception.operation.DuplicateEntryException;
 import org.gluu.persist.exception.operation.SearchException;
 import org.gluu.persist.ldap.impl.LdapBatchOperationWraper;
 import org.gluu.persist.ldap.operation.impl.LdapConnectionProvider;
-import org.gluu.persist.model.AttributeData;
 import org.gluu.persist.model.EntryData;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SortOrder;
@@ -66,10 +65,10 @@ public interface LdapOperationService extends PersistenceOperationService {
      *
      * @param dn
      * @param attributes
-     * @return List<AttributeData>
+     * @return EntryData
      * @throws ConnectionException
      */
-    List<AttributeData> lookup(String dn, String... attributes) throws ConnectionException, SearchException;
+    EntryData lookup(String dn, String... attributes) throws ConnectionException, SearchException;
 
     /**
      * Use this method to add new entry

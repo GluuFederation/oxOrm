@@ -180,23 +180,12 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         // Try to authenticate if the password was encrypted with additional mechanism
         List<PasswordEncryptionMethod> additionalPasswordMethods = this.connectionProvider.getAdditionalPasswordMethods();
         if ((persistenceExtension != null) || !additionalPasswordMethods.isEmpty()) {
-        	List<AttributeData> attributes = lookup(bindDn, USER_PASSWORD);
-            if (attributes == null) {
+        	EntryData entryData = lookup(bindDn, USER_PASSWORD);
+            if (entryData == null) {
                 throw new ConnectionException("Failed to find user by dn");
             }
 
-            Object userPasswordObj = null;
-	        for (AttributeData attribute : attributes) {
-	        	if (StringHelper.equalsIgnoreCase(attribute.getName(), USER_PASSWORD)) {
-	        		userPasswordObj = attribute.getValue();
-	        	}
-	        	
-	        }
-	
-	        String userPassword = null;
-	        if (userPasswordObj instanceof String) {
-	            userPassword = (String) userPasswordObj;
-	        }
+	        String userPassword = entryData.getDN();
 
 	        if (userPassword != null) {
 				if (persistenceExtension != null) {
@@ -573,10 +562,10 @@ public class LdapOperationServiceImpl implements LdapOperationService {
     }
 
     @Override
-    public List<AttributeData> lookup(String dn, String... attributes) throws ConnectionException, SearchException {
+    public EntryData lookup(String dn, String... attributes) throws ConnectionException, SearchException {
         Instant startTime = OperationDurationUtil.instance().now();
         
-        List<AttributeData> result = lookupImpl(dn, attributes);
+        EntryData result = lookupImpl(dn, attributes);
 
         Duration duration = OperationDurationUtil.instance().duration(startTime);
         OperationDurationUtil.instance().logDebug("LDAP operation: lookup, duration: {}, dn: {}, attributes: {}", duration, dn, attributes);
@@ -584,7 +573,7 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         return result;
     }
 
-    private List<AttributeData> lookupImpl(String dn, String... attributes) throws SearchException {
+    private EntryData lookupImpl(String dn, String... attributes) throws SearchException {
         try {
         	SearchResultEntry searchResultEntry;
             if (attributes == null) {
@@ -593,10 +582,10 @@ public class LdapOperationServiceImpl implements LdapOperationService {
             	searchResultEntry = getConnectionPool().getEntry(dn, attributes);
             }
 
-			List<AttributeData> result = getAttributeDataList(searchResultEntry, true);
-			if (result != null) {
-				return result;
-			}
+            EntryData result = getEntryData(searchResultEntry, true);
+            if (result != null) {
+            	return result;
+            }
         } catch (Exception ex) {
             throw new ConnectionException("Failed to lookup entry", ex);
         }
@@ -811,6 +800,18 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         return result;
     }
 
+    private EntryData getEntryData(SearchResultEntry entry, boolean skipDn) {
+    	List<AttributeData> attributeData = getAttributeDataList(entry, skipDn);
+    	if (attributeData == null) {
+    		return null;
+    	}
+
+    	EntryData result = new EntryData(attributeData, entry.getDN());
+
+    	return result;
+    }
+
+    // TODO: Check if we can remove skipDn
     private List<AttributeData> getAttributeDataList(SearchResultEntry entry, boolean skipDn) {
         if (entry == null) {
             return null;
@@ -927,7 +928,7 @@ public class LdapOperationServiceImpl implements LdapOperationService {
     			break;
     		}
 
-    		EntryData entryData = new EntryData(attributeDataList);
+    		EntryData entryData = new EntryData(attributeDataList, entry.getDN());
     		entryDataList.add(entryData);
     	}
 

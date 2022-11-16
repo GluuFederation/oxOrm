@@ -387,9 +387,9 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
     protected List<AttributeData> find(String dn, String[] objectClasses, Map<String, PropertyAnnotation> propertiesAnnotationsMap, String... ldapReturnAttributes) {
         try {
             // Load entry
-        	List<AttributeData> result = getOperationService().lookup(dn, ldapReturnAttributes);
+        	EntryData result = getOperationService().lookup(dn, ldapReturnAttributes);
             if (result != null) {
-                return result;
+                return result.getAttributeData();
             }
         } catch (Exception ex) {
             throw new EntryPersistenceException(String.format("Failed to find entry: %s", dn), ex);
@@ -750,9 +750,9 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
     @Override
     public List<AttributeData> exportEntry(String dn) {
         try {
-        	List<AttributeData> result = getOperationService().lookup(dn, (String[]) null);
+        	EntryData result = getOperationService().lookup(dn, (String[]) null);
             if (result != null) {
-                return result;
+                return result.getAttributeData();
             }
             
             return null;
