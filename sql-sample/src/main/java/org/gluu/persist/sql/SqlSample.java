@@ -48,7 +48,6 @@ public final class SqlSample {
         for (SimpleUser user : users0) {
             LOG.info("User XXX with '{}', associatedClient: '{}'", user.getUserId(), user.getAttributeValues("associatedClient"));
         }
-        System.exit(0);
 
         SimpleUser newUser = new SimpleUser();
         newUser.setDn(String.format("inum=%s,ou=people,o=gluu", System.currentTimeMillis()));

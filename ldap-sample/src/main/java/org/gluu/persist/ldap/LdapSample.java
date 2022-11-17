@@ -6,11 +6,11 @@
 
 package org.gluu.persist.ldap;
 
+import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
-import org.apache.log4j.Logger;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.status.StatusLogger;
+import org.gluu.persist.exception.AuthenticationException;
 import org.gluu.persist.ldap.impl.LdapEntryManager;
 import org.gluu.persist.ldap.model.SimpleAttribute;
 import org.gluu.persist.ldap.model.SimpleGrant;
@@ -19,21 +19,18 @@ import org.gluu.persist.ldap.model.SimpleUser;
 import org.gluu.persist.model.PagedResult;
 import org.gluu.persist.model.SearchScope;
 import org.gluu.persist.model.SortOrder;
-import org.gluu.persist.model.base.CustomAttribute;
+import org.gluu.persist.model.base.CustomObjectAttribute;
 import org.gluu.search.filter.Filter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Yuriy Movchan Date: 11/03/2016
  */
 public final class LdapSample {
 
-    private static final Logger LOG;
 
-    static {
-        StatusLogger.getLogger().setLevel(Level.OFF);
-        LoggingHelper.configureConsoleAppender();
-        LOG = Logger.getLogger(LdapSample.class);
-    }
+    private static final Logger LOG = LoggerFactory.getLogger(LdapSample.class);
 
     private LdapSample() {
     }
@@ -45,6 +42,31 @@ public final class LdapSample {
         // Create LDAP entry manager
         LdapEntryManager ldapEntryManager = ldapEntryManagerSample.createLdapEntryManager();
 
+        SimpleUser newUser = new SimpleUser();
+        newUser.setDn(String.format("inum=%s,ou=people,o=gluu", System.currentTimeMillis()));
+        newUser.setUserId("sample_user_" + System.currentTimeMillis());
+        newUser.setUserPassword("pwd");
+        newUser.getCustomAttributes().add(new CustomObjectAttribute("address", Arrays.asList("London", "Texas", "Kiev")));
+        newUser.getCustomAttributes().add(new CustomObjectAttribute("transientId", "transientId"));
+        newUser.getCustomAttributes().add(new CustomObjectAttribute("scimCustomThird", 100));
+        newUser.getCustomAttributes().add(new CustomObjectAttribute("phoneNumberVerified", true));
+        newUser.getCustomAttributes().add(new CustomObjectAttribute("updatedAt", new Date()));
+        
+        ldapEntryManager.persist(newUser);
+
+        SimpleUser dummyUser = ldapEntryManager.find(SimpleUser.class, newUser.getDn());
+        LOG.info("Dummy User '{}' with userId '{}'", dummyUser, newUser.getUserId());
+
+        boolean authenticated = ldapEntryManager.authenticate(newUser.getDn(), SimpleUser.class, "pwd");
+        LOG.info("Dummy User success authentication '{}'", authenticated);
+
+        try {
+			boolean authenticated2 = ldapEntryManager.authenticate(newUser.getDn(), SimpleUser.class, "pwd2");
+			LOG.info("Dummy User wrong authentication '{}'", authenticated2);
+		} catch (AuthenticationException ex) {
+			LOG.error(ex.getMessage());
+		}
+
         // Find all users which have specified object classes defined in SimpleUser
         List<SimpleUser> users = ldapEntryManager.findEntries("o=gluu", SimpleUser.class, null);
         for (SimpleUser user : users) {
@@ -54,7 +76,7 @@ public final class LdapSample {
         if (users.size() > 0) {
             // Add attribute "streetAddress" to first user
             SimpleUser user = users.get(0);
-            user.getCustomAttributes().add(new CustomAttribute("streetAddress", "Somewhere: " + System.currentTimeMillis()));
+            user.getCustomAttributes().add(new CustomObjectAttribute("streetAddress", "Somewhere: " + System.currentTimeMillis()));
 
             ldapEntryManager.merge(user);
         }
