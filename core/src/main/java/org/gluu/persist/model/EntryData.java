@@ -21,9 +21,9 @@ public class EntryData {
         this.attributeData = attributeData;
     }
 
-    public EntryData(List<AttributeData> attributeData, String dn) {
-        this.attributeData = attributeData;
+    public EntryData(String dn, List<AttributeData> attributeData) {
         this.dn = dn;
+        this.attributeData = attributeData;
     }
 
 	public List<AttributeData> getAttributeData() {

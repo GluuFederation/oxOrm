@@ -185,7 +185,18 @@ public class LdapOperationServiceImpl implements LdapOperationService {
                 throw new ConnectionException("Failed to find user by dn");
             }
 
-	        String userPassword = entryData.getDN();
+            Object userPasswordObj = null;
+	        for (AttributeData attribute : entryData.getAttributeData()) {
+	        	if (StringHelper.equalsIgnoreCase(attribute.getName(), USER_PASSWORD)) {
+	        		userPasswordObj = attribute.getValue();
+	        	}
+	        	
+	        }
+	
+	        String userPassword = null;
+	        if (userPasswordObj instanceof String) {
+	            userPassword = (String) userPasswordObj;
+	        }
 
 	        if (userPassword != null) {
 				if (persistenceExtension != null) {
@@ -298,7 +309,7 @@ public class LdapOperationServiceImpl implements LdapOperationService {
 
             LDAPConnection ldapConnection = null;
             try {
-                ldapConnection = getConnectionPool().getConnection();
+                ldapConnection = getConnection();
                 ASN1OctetString cookie = null;
                 SimplePagedResponse simplePagedResponse = null;
                 if (start > 0) {
@@ -338,10 +349,10 @@ public class LdapOperationServiceImpl implements LdapOperationService {
 
                     searchResult = ldapConnection.search(searchRequest);
                     if (!ResultCode.SUCCESS.equals(searchResult.getResultCode())) {
-                        throw new SearchEntryException(String.format("Failed to ssearch entries with baseDN: %s, filter: %s", dn, filter));
+                        throw new SearchEntryException(String.format("Failed to search entries with baseDN: %s, filter: %s", dn, filter));
                     }
 
-                    lastResult = getEntryDataList(searchResult, false);
+                    lastResult = getEntryDataList(searchResult);
 	    			lastCountRows = lastResult.size();
 
                     collectSearchResult = true;
@@ -383,7 +394,7 @@ public class LdapOperationServiceImpl implements LdapOperationService {
                     throw new SearchEntryException(String.format("Failed to ssearch entries with baseDN: %s, filter: %s", dn, filter));
                 }
 
-                List<EntryData> lastResult = getEntryDataList(searchResult, false);
+                List<EntryData> lastResult = getEntryDataList(searchResult);
 
                 boolean collectSearchResult = true;
                 if (batchOperation != null) {
@@ -463,7 +474,7 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         ASN1OctetString resumeCookie = null;
         LDAPConnection conn = null;
         try {
-        	conn = getConnectionPool().getConnection();
+        	conn = getConnection();
 	        SearchRequest searchRequest = new SearchRequest(dn, scope, filter, attributes);
 	
 	
@@ -517,7 +528,7 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         }
 
 
-        List<EntryData> entryDataList = getEntryDataList(searchResultEntryList, false);
+        List<EntryData> entryDataList = getEntryDataList(searchResultEntryList);
 
         PagedResult<EntryData> result = new PagedResult<EntryData>();
         result.setEntries(entryDataList);
@@ -582,7 +593,7 @@ public class LdapOperationServiceImpl implements LdapOperationService {
             	searchResultEntry = getConnectionPool().getEntry(dn, attributes);
             }
 
-            EntryData result = getEntryData(searchResultEntry, true);
+            EntryData result = getEntryData(searchResultEntry);
             if (result != null) {
             	return result;
             }
@@ -800,19 +811,18 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         return result;
     }
 
-    private EntryData getEntryData(SearchResultEntry entry, boolean skipDn) {
-    	List<AttributeData> attributeData = getAttributeDataList(entry, skipDn);
+    private EntryData getEntryData(SearchResultEntry entry) {
+    	List<AttributeData> attributeData = getAttributeDataList(entry);
     	if (attributeData == null) {
     		return null;
     	}
 
-    	EntryData result = new EntryData(attributeData, entry.getDN());
+    	EntryData result = new EntryData(entry.getDN(), attributeData);
 
     	return result;
     }
 
-    // TODO: Check if we can remove skipDn
-    private List<AttributeData> getAttributeDataList(SearchResultEntry entry, boolean skipDn) {
+    private List<AttributeData> getAttributeDataList(SearchResultEntry entry) {
         if (entry == null) {
             return null;
         }
@@ -821,12 +831,6 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         for (Attribute attribute : entry.getAttributes()) {
             Object[] attributeValues = NO_STRINGS;
             String attributeName = attribute.getName();
-
-            // TODO: Check if entry has DN
-        	if (skipDn && LdapOperationService.DN.equalsIgnoreCase(attributeName)) {
-        		// Skip DN attribute 
-        		continue;
-        	}
 
         	if (LOG.isTraceEnabled()) {
                 if (attribute.needsBase64Encoding()) {
@@ -862,44 +866,50 @@ public class LdapOperationServiceImpl implements LdapOperationService {
                 if (attributeType != null) {
                 	// Attempt to convert values to required java types
                     if (attributeType.equals(Integer.class)) {
+                    	Integer[] attributeValuesTyped = new Integer[attributeValues.length];
                     	for (int i = 0; i < attributeValues.length; i++) {
 							try {
 								if (attributeValues[i] != null) {
-									attributeValues[i] = Integer.valueOf(((String) attributeValues[i]));
+									attributeValuesTyped[i] = Integer.valueOf(((String) attributeValues[i]));
 								}
 							} catch (final NumberFormatException ex) {
-								attributeValues[i] = null;
+								attributeValuesTyped[i] = null;
 								LOG.debug("Failed to parse integer", ex);
 							}
 						}
+                    	attributeValues = attributeValuesTyped;
                     } else if (attributeType.equals(Boolean.class)) {
+                    	Boolean[] attributeValuesTyped = new Boolean[attributeValues.length];
                     	for (int i = 0; i < attributeValues.length; i++) {
 							if (attributeValues[i] != null) {
 								String lowerValue = StringHelper.toLowerCase((String) attributeValues[i]);
 								if (lowerValue.equals("true") || lowerValue.equals("t") || lowerValue.equals("yes")
 										|| lowerValue.equals("y") || lowerValue.equals("on")
 										|| lowerValue.equals("1")) {
-									attributeValues[i] = Boolean.TRUE;
+									attributeValuesTyped[i] = Boolean.TRUE;
 								} else if (lowerValue.equals("false") || lowerValue.equals("f")
 										|| lowerValue.equals("no") || lowerValue.equals("n") || lowerValue.equals("off")
 										|| lowerValue.equals("0")) {
-									attributeValues[i] = Boolean.FALSE;
+									attributeValuesTyped[i] = Boolean.FALSE;
 								} else {
-									attributeValues[i] = null;
+									attributeValuesTyped[i] = null;
 								}
 							}
                     	}
+                    	attributeValues = attributeValuesTyped;
                     } else if (attributeType.equals(Date.class)) {
+                    	Date[] attributeValuesTyped = new Date[attributeValues.length];
                     	for (int i = 0; i < attributeValues.length; i++) {
                     		if (attributeValues[i] != null) {
                     			try {
-									attributeValues[i] = StaticUtils.decodeGeneralizedTime((String) attributeValues[i]);
+                    				attributeValuesTyped[i] = StaticUtils.decodeGeneralizedTime((String) attributeValues[i]);
 								} catch (Exception ex) {
-									attributeValues[i] = null;
+									attributeValuesTyped[i] = null;
 									LOG.debug("Failed to parse date", ex);
 								}
                     		}
                     	}
+                    	attributeValues = attributeValuesTyped;
                     }
                 }
             }
@@ -912,23 +922,23 @@ public class LdapOperationServiceImpl implements LdapOperationService {
         return result;
     }
 
-    private List<EntryData> getEntryDataList(SearchResult searchResult, boolean skipDn) {
+    private List<EntryData> getEntryDataList(SearchResult searchResult) {
     	List<SearchResultEntry> searchResultEntries = searchResult.getSearchEntries();
 
-    	List<EntryData> entryDataList = getEntryDataList(searchResultEntries, skipDn);
+    	List<EntryData> entryDataList = getEntryDataList(searchResultEntries);
 
     	return entryDataList;
 	}
 
-	private List<EntryData> getEntryDataList(List<SearchResultEntry> searchResultEntries, boolean skipDn) {
+	private List<EntryData> getEntryDataList(List<SearchResultEntry> searchResultEntries) {
 		List<EntryData> entryDataList = new LinkedList<>();
         for (SearchResultEntry entry : searchResultEntries) {
-        	List<AttributeData> attributeDataList = getAttributeDataList(entry, false);
+        	List<AttributeData> attributeDataList = getAttributeDataList(entry);
     		if (attributeDataList == null) {
     			break;
     		}
 
-    		EntryData entryData = new EntryData(attributeDataList, entry.getDN());
+    		EntryData entryData = new EntryData(entry.getDN(), attributeDataList);
     		entryDataList.add(entryData);
     	}
 
