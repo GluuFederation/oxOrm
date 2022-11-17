@@ -854,6 +854,8 @@ public class LdapOperationServiceImpl implements LdapOperationService {
                                     + attributeValues[i]);
                         }
                     }
+                } else {
+                    attributeValues = attribute.getValues();
                 }
                 if (certificateAttribute) {
                     attributeName = getCertificateAttributeName(attributeName);
