@@ -1152,25 +1152,25 @@ public class LdapOperationServiceImpl implements LdapOperationService {
                             Class<?> cls = ATTRIBUTE_DATA_TYPES.get(attributeName);
 
                             if (cls != null) {
-                                if (cls.equals(String.class)) {
-                                    if (caseSensitive) {
-                                        result = value1.compareTo(value2);
-                                    } else {
-                                        result = value1.toLowerCase().compareTo(value2.toLowerCase());
-                                    }
-                                } else
                                 if (cls.equals(Integer.class)) {
-                                    result = resultEntry1.getAttributeValueAsInteger(attributeName)
+                                    return resultEntry1.getAttributeValueAsInteger(attributeName)
                                             .compareTo(resultEntry2.getAttributeValueAsInteger(attributeName));
                                 } else
                                 if (cls.equals(Boolean.class)) {
-                                    result = resultEntry1.getAttributeValueAsBoolean(attributeName)
+                                    return resultEntry1.getAttributeValueAsBoolean(attributeName)
                                             .compareTo(resultEntry2.getAttributeValueAsBoolean(attributeName));
                                 } else
                                 if (cls.equals(Date.class)) {
-                                    result = resultEntry1.getAttributeValueAsDate(attributeName)
+                                    return resultEntry1.getAttributeValueAsDate(attributeName)
                                             .compareTo(resultEntry2.getAttributeValueAsDate(attributeName));
                                 }
+                            }
+
+                            // Default comparision
+                            if (caseSensitive) {
+                                result = value1.compareTo(value2);
+                            } else {
+                                result = value1.toLowerCase().compareTo(value2.toLowerCase());
                             }
                         }
                     }
