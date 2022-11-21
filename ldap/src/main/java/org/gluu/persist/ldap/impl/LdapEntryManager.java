@@ -198,17 +198,17 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
                 AttributeData oldAttribute = attributeDataModification.getOldAttribute();
 
                 String attributeName = null;
-                String[] attributeValues = null;
+                Object[] attributeValues = null;
                 if (attribute != null) {
                     attributeName = attribute.getName();
-                    attributeValues = attribute.getStringValues();
+                    attributeValues = attribute.getValues();
                 }
 
                 String oldAttributeName = null;
-                String[] oldAttributeValues = null;
+                Object[] oldAttributeValues = null;
                 if (oldAttribute != null) {
                     oldAttributeName = oldAttribute.getName();
-                    oldAttributeValues = oldAttribute.getStringValues();
+                    oldAttributeValues = oldAttribute.getValues();
                 }
 
                 Modification modification = null;
@@ -221,8 +221,8 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
                         if (attributeValues.length == 1) {
                             modification = createModification(ModificationType.REPLACE, attributeName, attributeValues);
                         } else {
-                            String[] oldValues = ArrayHelper.arrayClone(oldAttributeValues);
-                            String[] newValues = ArrayHelper.arrayClone(attributeValues);
+                        	Object[] oldValues = ArrayHelper.arrayClone(oldAttributeValues);
+                            Object[] newValues = ArrayHelper.arrayClone(attributeValues);
 
                             Arrays.sort(oldValues);
                             Arrays.sort(newValues);
@@ -230,15 +230,19 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
                             boolean[] retainOldValues = new boolean[oldValues.length];
                             Arrays.fill(retainOldValues, false);
 
-                            List<String> addValues = new ArrayList<String>();
-                            List<String> removeValues = new ArrayList<String>();
+                            List<Object> addValues = new ArrayList<Object>();
+                            List<Object> removeValues = new ArrayList<Object>();
 
                             // Add new values
-                            for (String value : newValues) {
-                                int idx = Arrays.binarySearch(oldValues, value, new Comparator<String>() {
+                            for (Object value : newValues) {
+                                int idx = Arrays.binarySearch(oldValues, value, new Comparator<Object>() {
                                     @Override
-                                    public int compare(String o1, String o2) {
-                                        return o1.toLowerCase().compareTo(o2.toLowerCase());
+                                    public int compare(Object o1, Object o2) {
+                                    	if ((o1 instanceof Comparable) && (o2 instanceof Comparable)) {
+                                            return ((Comparable) o1).compareTo((Comparable) o2);
+										}
+
+                                    	return o1.toString().toLowerCase().compareTo(o2.toString().toLowerCase());
                                     }
                                 });
                                 if (idx >= 0) {
@@ -770,17 +774,36 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
         return getOperationService().getSupportedLDAPVersion();
     }
 
-    private Modification createModification(final ModificationType modificationType, final String attributeName, final String... attributeValues) {
-        String realAttributeName = attributeName;
+    private Modification createModification(final ModificationType modificationType, final String attributeName, final Object... attributeValues) {
+    	String[] attributeStringValues = convertValuesToStringValues(attributeValues);
+
+    	String realAttributeName = attributeName;
         if (getOperationService().isCertificateAttribute(realAttributeName)) {
             realAttributeName += ";binary";
-            byte[][] binaryValues = toBinaryValues(attributeValues);
+            byte[][] binaryValues = toBinaryValues(attributeStringValues);
 
             return new Modification(modificationType, realAttributeName, binaryValues);
         }
 
-        return new Modification(modificationType, realAttributeName, attributeValues);
+        return new Modification(modificationType, realAttributeName, attributeStringValues);
     }
+
+	private String[] convertValuesToStringValues(final Object... attributeValues) {
+		if (attributeValues == null) {
+    		return null;
+    	}
+
+    	String[] attributeStringValues = new String[attributeValues.length];
+    	for (int i = 0; i < attributeValues.length; i++) {
+    		if (attributeValues[i] instanceof Date) {
+    			attributeValues[i] = StaticUtils.encodeGeneralizedTime((Date) attributeValues[i]);
+    		} else {
+    			attributeValues[i] = attributeValues[i].toString();
+    		}
+    	}
+    	
+    	return attributeStringValues;
+	}
 
     private com.unboundid.ldap.sdk.Filter toLdapFilter(Filter genericFilter) throws SearchException {
         return LDAP_FILTER_CONVERTER.convertToLdapFilter(genericFilter);
