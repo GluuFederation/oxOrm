@@ -30,13 +30,13 @@ public class SqlEntryManagerSample {
             connectionProperties.put("sql#connection.driver-property.serverTimezone", "GMT+2");
 
             connectionProperties.put("sql#auth.userName", "root");
-            connectionProperties.put("sql#auth.userPassword", "Secret1!");
+            connectionProperties.put("sql#auth.userPassword", "secret");
         } else {
             connectionProperties.put("sql#db.schema.name", "public");
         	connectionProperties.put("sql#connection.uri", "jdbc:postgresql://u204.gluu.info:5432/gluudb");
 
         	connectionProperties.put("sql#auth.userName", "postgres");
-            connectionProperties.put("sql#auth.userPassword", "Secret1!");
+            connectionProperties.put("sql#auth.userPassword", "secret");
         }
 
         connectionProperties.put("sql#connection.pool.max-total", "300");

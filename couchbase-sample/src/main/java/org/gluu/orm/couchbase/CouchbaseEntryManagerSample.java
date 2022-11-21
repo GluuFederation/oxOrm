@@ -33,7 +33,7 @@ public class CouchbaseEntryManagerSample {
 
         connectionProperties.put("couchbase#bucket.default", "gluu");
         connectionProperties.put("couchbase#bucket.gluu_user.mapping", "people, groups, authorizations");
-        connectionProperties.put("couchbase#bucket.gluu_site.mapping", "cache-refresh");
+//        connectionProperties.put("couchbase#bucket.gluu_site.mapping", "cache-refresh");
         connectionProperties.put("couchbase#bucket.gluu_cache.mapping", "cache");
         connectionProperties.put("couchbase#bucket.gluu_token.mapping", "tokens");
         connectionProperties.put("couchbase#bucket.gluu_session.mapping", "sessions");

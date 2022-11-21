@@ -37,38 +37,38 @@ public final class LdapSample {
 
     public static void main(String[] args) {
         // Prepare sample connection details
-        LdapEntryManagerSample ldapEntryManagerSample = new LdapEntryManagerSample();
+        LdapEntryManagerSample entryManagerSample = new LdapEntryManagerSample();
 
         // Create LDAP entry manager
-        LdapEntryManager ldapEntryManager = ldapEntryManagerSample.createLdapEntryManager();
+        LdapEntryManager entryManager = entryManagerSample.createLdapEntryManager();
 
-        SimpleUser newUser = new SimpleUser();
-        newUser.setDn(String.format("inum=%s,ou=people,o=gluu", System.currentTimeMillis()));
-        newUser.setUserId("sample_user_" + System.currentTimeMillis());
-        newUser.setUserPassword("pwd");
-        newUser.getCustomAttributes().add(new CustomObjectAttribute("address", Arrays.asList("London", "Texas", "Kiev")));
-        newUser.getCustomAttributes().add(new CustomObjectAttribute("transientId", "transientId"));
-        newUser.getCustomAttributes().add(new CustomObjectAttribute("scimCustomThird", 100));
-        newUser.getCustomAttributes().add(new CustomObjectAttribute("phoneNumberVerified", true));
-        newUser.getCustomAttributes().add(new CustomObjectAttribute("updatedAt", new Date()));
+        SimpleUser newCustomUser = new SimpleUser();
+        newCustomUser.setDn(String.format("inum=%s,ou=people,o=gluu", System.currentTimeMillis()));
+        newCustomUser.setUserId("sample_user_" + System.currentTimeMillis());
+        newCustomUser.setUserPassword("pwd");
+        newCustomUser.getCustomAttributes().add(new CustomObjectAttribute("address", Arrays.asList("London", "Texas", "Kiev")));
+        newCustomUser.getCustomAttributes().add(new CustomObjectAttribute("transientId", "transientId"));
+        newCustomUser.getCustomAttributes().add(new CustomObjectAttribute("scimCustomThird", 100));
+        newCustomUser.getCustomAttributes().add(new CustomObjectAttribute("phoneNumberVerified", true));
+        newCustomUser.getCustomAttributes().add(new CustomObjectAttribute("updatedAt", new Date()));
         
-        ldapEntryManager.persist(newUser);
+        entryManager.persist(newCustomUser);
 
-        SimpleUser dummyUser = ldapEntryManager.find(SimpleUser.class, newUser.getDn());
-        LOG.info("Dummy User '{}' with userId '{}'", dummyUser, newUser.getUserId());
+        SimpleUser dummyCustomUser = entryManager.find(SimpleUser.class, newCustomUser.getDn());
+        LOG.info("Dummy User '{}' with userId '{}'", dummyCustomUser, newCustomUser.getUserId());
 
-        boolean authenticated = ldapEntryManager.authenticate(newUser.getDn(), SimpleUser.class, "pwd");
+        boolean authenticated = entryManager.authenticate(newCustomUser.getDn(), SimpleUser.class, "pwd");
         LOG.info("Dummy User success authentication '{}'", authenticated);
 
         try {
-			boolean authenticated2 = ldapEntryManager.authenticate(newUser.getDn(), SimpleUser.class, "pwd2");
+			boolean authenticated2 = entryManager.authenticate(newCustomUser.getDn(), SimpleUser.class, "pwd2");
 			LOG.info("Dummy User wrong authentication '{}'", authenticated2);
 		} catch (AuthenticationException ex) {
 			LOG.error(ex.getMessage());
 		}
 
         // Find all users which have specified object classes defined in SimpleUser
-        List<SimpleUser> users = ldapEntryManager.findEntries("o=gluu", SimpleUser.class, null);
+        List<SimpleUser> users = entryManager.findEntries("o=gluu", SimpleUser.class, null);
         for (SimpleUser user : users) {
             LOG.debug("User with uid: " + user.getUserId());
         }
@@ -78,25 +78,25 @@ public final class LdapSample {
             SimpleUser user = users.get(0);
             user.getCustomAttributes().add(new CustomObjectAttribute("streetAddress", "Somewhere: " + System.currentTimeMillis()));
 
-            ldapEntryManager.merge(user);
+            entryManager.merge(user);
         }
 
         Filter filter = Filter.createEqualityFilter("status", "active");
-        List<SimpleAttribute> attributes = ldapEntryManager.findEntries("o=gluu", SimpleAttribute.class, filter, SearchScope.SUB, null, null, 10, 0,
+        List<SimpleAttribute> attributes = entryManager.findEntries("o=gluu", SimpleAttribute.class, filter, SearchScope.SUB, null, null, 10, 0,
                 0);
         for (SimpleAttribute attribute : attributes) {
             LOG.debug("Attribute with displayName: " + attribute.getCustomAttributes().get(1));
         }
 
-        List<SimpleSession> sessions = ldapEntryManager.findEntries("o=gluu", SimpleSession.class, filter, SearchScope.SUB, null, null, 10, 0, 0);
+        List<SimpleSession> sessions = entryManager.findEntries("o=gluu", SimpleSession.class, filter, SearchScope.SUB, null, null, 10, 0, 0);
         LOG.debug("Found sessions: " + sessions.size());
 
-        List<SimpleGrant> grants = ldapEntryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB, new String[] { "grtId" },
+        List<SimpleGrant> grants = entryManager.findEntries("o=gluu", SimpleGrant.class, null, SearchScope.SUB, new String[] { "grtId" },
                 null, 10, 0, 0);
         LOG.debug("Found grants: " + grants.size());
 
         try {
-            PagedResult<SimpleUser> vlvResponse = ldapEntryManager.findPagedEntries("o=gluu", SimpleUser.class, null,
+            PagedResult<SimpleUser> vlvResponse = entryManager.findPagedEntries("o=gluu", SimpleUser.class, null,
                     new String[] { "uid", "displayName", "status" }, "displayName", SortOrder.ASCENDING, 10, 100000, 1000);
 
             LOG.debug("Found persons: " + vlvResponse.getTotalEntriesCount());

@@ -31,6 +31,9 @@ public class SimpleUser implements Serializable {
     @DN
     private String dn;
 
+    @AttributeName(name = "inum")
+    private String inum;
+
     @AttributeName(name = "uid")
     private String userId;
 
@@ -57,7 +60,15 @@ public class SimpleUser implements Serializable {
         this.dn = dn;
     }
 
-    public String getUserId() {
+    public String getInum() {
+		return inum;
+	}
+
+	public void setInum(String inum) {
+		this.inum = inum;
+	}
+
+	public String getUserId() {
         return userId;
     }
 

@@ -26,7 +26,7 @@ public class SpannerEntryManagerSample {
         connectionProperties.put("spanner#connection.instance", "gluu-instance");
         connectionProperties.put("spanner#connection.database", "gluudb");
 
-        connectionProperties.put("spanner#connection.emulator-host", "localhost:9010");
+        connectionProperties.put("spanner#connection.emulator-host", "jenkins-dev1.gluu.org:9010");
         
         // Password hash method
         connectionProperties.put("spanner#password.encryption.method", "SSHA-256");
