@@ -198,17 +198,17 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
                 AttributeData oldAttribute = attributeDataModification.getOldAttribute();
 
                 String attributeName = null;
-                Object[] attributeValues = null;
+                String[] attributeValues = null;
                 if (attribute != null) {
                     attributeName = attribute.getName();
-                    attributeValues = attribute.getValues();
+                    attributeValues = convertValuesToStringValues(attribute.getValues());
                 }
 
                 String oldAttributeName = null;
-                Object[] oldAttributeValues = null;
+                String[] oldAttributeValues = null;
                 if (oldAttribute != null) {
                     oldAttributeName = oldAttribute.getName();
-                    oldAttributeValues = oldAttribute.getValues();
+                    oldAttributeValues = convertValuesToStringValues(oldAttribute.getValues());
                 }
 
                 Modification modification = null;
@@ -221,8 +221,8 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
                         if (attributeValues.length == 1) {
                             modification = createModification(ModificationType.REPLACE, attributeName, attributeValues);
                         } else {
-                        	Object[] oldValues = ArrayHelper.arrayClone(oldAttributeValues);
-                            Object[] newValues = ArrayHelper.arrayClone(attributeValues);
+                        	String[] oldValues = ArrayHelper.arrayClone(oldAttributeValues);
+                        	String[] newValues = ArrayHelper.arrayClone(attributeValues);
 
                             Arrays.sort(oldValues);
                             Arrays.sort(newValues);
@@ -230,19 +230,15 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
                             boolean[] retainOldValues = new boolean[oldValues.length];
                             Arrays.fill(retainOldValues, false);
 
-                            List<Object> addValues = new ArrayList<Object>();
-                            List<Object> removeValues = new ArrayList<Object>();
+                            List<String> addValues = new ArrayList<String>();
+                            List<String> removeValues = new ArrayList<String>();
 
                             // Add new values
-                            for (Object value : newValues) {
-                                int idx = Arrays.binarySearch(oldValues, value, new Comparator<Object>() {
+                            for (String value : newValues) {
+                                int idx = Arrays.binarySearch(oldValues, value, new Comparator<String>() {
                                     @Override
-                                    public int compare(Object o1, Object o2) {
-                                    	if ((o1 instanceof Comparable) && (o2 instanceof Comparable)) {
-                                            return ((Comparable) o1).compareTo((Comparable) o2);
-										}
-
-                                    	return o1.toString().toLowerCase().compareTo(o2.toString().toLowerCase());
+                                    public int compare(String o1, String o2) {
+                                    	return o1.toLowerCase().compareTo(o2.toLowerCase());
                                     }
                                 });
                                 if (idx >= 0) {
@@ -774,18 +770,16 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
         return getOperationService().getSupportedLDAPVersion();
     }
 
-    private Modification createModification(final ModificationType modificationType, final String attributeName, final Object... attributeValues) {
-    	String[] attributeStringValues = convertValuesToStringValues(attributeValues);
-
+    private Modification createModification(final ModificationType modificationType, final String attributeName, final String... attributeValues) {
     	String realAttributeName = attributeName;
         if (getOperationService().isCertificateAttribute(realAttributeName)) {
             realAttributeName += ";binary";
-            byte[][] binaryValues = toBinaryValues(attributeStringValues);
+            byte[][] binaryValues = toBinaryValues(attributeValues);
 
             return new Modification(modificationType, realAttributeName, binaryValues);
         }
 
-        return new Modification(modificationType, realAttributeName, attributeStringValues);
+        return new Modification(modificationType, realAttributeName, attributeValues);
     }
 
 	private String[] convertValuesToStringValues(final Object... attributeValues) {
