@@ -790,9 +790,9 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
     	String[] attributeStringValues = new String[attributeValues.length];
     	for (int i = 0; i < attributeValues.length; i++) {
     		if (attributeValues[i] instanceof Date) {
-    			attributeValues[i] = StaticUtils.encodeGeneralizedTime((Date) attributeValues[i]);
+    			attributeStringValues[i] = StaticUtils.encodeGeneralizedTime((Date) attributeValues[i]);
     		} else {
-    			attributeValues[i] = attributeValues[i].toString();
+    			attributeStringValues[i] = attributeValues[i].toString();
     		}
     	}
     	
