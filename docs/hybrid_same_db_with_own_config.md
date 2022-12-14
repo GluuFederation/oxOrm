@@ -8,7 +8,7 @@ Both servers can work with same or different salt. Same salt will allow to use s
 1. Create VM which conform minimal CE requirements.
 2. Open 3306 port to allow access MySQL DB on this server.
 3. Install CE into it.
-4. In `/etc/mysql/mysql.conf.d/mysqld.cnf` configure to listen on 
+4. In MySQL server file `/etc/mysql/mysql.conf.d/mysqld.cnf` configure to listen on 
 ```
 bind-address		= 0.0.0.0
 ```
@@ -17,12 +17,12 @@ bind-address		= 0.0.0.0
 ```
 systemctl restart mysql
 ```
-6. Configure gluu DB `user`to allow access from another server:
- - Create `/root/.mysql` and protect file with admin sql user password.
+6. Configure `gluu` DB `user`to allow access from another server:
+ - Create `/root/.mysql` with admin MySql user password and protect file.
  - Run `mysql -u root --password="$(cat /root/.mysql)" -e "CREATE USER 'gluu'@'%' IDENTIFIED BY '$(cat /root/.mysql)'"`
  - Run `mysql -u root --password="$(cat /root/.mysql)" -e "GRANT ALL PRIVILEGES ON gluudb.* TO 'gluu'@'%'"`
 
-  Note: if you need to provide access from specifc IP replace `'gluu'@'%'` in both commands with command with Ip address `'gluu'@'%XX.XX.XX.XX'`
+  Note: if you need to provide access from specifc IP replace `'gluu'@'%'` in both commands with command with IP address `'gluu'@'%XX.XX.XX.XX'`
 
 7. It's not required step. This server is also possible to configure to use Hybrid ORM if in deployment you will use 3 DB: 2 DB with `ou=configuration` and third with all shared tables.
  - Create Hybrid ORM configuration files.
@@ -52,7 +52,7 @@ storage.sql.mapping:
  - Copy `/install/community-edition-setup/setup.properties` from first server into `/root/setup.properties`. This file is encrypted after install. You need to decrypt it with command which setup provided at the end of install:
 ```
 cd /install/community-edition-setup
-enc -d -aes-256-cbc -in setup.properties.last.enc -out setup.properties
+openssl enc -d -aes-256-cbc -in setup.properties.last.enc -out setup.properties
 ```
  - Update `hostname`, `oxd_server_https` and `ip` property in `/root/setup.properties` and update other properties if needed.
 3. Install CE into this VM. To run setup with preconfigured salt use command: `./setup.py -f /root/setup.properties`
