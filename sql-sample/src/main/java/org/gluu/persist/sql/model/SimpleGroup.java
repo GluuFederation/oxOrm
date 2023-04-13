@@ -4,9 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-
 import org.gluu.persist.annotation.AttributeName;
 import org.gluu.persist.annotation.DataEntry;
 import org.gluu.persist.annotation.ObjectClass;
@@ -32,16 +29,12 @@ public class SimpleGroup extends Entry implements Serializable {
 	@AttributeName(ignoreDuringUpdate = true)
 	private String inum;
 
-	@NotNull
-	@Size(min = 0, max = 60, message = "Length of the Display Name should not exceed 60")
 	@AttributeName
 	private String displayName;
 
-	@Size(min = 0, max = 4000, message = "Length of the Description should not exceed 4000")
 	@AttributeName
 	private String description;
 
-	@NotNull
 	@AttributeName
 	private String owner;
 
