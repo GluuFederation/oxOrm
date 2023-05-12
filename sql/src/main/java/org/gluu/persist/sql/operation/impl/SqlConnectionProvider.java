@@ -57,8 +57,9 @@ public class SqlConnectionProvider {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SqlConnectionProvider.class);
 
-    private static final String MYSQL_QUERY_ENGINE_TYPE =
-    		"SELECT TABLE_NAME, ENGINE FROM information_schema.tables WHERE table_schema = ?";
+	private static final String MYSQL_QUERY_ENGINE_TYPE = "SELECT TABLE_NAME, ENGINE FROM information_schema.tables WHERE table_schema = ?";
+
+	private static final String MYSQL_QUERY_CONSTRAINT_CHECK = "SELECT CONSTRAINT_SCHEMA AS TABLE_SCHEMA, TABLE_NAME, CONSTRAINT_NAME, CHECK_CLAUSE AS DEFINITION FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = ? ORDER BY TABLE_SCHEMA, TABLE_NAME";
 
     private static final String DRIVER_PROPERTIES_PREFIX = "connection.driver-property";
 
@@ -89,7 +90,7 @@ public class SqlConnectionProvider {
 	
 	private Map<String, Map<String, AttributeType>> tableColumnsMap;
 	private Map<String, String> tableEnginesMap = new HashMap<>();
-
+	private Map<String, ArrayList<String>> tableJsonColumnsMap = new HashMap<>();
 
     protected SqlConnectionProvider() {
     }
@@ -129,7 +130,8 @@ public class SqlConnectionProvider {
 		Properties filteredDriverProperties = PropertiesHelper.findProperties(props, DRIVER_PROPERTIES_PREFIX, ".");
         this.connectionProperties = new Properties();
 		for (Entry<Object, Object> driverPropertyEntry : filteredDriverProperties.entrySet()) {
-			String key = StringHelper.toString(driverPropertyEntry.getKey()).substring(DRIVER_PROPERTIES_PREFIX.length() + 1);
+			String key = StringHelper.toString(driverPropertyEntry.getKey())
+					.substring(DRIVER_PROPERTIES_PREFIX.length() + 1);
 			String value = StringHelper.toString(driverPropertyEntry.getValue());
 
 			connectionProperties.put(key, value);
@@ -158,12 +160,14 @@ public class SqlConnectionProvider {
         	objectPoolConfig.setMinIdle(cpMinIdle);
         }
 
-        Integer cpMaxWaitTimeMillis = StringHelper.toInteger(props.getProperty("connection.pool.max-wait-time-millis"), null);
+		Integer cpMaxWaitTimeMillis = StringHelper.toInteger(props.getProperty("connection.pool.max-wait-time-millis"),
+				null);
         if (cpMaxWaitTimeMillis != null) {
         	objectPoolConfig.setMaxWaitMillis(cpMaxWaitTimeMillis);
         }
 
-        Integer cpMinEvictableIdleTimeMillis = StringHelper.toInteger(props.getProperty("connection.pool.min-evictable-idle-time-millis"), null);
+		Integer cpMinEvictableIdleTimeMillis = StringHelper
+				.toInteger(props.getProperty("connection.pool.min-evictable-idle-time-millis"), null);
         if (cpMaxWaitTimeMillis != null) {
         	objectPoolConfig.setMinEvictableIdleTimeMillis(cpMinEvictableIdleTimeMillis);
         }
@@ -172,7 +176,8 @@ public class SqlConnectionProvider {
         LOG.info("Created connection pool");
 
         if (props.containsKey("password.encryption.method")) {
-            this.passwordEncryptionMethod = PasswordEncryptionMethod.getMethod(props.getProperty("password.encryption.method"));
+			this.passwordEncryptionMethod = PasswordEncryptionMethod
+					.getMethod(props.getProperty("password.encryption.method"));
         } else {
             this.passwordEncryptionMethod = PasswordEncryptionMethod.HASH_METHOD_SHA256;
         }
@@ -231,6 +236,32 @@ public class SqlConnectionProvider {
 	    	}
         }
 	
+		if (mariaDb) {
+			LOG.info("Loading contrains to identify JSON columns ...");
+			PreparedStatement preparedStatement = con.prepareStatement(MYSQL_QUERY_CONSTRAINT_CHECK);
+			preparedStatement.setString(1, schemaName);
+
+			try (ResultSet tableEnginesResultSet = preparedStatement.executeQuery()) {
+				while (tableEnginesResultSet.next()) {
+					String tableName = tableEnginesResultSet.getString("TABLE_NAME");
+					String constraintName = tableEnginesResultSet.getString("CONSTRAINT_NAME");
+					String definition = tableEnginesResultSet.getString("DEFINITION");
+
+					ArrayList<String> tableJsonColumns = tableJsonColumnsMap.get(tableName);
+					if (tableJsonColumns == null) {
+						tableJsonColumns = new ArrayList<>();
+						tableJsonColumnsMap.put(tableName, tableJsonColumns);
+					}
+
+					if ((definition != null) && definition.toLowerCase().contains("json_valid")) { // Example:
+																									// json_valid(`memberOf`)
+						tableJsonColumns.add(constraintName.toLowerCase());
+					}
+				}
+			}
+			LOG.debug("Found JSON constrains: '{}'.", tableJsonColumnsMap);
+		}
+
         LOG.info("Scanning DB metadata...");
         try (ResultSet tableResultSet = databaseMetaData.getTables(null, schemaName, null, new String[]{"TABLE"})) {
 	    	while (tableResultSet.next()) {
@@ -245,16 +276,24 @@ public class SqlConnectionProvider {
 		        		String columnName = columnResultSet.getString("COLUMN_NAME").toLowerCase();
 						String columnTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
 		
-						String remark = columnResultSet.getString("REMARKS");
-		        		if (mariaDb && SqlOperationService.LONGTEXT_TYPE_NAME.equalsIgnoreCase(columnTypeName) && SqlOperationService.JSON_TYPE_NAME.equalsIgnoreCase(remark)) {
-		        			columnTypeName = SqlOperationService.JSON_TYPE_NAME;
-		        		}
+						if (mariaDb && SqlOperationService.LONGTEXT_TYPE_NAME.equalsIgnoreCase(columnTypeName)) {
+							String remark = columnResultSet.getString("REMARKS");
+			        		if (SqlOperationService.JSON_TYPE_NAME.equalsIgnoreCase(remark)) {
+								columnTypeName = SqlOperationService.JSON_TYPE_NAME;
+			        		} else {
+			        			ArrayList<String> tableJsonColumns = tableJsonColumnsMap.get(tableName);
+								if ((tableJsonColumns != null) && tableJsonColumns.contains(columnName)) {
+									columnTypeName = SqlOperationService.JSON_TYPE_NAME;
+								}
+			        		}
+						}
 
 		        		if (SqlOperationService.JSONB_TYPE_NAME.equalsIgnoreCase(columnTypeName)) {
 		        			columnTypeName = SqlOperationService.JSONB_TYPE_NAME;
 		        		}
 		
-		        		boolean multiValued = SqlOperationService.JSON_TYPE_NAME.equals(columnTypeName) || SqlOperationService.JSONB_TYPE_NAME.equals(columnTypeName);
+						boolean multiValued = SqlOperationService.JSON_TYPE_NAME.equals(columnTypeName)
+								|| SqlOperationService.JSONB_TYPE_NAME.equals(columnTypeName);
 		
 		        		AttributeType attributeType = new AttributeType(columnName, columnTypeName, multiValued);
 		        		tableColumns.put(columnName, attributeType);
@@ -287,7 +326,8 @@ public class SqlConnectionProvider {
 	}
 
     private void openWithWaitImpl() throws Exception {
-    	long connectionMaxWaitTimeMillis = StringHelper.toLong(props.getProperty("connection.pool.create-max-wait-time-millis"), 30 * 1000L);
+		long connectionMaxWaitTimeMillis = StringHelper
+				.toLong(props.getProperty("connection.pool.create-max-wait-time-millis"), 30 * 1000L);
         LOG.debug("Using connection timeout: '{}'", connectionMaxWaitTimeMillis);
 
         Exception lastException = null;
@@ -331,7 +371,8 @@ public class SqlConnectionProvider {
     private void open() {
 		ConnectionFactory connectionFactory = new DriverManagerConnectionFactory(connectionUri, connectionProperties);
 		PoolableConnectionFactory poolableConnectionFactory = new PoolableConnectionFactory(connectionFactory, null);
-		ObjectPool<PoolableConnection> objectPool = new GenericObjectPool<>(poolableConnectionFactory, objectPoolConfig);
+		ObjectPool<PoolableConnection> objectPool = new GenericObjectPool<>(poolableConnectionFactory,
+				objectPoolConfig);
 
 		this.poolingDataSource = new PoolingDataSource<>(objectPool);
 		poolableConnectionFactory.setPool(objectPool);
