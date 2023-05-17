@@ -11,6 +11,7 @@ import java.util.Map;
 public enum SupportedDbType {
 
 	MYSQL("mysql"),
+	MARIADB("mariadb"),
     POSTGRESQL("postgresql");
 
 	private String dbType;
