@@ -34,6 +34,7 @@ import org.gluu.persist.exception.operation.ConfigurationException;
 import org.gluu.persist.exception.operation.ConnectionException;
 import org.gluu.persist.model.AttributeType;
 import org.gluu.persist.operation.auth.PasswordEncryptionMethod;
+import org.gluu.persist.sql.dsl.template.MariaDBJsonTemplates;
 import org.gluu.persist.sql.dsl.template.MySQLJsonTemplates;
 import org.gluu.persist.sql.dsl.template.PostgreSQLJsonTemplates;
 import org.gluu.persist.sql.model.ResultCode;
@@ -79,8 +80,6 @@ public class SqlConnectionProvider {
 
 	private SupportedDbType dbType;
 	private String dbVersion;
-
-	private boolean mariaDb = false;
 
 	private String schemaName;
 
@@ -207,7 +206,7 @@ public class SqlConnectionProvider {
         	
         	this.dbVersion = databaseMetaData.getDatabaseProductVersion().toLowerCase();
         	if ((this.dbVersion != null) && this.dbVersion.toLowerCase().contains("mariadb")) {
-        		this.mariaDb = true;
+            	this.dbType = SupportedDbType.MARIADB;
         	}
             LOG.debug("Database product name: '{}'", dbType);
             loadTableMetaData(databaseMetaData, con);
@@ -236,7 +235,7 @@ public class SqlConnectionProvider {
 	    	}
         }
 	
-		if (mariaDb) {
+		if (SupportedDbType.MARIADB == dbType) {
 			LOG.info("Loading contrains to identify JSON columns ...");
 			PreparedStatement preparedStatement = con.prepareStatement(MYSQL_QUERY_CONSTRAINT_CHECK);
 			preparedStatement.setString(1, schemaName);
@@ -276,7 +275,7 @@ public class SqlConnectionProvider {
 		        		String columnName = columnResultSet.getString("COLUMN_NAME").toLowerCase();
 						String columnTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
 		
-						if (mariaDb && SqlOperationService.LONGTEXT_TYPE_NAME.equalsIgnoreCase(columnTypeName)) {
+						if ((SupportedDbType.MARIADB == dbType) && SqlOperationService.LONGTEXT_TYPE_NAME.equalsIgnoreCase(columnTypeName)) {
 							String remark = columnResultSet.getString("REMARKS");
 			        		if (SqlOperationService.JSON_TYPE_NAME.equalsIgnoreCase(remark)) {
 								columnTypeName = SqlOperationService.JSON_TYPE_NAME;
@@ -315,6 +314,8 @@ public class SqlConnectionProvider {
 			SQLTemplates.Builder sqlBuilder = templatesRegistry.getBuilder(databaseMetaData);
 			if (SupportedDbType.MYSQL == dbType) {
 				sqlBuilder = MySQLJsonTemplates.builder();
+			} else if (SupportedDbType.MARIADB == dbType) {
+				sqlBuilder = MariaDBJsonTemplates.builder();
 			} else if (SupportedDbType.POSTGRESQL == dbType) {
 				sqlBuilder = PostgreSQLJsonTemplates.builder().quote();
 			}
@@ -493,10 +494,6 @@ public class SqlConnectionProvider {
         } catch (SQLException ex) {
         	throw new ConnectionException("Failed to get database metadata", ex);
         }
-	}
-
-	public boolean isMariaDb() {
-		return mariaDb;
 	}
 
 	public SupportedDbType getDbType() {
