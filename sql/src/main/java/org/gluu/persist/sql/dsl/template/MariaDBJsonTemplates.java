@@ -25,7 +25,7 @@ public class MariaDBJsonTemplates extends MySQLTemplates {
 		super(escape, quote);
 
 		add(SqlOps.JSON_CONTAINS, "JSON_CONTAINS({0}, {1}, {2})");
-		add(SqlOps.JSON_EXTRACT, "{0}->{1}");
+		add(SqlOps.JSON_EXTRACT, "JSON_EXTRACT({0}, {1})");
 	}
 
 }
