@@ -340,6 +340,18 @@ public final class StringHelper {
         }
     }
 
+    public static Boolean toBoolean(final String string, Boolean defaultValue) {
+        if (isEmpty(string)) {
+            return defaultValue;
+        }
+
+        try {
+            return Boolean.parseBoolean(string);
+        } catch (NumberFormatException ex) {
+            return defaultValue;
+        }
+    }
+
     public static boolean toBoolean(Boolean value, boolean defaultValue) {
         if (value == null) {
             return defaultValue;

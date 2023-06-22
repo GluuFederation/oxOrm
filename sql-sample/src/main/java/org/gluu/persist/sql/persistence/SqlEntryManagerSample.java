@@ -41,7 +41,10 @@ public class SqlEntryManagerSample {
 
         connectionProperties.put("sql#connection.pool.max-total", "300");
         connectionProperties.put("sql#connection.pool.max-idle", "300");
-        
+
+        connectionProperties.put("sql#connection.pool.test-on-create", "true");
+        connectionProperties.put("sql#connection.pool.test-on-return", "true");
+
         // Password hash method
         connectionProperties.put("sql#password.encryption.method", "SSHA-256");
         
