@@ -124,7 +124,9 @@ public final class SqlUserSearchSample {
         	String uid = "user" + j; /*String.format("user%06d", userUid);*/
 
         	SimpleUser newUser = new SimpleUser();
-	        newUser.setDn(String.format("inum=%s,ou=people,o=gluu", startTime + j));
+        	newUser.setInum("" + (startTime + j));
+
+            newUser.setDn(String.format("inum=%s,ou=people,o=gluu", newUser.getInum()));
 	        newUser.setUserId(uid);
 	        newUser.setUserPassword("topsecret" + uid);
 	        newUser.setUserRole(j % 2 == 0 ? UserRole.ADMIN : UserRole.USER);
