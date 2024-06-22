@@ -6,6 +6,7 @@
 
 package org.gluu.orm.couchbase.operation.impl;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,6 +36,7 @@ import com.couchbase.client.java.env.ClusterEnvironment;
 import com.couchbase.client.java.json.JsonArray;
 import com.couchbase.client.java.manager.bucket.BucketManager;
 import com.couchbase.client.java.manager.bucket.BucketSettings;
+import com.couchbase.client.java.manager.bucket.GetBucketOptions;
 import com.couchbase.client.java.query.QueryOptions;
 import com.couchbase.client.java.query.QueryResult;
 import com.couchbase.client.java.query.QueryStatus;
@@ -247,7 +249,7 @@ public class CouchbaseConnectionProvider {
         Bucket bucket = bucketMapping.getBucket();
 
         BucketManager bucketManager = this.cluster.buckets();
-        BucketSettings bucketSettings = bucketManager.getBucket(bucket.name());
+        BucketSettings bucketSettings = bucketManager.getBucket(bucket.name(), GetBucketOptions.getBucketOptions().timeout(Duration.ofSeconds(5)));
 
         boolean result = true;
         if (com.couchbase.client.java.manager.bucket.BucketType.COUCHBASE == bucketSettings.bucketType()) {
