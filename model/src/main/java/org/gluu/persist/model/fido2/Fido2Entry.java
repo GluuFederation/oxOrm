@@ -35,7 +35,7 @@ public class Fido2Entry extends BaseEntry {
     @AttributeName(name = "oxCodeChallenge")
     private String challange;
 
-    @AttributeName(name = "jansCodeChallengeHash")
+    @AttributeName(name = "oxCodeChallengeHash")
     private Integer challengeHash;
 
     @AttributeName(name = "creationDate")
@@ -44,10 +44,10 @@ public class Fido2Entry extends BaseEntry {
     @AttributeName(name = "personInum")
     private String userInum;
 
-	@AttributeName(name = "jansApp")
+	@AttributeName(name = "oxApplication")
 	private String rpId;
 
-    @AttributeName(name = "jansSessStateId")
+    @AttributeName(name = "oxSessionStateId")
     private String sessionStateId;
 
     @AttributeName(name = "exp")
