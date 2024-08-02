@@ -77,6 +77,9 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 	private static final Class<?>[] LDAP_EXPIRATION_PROPERTY_ANNOTATION = { Expiration.class };
 
 	public static final String OBJECT_CLASS = "objectClass";
+	public static final String USER_PASSWORD = "userPassword";
+	private static final String MASKED = "*masked*";
+
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	private static final Class<?>[] GROUP_BY_ALLOWED_DATA_TYPES = { String.class, Date.class, Integer.class,
@@ -127,8 +130,9 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		String[] objectClasses = getObjectClasses(entry, entryClass);
 		attributes.add(new AttributeData(OBJECT_CLASS, objectClasses, true));
 
-		LOG.debug(String.format("LDAP attributes for persist: %s", attributes));
-
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(String.format("LDAP attributes for persist: %s", maskSensetiveData(attributes)));
+		}
 		persist(dnValue.toString(), objectClasses, attributes, expirationValue);
 	}
 
@@ -1413,8 +1417,14 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		Object[] attributeValues = getAttributeValues(propertyName, jsonObject, propertyValue, multiValued);
 
 		if (LOG.isDebugEnabled()) {
+			String values;
+			if (StringHelper.equalsIgnoreCase(USER_PASSWORD, propertyName)) {
+				values = MASKED;
+			} else {
+				values = Arrays.toString(attributeValues);
+			}
 			LOG.debug(String.format("Property: %s, LdapProperty: %s, PropertyValue: %s", propertyName,
-					ldapAttributeName, Arrays.toString(attributeValues)));
+					ldapAttributeName, values));
 		}
 
 		if (attributeValues.length == 0) {
@@ -2340,4 +2350,29 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		System.out.println(variableName + ": END");
 	}
 
+	private String maskSensetiveData(List<AttributeData> attributes) {
+		if (attributes == null) {
+			return null;
+		}
+
+		boolean added = false;
+		StringBuilder sb = new StringBuilder("[");
+		for (AttributeData attr : attributes) {
+			if (added) {
+				sb.append(", ");
+			}
+
+			if (StringHelper.equalsIgnoreCase(USER_PASSWORD, attr.getName())) {
+				AttributeData clonedAttr = new AttributeData(
+						attr.getName(), new Object[] { MASKED }, attr.getMultiValued());
+				sb.append(clonedAttr);
+			} else {
+				sb.append(attr);
+			}
+			added = true;
+		}
+		sb.append(']');
+
+		return sb.toString();
+	}
 }
