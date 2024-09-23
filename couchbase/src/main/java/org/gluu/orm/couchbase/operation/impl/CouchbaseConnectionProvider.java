@@ -136,7 +136,9 @@ public class CouchbaseConnectionProvider {
     }
 
     private void openWithWaitImpl() {
-        String connectionMaxWaitTime = props.getProperty("connection.connection-max-wait-time");
+    	int waitUntilReadyTimeSeconds = StringHelper.toInteger(props.getProperty("connection.wait-until-ready-time"), -1);
+    	
+    	String connectionMaxWaitTime = props.getProperty("connection.connection-max-wait-time");
         int connectionMaxWaitTimeSeconds = 30;
         if (StringHelper.isNotEmpty(connectionMaxWaitTime)) {
             connectionMaxWaitTimeSeconds = Integer.parseInt(connectionMaxWaitTime);
@@ -155,7 +157,7 @@ public class CouchbaseConnectionProvider {
             }
 
             try {
-                open();
+                open(waitUntilReadyTimeSeconds);
                 if (isConnected()) {
                 	break;
                 } else {
@@ -181,7 +183,7 @@ public class CouchbaseConnectionProvider {
         }
     }
 
-    private void open() {
+    private void open(int waitUntilReadyTimeSeconds) {
         this.bucketToBaseNameMapping = new HashMap<String, BucketMapping>();
         this.baseNameToBucketMapping = new HashMap<String, BucketMapping>();
 
@@ -191,6 +193,10 @@ public class CouchbaseConnectionProvider {
         }
 
         this.cluster = Cluster.connect(connectionString, clusterOptions);
+
+        if (waitUntilReadyTimeSeconds > 0) {
+        	this.cluster.waitUntilReady(Duration.ofSeconds(waitUntilReadyTimeSeconds));
+        }
 
         // Open required buckets
         for (String bucketName : buckets) {
