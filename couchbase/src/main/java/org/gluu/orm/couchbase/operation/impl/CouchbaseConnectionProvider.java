@@ -197,7 +197,7 @@ public class CouchbaseConnectionProvider {
         this.cluster = Cluster.connect(connectionString, clusterOptions);
 
         if (waitUntilReadyTimeSeconds > 0) {
-            LOG.info("Uwe waitUntilReady SDK option: '{}'", waitUntilReadyTimeSeconds);
+            LOG.info("Uwe waitUntilReady cluster SDK option: '{}'", waitUntilReadyTimeSeconds);
         	this.cluster.waitUntilReady(Duration.ofSeconds(waitUntilReadyTimeSeconds));
         }
 
@@ -207,6 +207,10 @@ public class CouchbaseConnectionProvider {
             String[] baseNames = StringHelper.split(baseNamesProp, ",");
 
             Bucket bucket = this.cluster.bucket(bucketName);
+            if (waitUntilReadyTimeSeconds > 0) {
+                LOG.info("Uwe waitUntilReady bucket SDK option: '{}'", waitUntilReadyTimeSeconds);
+                bucket.waitUntilReady(Duration.ofSeconds(waitUntilReadyTimeSeconds));
+            }
 
             BucketMapping bucketMapping = new BucketMapping(bucketName, bucket);
 
