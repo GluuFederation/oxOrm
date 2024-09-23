@@ -195,6 +195,7 @@ public class CouchbaseConnectionProvider {
         this.cluster = Cluster.connect(connectionString, clusterOptions);
 
         if (waitUntilReadyTimeSeconds > 0) {
+            LOG.info("Uwe waitUntilReady SDK option: '{}'", waitUntilReadyTimeSeconds);
         	this.cluster.waitUntilReady(Duration.ofSeconds(waitUntilReadyTimeSeconds));
         }
 
