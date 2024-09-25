@@ -17,7 +17,7 @@
 
 		<maven.min-version>3.0.3</maven.min-version>
 
-		<gluu.version>4.5.1.sp1</gluu.version>
+		<gluu.version>4.5.1.Final</gluu.version>
 	</properties>
 
 	<scm>
